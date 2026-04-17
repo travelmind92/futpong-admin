@@ -1,0 +1,113 @@
+import {
+  BatchWriteCommand,
+  BatchWriteCommandInput,
+  DynamoDBDocumentClient,
+  NativeAttributeValue,
+  ScanCommand,
+  ScanCommandInput,
+} from '@aws-sdk/lib-dynamodb';
+import { useCallback, useContext } from 'react';
+import { ServicesContext } from '../../context/servicesOutletContext';
+import { createBatches } from './utils';
+
+type Attribute = Record<string, NativeAttributeValue>;
+
+export const useDynamoActions = () => {
+  const services = useContext(ServicesContext);
+  const dynamoClient = services?.dynamoClient;
+
+  return useCallback(
+    (client: DynamoDBDocumentClient = dynamoClient!) => {
+    const getAll = async (table: string) => {
+      try {
+        const items: Attribute[] = [];
+        let startKey: Attribute | undefined;
+        do {
+          const result = await getBatch(table, startKey);
+          items.push(...(result?.Items || []));
+          startKey = result?.LastEvaluatedKey;
+        } while (startKey);
+        return items;
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const getBatch = async (table: string, startKey?: Attribute) => {
+      const params: ScanCommandInput = {
+        TableName: table,
+        Limit: 100,
+        ExclusiveStartKey: startKey,
+      };
+      return client.send(new ScanCommand(params));
+    };
+
+    const save = async (table: string, items: Attribute[]) => {
+      if (items.length === 0) {
+        return;
+      }
+      try {
+        const batches = createBatches(items);
+        for (const batchItems of batches) {
+          await saveBatch(table, batchItems);
+        }
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    };
+
+    const saveBatch = async (table: string, items: Attribute[]) => {
+      const params: BatchWriteCommandInput = {
+        RequestItems: {
+          [table]: items.map((item) => ({
+            PutRequest: {
+              Item: item,
+            },
+          })),
+        },
+      };
+      const result = await client.send(new BatchWriteCommand(params));
+      return result.UnprocessedItems;
+    };
+
+    const remove = async (table: string, ids: string[]) => {
+      if (ids.length === 0) {
+        return;
+      }
+      try {
+        const batches = createBatches(ids);
+        for (const batchIds of batches) {
+          await removeBatch(table, batchIds);
+        }
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    };
+
+    const removeBatch = async (table: string, ids: string[]) => {
+      const params: BatchWriteCommandInput = {
+        RequestItems: {
+          [table]: ids.map((id) => ({
+            DeleteRequest: {
+              Key: {
+                id,
+              },
+            },
+          })),
+        },
+      };
+      const result = await client.send(new BatchWriteCommand(params));
+      return result.UnprocessedItems;
+    };
+
+    return {
+      getAll,
+      save,
+      remove,
+    };
+  },
+  [dynamoClient]
+  );
+};
