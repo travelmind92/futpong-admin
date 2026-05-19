@@ -3,8 +3,6 @@ import {
   BatchWriteCommandInput,
   DynamoDBDocumentClient,
   NativeAttributeValue,
-  ScanCommand,
-  ScanCommandInput,
 } from '@aws-sdk/lib-dynamodb';
 import { useCallback, useContext } from 'react';
 import { ServicesContext } from '../../context/servicesOutletContext';
@@ -18,29 +16,6 @@ export const useDynamoActions = () => {
 
   return useCallback(
     (client: DynamoDBDocumentClient = dynamoClient!) => {
-    const getAll = async (table: string) => {
-      try {
-        const items: Attribute[] = [];
-        let startKey: Attribute | undefined;
-        do {
-          const result = await getBatch(table, startKey);
-          items.push(...(result?.Items || []));
-          startKey = result?.LastEvaluatedKey;
-        } while (startKey);
-        return items;
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    const getBatch = async (table: string, startKey?: Attribute) => {
-      const params: ScanCommandInput = {
-        TableName: table,
-        Limit: 100,
-        ExclusiveStartKey: startKey,
-      };
-      return client.send(new ScanCommand(params));
-    };
 
     const save = async (table: string, items: Attribute[]) => {
       if (items.length === 0) {
@@ -103,7 +78,6 @@ export const useDynamoActions = () => {
     };
 
     return {
-      getAll,
       save,
       remove,
     };

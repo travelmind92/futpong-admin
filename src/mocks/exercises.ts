@@ -6,11 +6,15 @@ const longDescription =
 export const MOCK_EXERCISES: Exercise[] = Array.from({ length: 25 }, (_, i) => {
   const n = i + 1;
   const hasVideo = n % 3 !== 0;
+  const hasThumb = n % 4 !== 0;
   return {
     id: `exercise-${n}`,
     name: `Exercise ${n}`,
     repType: n % 2 === 0 ? RepType.REPETITIONS : RepType.SECONDS,
-    videoUrl: hasVideo ? `https://example.com/videos/exercise-${n}` : '',
+    ...(hasVideo ? { videoUrl: `https://example.com/videos/exercise-${n}.mp4` } : {}),
+    ...(hasThumb
+      ? { thumbnailUrl: `https://example.com/videos/exercise-${n}.jpg` }
+      : {}),
     description:
       n % 5 === 0
         ? longDescription

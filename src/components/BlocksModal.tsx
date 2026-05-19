@@ -116,11 +116,10 @@ export function normalizeBlocksForSave(
 }
 
 type ExerciseSearchFieldProps = {
+  inputId: string;
   showSuggestions: boolean;
   searchDisplay: string;
   pickerList: Exercise[];
-  blockIndexLabel: number;
-  exIndex: number;
   onSearchChange: (value: string) => void;
   onFocusCombo: () => void;
   onBlurCombo: () => void;
@@ -128,11 +127,10 @@ type ExerciseSearchFieldProps = {
 };
 
 function ExerciseSearchField({
+  inputId,
   showSuggestions,
   searchDisplay,
   pickerList,
-  blockIndexLabel,
-  exIndex,
   onSearchChange,
   onFocusCombo,
   onBlurCombo,
@@ -189,12 +187,12 @@ function ExerciseSearchField({
   return (
     <div ref={wrapRef} className="blocks-modal-exercise-search-wrap">
       <input
+        id={inputId}
         type="text"
         className="blocks-modal-field-input blocks-modal-field-exercise-search"
         value={searchDisplay}
         placeholder="Search exercise…"
         autoComplete="off"
-        aria-label={`Exercise ${exIndex} for block ${blockIndexLabel}`}
         onChange={(e) => onSearchChange(e.target.value)}
         onFocus={onFocusCombo}
         onBlur={onBlurCombo}
@@ -329,17 +327,6 @@ export function BlocksModal({
     );
   };
 
-  const moveExerciseRow = (blockIndex: number, from: number, to: number) => {
-    if (from === to || from < 0 || to < 0) {
-      return;
-    }
-    const block = blocks[blockIndex];
-    const list = [...(block.exercises ?? [])];
-    const [item] = list.splice(from, 1);
-    list.splice(to, 0, item);
-    setBlockExercises(blockIndex, list);
-  };
-
   const updateExerciseSearchText = (
     blockIndex: number,
     exerciseIndex: number,
@@ -471,133 +458,119 @@ export function BlocksModal({
         <div className="blocks-modal-body" ref={bodyScrollRef}>
           <div className="exercises-list-table-wrap blocks-modal-table-wrap">
             <table className="exercises-list-table blocks-modal-table">
-              <thead>
-                <tr>
-                  <th scope="col" className="blocks-modal-col-drag" />
-                  <th scope="col">Name</th>
-                  <th scope="col">Series</th>
-                  <th
-                    scope="col"
-                    className="blocks-modal-col-actions"
-                    aria-label="Actions"
-                  />
-                </tr>
-              </thead>
-              <tbody>
-                {blocks.length === 0 ? (
+              {blocks.length === 0 ? (
+                <tbody>
                   <tr>
                     <td colSpan={4} className="blocks-modal-empty">
                       No blocks yet. Add one below.
                     </td>
                   </tr>
-                ) : (
-                  blocks.map((block, index) => (
-                    <React.Fragment key={block.id}>
-                      <tr
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          e.dataTransfer.dropEffect = 'move';
-                        }}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          const from = Number(
-                            e.dataTransfer.getData('text/plain')
-                          );
-                          if (!Number.isNaN(from)) {
-                            moveRow(from, index);
-                          }
-                        }}
+                </tbody>
+              ) : (
+                blocks.map((block, index) => (
+                  <tbody key={block.id} className="blocks-modal-block-group">
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="blocks-modal-block-card-cell"
                       >
-                        <td className="blocks-modal-cell-drag">
-                          <button
-                            type="button"
-                            className="blocks-modal-drag"
-                            draggable
-                            title="Drag to reorder"
-                            aria-label={`Reorder block ${block.index}`}
-                            onDragStart={(e) => {
-                              e.dataTransfer.effectAllowed = 'move';
-                              e.dataTransfer.setData(
-                                'text/plain',
-                                String(index)
-                              );
-                            }}
-                          >
-                            <svg
-                              className="blocks-modal-drag-icon"
-                              viewBox="0 0 24 24"
-                              aria-hidden
-                            >
-                              <path
-                                fill="currentColor"
-                                d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
+                        <div
+                          className="blocks-modal-block-card"
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = 'move';
+                          }}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            const from = Number(
+                              e.dataTransfer.getData('text/plain')
+                            );
+                            if (!Number.isNaN(from)) {
+                              moveRow(from, index);
+                            }
+                          }}
+                        >
+                          <div className="blocks-modal-block-main">
+                            <div className="blocks-modal-cell-drag">
+                              <button
+                                type="button"
+                                className="blocks-modal-drag"
+                                draggable
+                                title="Drag to reorder"
+                                aria-label={`Reorder block ${block.index}`}
+                                onDragStart={(e) => {
+                                  e.dataTransfer.effectAllowed = 'move';
+                                  e.dataTransfer.setData(
+                                    'text/plain',
+                                    String(index)
+                                  );
+                                }}
+                              >
+                                <svg
+                                  className="blocks-modal-drag-icon"
+                                  viewBox="0 0 24 24"
+                                  aria-hidden
+                                >
+                                  <path
+                                    fill="currentColor"
+                                    d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                            <div className="blocks-modal-block-field blocks-modal-block-field--labeled">
+                              <label
+                                className="blocks-modal-block-inline-label"
+                                htmlFor={`block-name-${block.id}`}
+                              >
+                                Name
+                              </label>
+                              <input
+                                id={`block-name-${block.id}`}
+                                type="text"
+                                className="blocks-modal-field-input"
+                                value={block.name}
+                                onChange={(e) =>
+                                  updateName(index, e.target.value)
+                                }
                               />
-                            </svg>
-                          </button>
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            className="blocks-modal-field-input"
-                            value={block.name}
-                            placeholder="Name"
-                            aria-label={`Block ${block.index} name`}
-                            onChange={(e) =>
-                              updateName(index, e.target.value)
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            className="blocks-modal-field-input"
-                            value={block.series}
-                            placeholder="Series"
-                            aria-label={`Block ${block.index} series`}
-                            onChange={(e) =>
-                              updateSeries(index, e.target.value)
-                            }
-                          />
-                        </td>
-                        <td className="blocks-modal-cell-actions">
-                          <button
-                            type="button"
-                            className="blocks-modal-remove"
-                            aria-label={`Remove block ${block.index}`}
-                            onClick={() => removeRow(index)}
-                          >
-                            ×
-                          </button>
-                        </td>
-                      </tr>
-                      <tr className="blocks-modal-block-exercises-row">
-                        <td colSpan={4} className="blocks-modal-block-exercises">
+                            </div>
+                            <div className="blocks-modal-block-field blocks-modal-block-field--labeled">
+                              <label
+                                className="blocks-modal-block-inline-label"
+                                htmlFor={`block-series-${block.id}`}
+                              >
+                                Series
+                              </label>
+                              <input
+                                id={`block-series-${block.id}`}
+                                type="text"
+                                className="blocks-modal-field-input"
+                                value={block.series}
+                                onChange={(e) =>
+                                  updateSeries(index, e.target.value)
+                                }
+                              />
+                            </div>
+                            <div className="blocks-modal-cell-actions">
+                              <button
+                                type="button"
+                                className="blocks-modal-remove"
+                                aria-label={`Remove block ${block.index}`}
+                                onClick={() => removeRow(index)}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          </div>
+                          <div className="blocks-modal-block-exercises">
                           <div className="blocks-modal-exercise-table-wrap">
-                            <table className="blocks-modal-exercise-table">
-                              <thead>
-                                <tr>
-                                  <th
-                                    scope="col"
-                                    className="blocks-modal-col-drag blocks-modal-col-drag--nested"
-                                  />
-                                  <th scope="col" className="blocks-modal-col-exercise">
-                                    Exercise
-                                  </th>
-                                  <th scope="col" className="blocks-modal-col-reps">
-                                    Reps
-                                  </th>
-                                  <th
-                                    scope="col"
-                                    className="blocks-modal-col-actions"
-                                    aria-label="Exercise actions"
-                                  />
-                                </tr>
-                              </thead>
+                            <table className="exercises-list-table blocks-modal-exercise-table">
                               <tbody>
                                 {(block.exercises ?? []).length === 0 ? (
                                   <tr>
                                     <td
-                                      colSpan={4}
+                                      colSpan={3}
                                       className="blocks-modal-exercise-empty"
                                     >
                                       No exercises yet. Add one below.
@@ -618,129 +591,98 @@ export function BlocksModal({
                                       const showSuggestions =
                                         activeExerciseComboKey === comboKey &&
                                         pickerList.length > 0;
+                                      const exerciseInputId = `exercise-pick-${block.id}-${ex.id}`;
+                                      const repsInputId = `exercise-reps-${block.id}-${ex.id}`;
 
                                       return (
-                                      <tr
-                                        key={ex.id}
-                                        onDragOver={(e) => {
-                                          e.preventDefault();
-                                          e.dataTransfer.dropEffect = 'move';
-                                        }}
-                                        onDrop={(e) => {
-                                          e.preventDefault();
-                                          const from = Number(
-                                            e.dataTransfer.getData(
-                                              'text/plain'
-                                            )
-                                          );
-                                          if (!Number.isNaN(from)) {
-                                            moveExerciseRow(
-                                              index,
-                                              from,
-                                              exIndex
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        <td className="blocks-modal-cell-drag">
-                                          <button
-                                            type="button"
-                                            className="blocks-modal-drag"
-                                            draggable
-                                            title="Drag to reorder"
-                                            aria-label={`Reorder exercise ${ex.index} in block ${block.index}`}
-                                            onDragStart={(e) => {
-                                              e.dataTransfer.effectAllowed =
-                                                'move';
-                                              e.dataTransfer.setData(
-                                                'text/plain',
-                                                String(exIndex)
-                                              );
-                                            }}
-                                          >
-                                            <svg
-                                              className="blocks-modal-drag-icon"
-                                              viewBox="0 0 24 24"
-                                              aria-hidden
+                                      <tr key={ex.id}>
+                                        <td>
+                                          <div className="blocks-modal-block-field blocks-modal-block-field--labeled blocks-modal-exercise-labeled-cell">
+                                            <label
+                                              className="blocks-modal-block-inline-label"
+                                              htmlFor={exerciseInputId}
                                             >
-                                              <path
-                                                fill="currentColor"
-                                                d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
-                                              />
-                                            </svg>
-                                          </button>
-                                        </td>
-                                        <td className="blocks-modal-col-exercise-cell">
-                                          <ExerciseSearchField
-                                            showSuggestions={showSuggestions}
-                                            searchDisplay={searchDisplay}
-                                            pickerList={pickerList}
-                                            blockIndexLabel={block.index}
-                                            exIndex={ex.index}
-                                            onSearchChange={(value) =>
-                                              updateExerciseSearchText(
-                                                index,
-                                                exIndex,
-                                                value
-                                              )
-                                            }
-                                            onFocusCombo={() =>
-                                              setActiveExerciseComboKey(
-                                                comboKey
-                                              )
-                                            }
-                                            onBlurCombo={() => {
-                                              window.setTimeout(() => {
+                                              Exercise
+                                            </label>
+                                            <ExerciseSearchField
+                                              inputId={exerciseInputId}
+                                              showSuggestions={showSuggestions}
+                                              searchDisplay={searchDisplay}
+                                              pickerList={pickerList}
+                                              onSearchChange={(value) =>
+                                                updateExerciseSearchText(
+                                                  index,
+                                                  exIndex,
+                                                  value
+                                                )
+                                              }
+                                              onFocusCombo={() =>
                                                 setActiveExerciseComboKey(
-                                                  (k) =>
-                                                    k === comboKey ? null : k
+                                                  comboKey
+                                                )
+                                              }
+                                              onBlurCombo={() => {
+                                                window.setTimeout(() => {
+                                                  setActiveExerciseComboKey(
+                                                    (k) =>
+                                                      k === comboKey ? null : k
+                                                  );
+                                                  blurResolveExercise(
+                                                    index,
+                                                    exIndex
+                                                  );
+                                                }, 120);
+                                              }}
+                                              onPick={(exerciseId) => {
+                                                selectExercise(
+                                                  index,
+                                                  exIndex,
+                                                  exerciseId
                                                 );
-                                                blurResolveExercise(
+                                                setActiveExerciseComboKey(null);
+                                              }}
+                                            />
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <div className="blocks-modal-block-field blocks-modal-block-field--labeled blocks-modal-exercise-labeled-cell">
+                                            <label
+                                              className="blocks-modal-block-inline-label"
+                                              htmlFor={repsInputId}
+                                            >
+                                              Reps
+                                            </label>
+                                            <input
+                                              id={repsInputId}
+                                              type="text"
+                                              className="blocks-modal-field-input blocks-modal-field-reps-narrow"
+                                              value={ex.reps}
+                                              onChange={(e) =>
+                                                updateExerciseReps(
+                                                  index,
+                                                  exIndex,
+                                                  e.target.value
+                                                )
+                                              }
+                                            />
+                                          </div>
+                                        </td>
+                                        <td className="exercises-list-actions-cell">
+                                          <div className="exercises-list-actions">
+                                            <button
+                                              type="button"
+                                              className="blocks-modal-remove"
+                                              aria-label={`Remove exercise ${ex.index} from block ${block.index}`}
+                                              onClick={() =>
+                                                removeExerciseRow(
                                                   index,
                                                   exIndex
-                                                );
-                                              }, 120);
-                                            }}
-                                            onPick={(exerciseId) => {
-                                              selectExercise(
-                                                index,
-                                                exIndex,
-                                                exerciseId
-                                              );
-                                              setActiveExerciseComboKey(null);
-                                            }}
-                                          />
-                                        </td>
-                                        <td className="blocks-modal-col-reps-cell">
-                                          <input
-                                            type="text"
-                                            className="blocks-modal-field-input blocks-modal-field-reps-narrow"
-                                            value={ex.reps}
-                                            placeholder="Reps"
-                                            aria-label={`Reps for exercise ${ex.index} in block ${block.index}`}
-                                            onChange={(e) =>
-                                              updateExerciseReps(
-                                                index,
-                                                exIndex,
-                                                e.target.value
-                                              )
-                                            }
-                                          />
-                                        </td>
-                                        <td className="blocks-modal-cell-actions">
-                                          <button
-                                            type="button"
-                                            className="blocks-modal-remove"
-                                            aria-label={`Remove exercise ${ex.index} from block ${block.index}`}
-                                            onClick={() =>
-                                              removeExerciseRow(
-                                                index,
-                                                exIndex
-                                              )
-                                            }
-                                          >
-                                            ×
-                                          </button>
+                                                )
+                                              }
+                                            >
+                                              ×
+                                            </button>
+                                          </div>
                                         </td>
                                       </tr>
                                       );
@@ -759,12 +701,13 @@ export function BlocksModal({
                               Add exercise
                             </button>
                           </div>
-                        </td>
-                      </tr>
-                    </React.Fragment>
-                  ))
-                )}
-              </tbody>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                ))
+              )}
             </table>
 
             <div className="blocks-modal-add-row blocks-modal-add-row--in-scroll">

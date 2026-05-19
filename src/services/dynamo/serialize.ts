@@ -10,13 +10,21 @@ import type {
 type DynamoItem = Record<string, NativeAttributeValue>;
 
 export function exerciseToDynamoItem(exercise: Exercise): DynamoItem {
-  return {
+  const item: DynamoItem = {
     id: exercise.id,
     name: exercise.name,
     repType: exercise.repType,
-    videoUrl: exercise.videoUrl,
     description: exercise.description,
   };
+  const v = exercise.videoUrl?.trim();
+  if (v) {
+    item.videoUrl = v;
+  }
+  const t = exercise.thumbnailUrl?.trim();
+  if (t) {
+    item.thumbnailUrl = t;
+  }
+  return item;
 }
 
 export function routineToDynamoItem(routine: Routine): DynamoItem {

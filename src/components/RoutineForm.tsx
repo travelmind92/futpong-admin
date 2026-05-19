@@ -267,6 +267,11 @@ export function RoutineForm() {
     trainingDays.length
   );
 
+  const showDaysPrev =
+    trainingDays.length > 0 && daysSafePage > 1;
+  const showDaysNext =
+    trainingDays.length > 0 && daysSafePage < daysTotalPages;
+
   const addTrainingDay = () => {
     setTrainingDays((prev) => [defaultNewDay(prev), ...prev]);
     setDaysPage(1);
@@ -591,11 +596,11 @@ export function RoutineForm() {
         </div>
 
         <section
-          className="routine-form-days"
+          className="exercises-list routine-form-days"
           aria-labelledby="routine-form-days-heading"
         >
-          <div className="routine-form-days-toolbar">
-            <h3 id="routine-form-days-heading" className="routine-form-days-title">
+          <div className="exercises-list-toolbar">
+            <h3 id="routine-form-days-heading" className="exercises-list-title">
               Days
             </h3>
             <button
@@ -613,272 +618,234 @@ export function RoutineForm() {
             </button>
           </div>
 
-          <div className="exercises-list-table-wrap routine-form-days-table-wrap">
-            <table className="exercises-list-table routine-form-days-table routine-form-days-table--bar">
+          <div className="exercises-list-table-wrap">
+            <table className="exercises-list-table list-data-table">
               <thead>
                 <tr>
-                  <th scope="col" className="routine-form-days-head-main">
-                    Days
-                  </th>
+                  <th scope="col">Day</th>
+                  <th scope="col">Matchday</th>
+                  <th scope="col">Blocks</th>
+                  <th
+                    scope="col"
+                    className="exercises-list-actions-header"
+                    aria-label="Actions"
+                  />
                 </tr>
               </thead>
               <tbody>
                 {daysPageItems.length === 0 ? (
                   <tr>
-                    <td className="routine-form-days-empty">
+                    <td colSpan={4} className="routine-form-days-empty">
                       No days yet. Use Create to add a row.
                     </td>
                   </tr>
                 ) : (
                   daysPageItems.map((row) => (
-                      <tr key={row.id} className="routine-form-days-main-tr">
-                        <td className="routine-form-days-cell-bar">
-                          <div className="routine-form-days-row-bar">
-                            <div className="routine-form-days-row-slot">
-                              <div className="routine-form-days-labeled">
-                                {row.status === 'saved' ? (
-                                  <>
-                                    <span className="routine-form-days-inline-label">
-                                      Day
-                                    </span>
-                                    <div className="routine-form-days-inline-control routine-form-days-inline-control--tight">
-                                      <span className="routine-form-days-static">
-                                        {row.day}
-                                      </span>
-                                    </div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <label
-                                      className="routine-form-days-inline-label"
-                                      htmlFor={`day-num-${row.id}`}
-                                    >
-                                      Day
-                                    </label>
-                                    <div className="routine-form-days-inline-control routine-form-days-inline-control--tight">
-                                      <div className="routine-form-days-day-field">
-                                        <input
-                                          id={`day-num-${row.id}`}
-                                          type="text"
-                                          inputMode="numeric"
-                                          autoComplete="off"
-                                          className="routine-form-days-input routine-form-days-input--num"
-                                          value={
-                                            row.day === ''
-                                              ? ''
-                                              : String(row.day)
-                                          }
-                                          onChange={(e) => {
-                                            const parsed = parseDayInput(
-                                              e.target.value
-                                            );
-                                            if (parsed === '') {
-                                              updateTrainingDay(row.id, {
-                                                day: '',
-                                              });
-                                              return;
-                                            }
-                                            updateTrainingDay(row.id, {
-                                              day: parsed,
-                                              matchday:
-                                                matchdayForDay(parsed),
-                                            });
-                                          }}
-                                          aria-required="true"
-                                          aria-invalid={
-                                            dayNumberErrors[row.id]
-                                              ? true
-                                              : undefined
-                                          }
-                                          aria-describedby={
-                                            dayNumberErrors[row.id]
-                                              ? `day-num-${row.id}-error`
-                                              : undefined
-                                          }
-                                        />
-                                        {dayNumberErrors[row.id] ? (
-                                          <p
-                                            id={`day-num-${row.id}-error`}
-                                            className="exercise-form-error routine-form-days-day-error"
-                                            role="alert"
-                                          >
-                                            {dayNumberErrors[row.id]}
-                                          </p>
-                                        ) : null}
-                                      </div>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                            <div className="routine-form-days-row-slot">
-                              <div className="routine-form-days-labeled">
-                                {row.status === 'saved' ? (
-                                  <>
-                                    <span className="routine-form-days-inline-label">
-                                      Matchday
-                                    </span>
-                                    <div className="routine-form-days-inline-control routine-form-days-inline-control--tight">
-                                      <span className="routine-form-days-static">
-                                        {row.matchday}
-                                      </span>
-                                    </div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <label
-                                      className="routine-form-days-inline-label"
-                                      htmlFor={`day-md-${row.id}`}
-                                    >
-                                      Matchday
-                                    </label>
-                                    <div className="routine-form-days-inline-control routine-form-days-inline-control--tight">
-                                      <select
-                                        id={`day-md-${row.id}`}
-                                        className="routine-form-days-select routine-form-days-select--narrow"
-                                        value={row.matchday}
-                                        onChange={(e) =>
-                                          updateTrainingDay(row.id, {
-                                            matchday: e.target.value,
-                                          })
-                                        }
-                                      >
-                                        {MATCHDAY_OPTIONS.map((opt) => (
-                                          <option key={opt} value={opt}>
-                                            {opt}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                            <div className="routine-form-days-row-slot routine-form-days-row-slot--blocks">
+                    <tr key={row.id}>
+                      <td>
+                        {row.status === 'saved' ? (
+                          <span className="routine-form-days-static">
+                            {row.day}
+                          </span>
+                        ) : (
+                          <div className="routine-form-days-day-field">
+                            <input
+                              id={`day-num-${row.id}`}
+                              type="text"
+                              inputMode="numeric"
+                              autoComplete="off"
+                              className="routine-form-days-input routine-form-days-input--num"
+                              value={
+                                row.day === '' ? '' : String(row.day)
+                              }
+                              onChange={(e) => {
+                                const parsed = parseDayInput(e.target.value);
+                                if (parsed === '') {
+                                  updateTrainingDay(row.id, {
+                                    day: '',
+                                  });
+                                  return;
+                                }
+                                updateTrainingDay(row.id, {
+                                  day: parsed,
+                                  matchday: matchdayForDay(parsed),
+                                });
+                              }}
+                              aria-label="Day number"
+                              aria-required="true"
+                              aria-invalid={
+                                dayNumberErrors[row.id]
+                                  ? true
+                                  : undefined
+                              }
+                              aria-describedby={
+                                dayNumberErrors[row.id]
+                                  ? `day-num-${row.id}-error`
+                                  : undefined
+                              }
+                            />
+                            {dayNumberErrors[row.id] ? (
+                              <p
+                                id={`day-num-${row.id}-error`}
+                                className="exercise-form-error routine-form-days-day-error"
+                                role="alert"
+                              >
+                                {dayNumberErrors[row.id]}
+                              </p>
+                            ) : null}
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        {row.status === 'saved' ? (
+                          <span className="routine-form-days-static">
+                            {row.matchday}
+                          </span>
+                        ) : (
+                          <select
+                            id={`day-md-${row.id}`}
+                            className="routine-form-days-select routine-form-days-select--narrow"
+                            value={row.matchday}
+                            onChange={(e) =>
+                              updateTrainingDay(row.id, {
+                                matchday: e.target.value,
+                              })
+                            }
+                            aria-label="Matchday"
+                          >
+                            {MATCHDAY_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="routine-form-days-blocks-btn"
+                          onClick={() => openBlocksModal(row.id)}
+                        >
+                          {`${blocksByDayRowId[row.id]?.length ?? 0} Blocks`}
+                        </button>
+                      </td>
+                      <td className="exercises-list-actions-cell">
+                        <div className="exercises-list-actions">
+                          {row.status === 'draft' ? (
+                            <>
                               <button
                                 type="button"
-                                className="routine-form-days-blocks-btn"
-                                onClick={() => openBlocksModal(row.id)}
+                                className="routine-form-day-save"
+                                onClick={() => saveDayRow(row.id)}
                               >
-                                {`${blocksByDayRowId[row.id]?.length ?? 0} Blocks`}
+                                Save
                               </button>
-                            </div>
-                            <div className="routine-form-days-row-slot routine-form-days-row-slot--actions">
-                              {row.status === 'draft' ? (
-                                <div className="routine-form-days-row-actions">
-                                  <button
-                                    type="button"
-                                    className="routine-form-day-save"
-                                    onClick={() => saveDayRow(row.id)}
-                                  >
-                                    Save
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="routine-form-day-remove"
-                                    aria-label="Remove draft day row"
-                                    title="Remove row"
-                                    onClick={() => removeDayRow(row.id)}
-                                  >
-                                    <svg
-                                      className="routine-form-day-remove-icon"
-                                      viewBox="0 0 24 24"
-                                      aria-hidden
-                                    >
-                                      <path
-                                        fill="currentColor"
-                                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
-                                      />
-                                    </svg>
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="routine-form-days-row-actions routine-form-days-row-actions--saved">
-                                  <button
-                                    type="button"
-                                    className="exercises-list-icon-btn exercises-list-icon-btn--edit routine-form-days-icon-btn"
-                                    aria-label="Edit day row"
-                                    title={
-                                      hasDraftDayRow
-                                        ? 'Finish editing the day row in progress first'
-                                        : 'Edit'
-                                    }
-                                    disabled={hasDraftDayRow}
-                                    onClick={() =>
-                                      editSavedDayRow(row.id)
-                                    }
-                                  >
-                                    <svg
-                                      className="exercises-list-row-icon"
-                                      viewBox="0 0 24 24"
-                                      aria-hidden
-                                    >
-                                      <path
-                                        fill="currentColor"
-                                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
-                                      />
-                                    </svg>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="exercises-list-icon-btn exercises-list-icon-btn--remove routine-form-days-icon-btn"
-                                    aria-label="Remove day row"
-                                    title="Remove"
-                                    onClick={() => removeDayRow(row.id)}
-                                  >
-                                    <svg
-                                      className="exercises-list-row-icon"
-                                      viewBox="0 0 24 24"
-                                      aria-hidden
-                                    >
-                                      <path
-                                        fill="currentColor"
-                                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
-                                      />
-                                    </svg>
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
+                              <button
+                                type="button"
+                                className="routine-form-day-remove"
+                                aria-label="Remove draft day row"
+                                title="Remove row"
+                                onClick={() => removeDayRow(row.id)}
+                              >
+                                <svg
+                                  className="routine-form-day-remove-icon"
+                                  viewBox="0 0 24 24"
+                                  aria-hidden
+                                >
+                                  <path
+                                    fill="currentColor"
+                                    d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                                  />
+                                </svg>
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                className="exercises-list-icon-btn exercises-list-icon-btn--edit routine-form-days-icon-btn"
+                                aria-label="Edit day row"
+                                title={
+                                  hasDraftDayRow
+                                    ? 'Finish editing the day row in progress first'
+                                    : 'Edit'
+                                }
+                                disabled={hasDraftDayRow}
+                                onClick={() => editSavedDayRow(row.id)}
+                              >
+                                <svg
+                                  className="exercises-list-row-icon"
+                                  viewBox="0 0 24 24"
+                                  aria-hidden
+                                >
+                                  <path
+                                    fill="currentColor"
+                                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
+                                  />
+                                </svg>
+                              </button>
+                              <button
+                                type="button"
+                                className="exercises-list-icon-btn exercises-list-icon-btn--remove routine-form-days-icon-btn"
+                                aria-label="Remove day row"
+                                title="Remove"
+                                onClick={() => removeDayRow(row.id)}
+                              >
+                                <svg
+                                  className="exercises-list-row-icon"
+                                  viewBox="0 0 24 24"
+                                  aria-hidden
+                                >
+                                  <path
+                                    fill="currentColor"
+                                    d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                                  />
+                                </svg>
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
                   ))
                 )}
               </tbody>
             </table>
           </div>
 
-          <div className="exercises-list-pagination routine-form-days-pagination">
+          <div className="exercises-list-pagination">
             <span className="exercises-list-range">
               {trainingDays.length === 0
                 ? 'No days'
                 : `Showing ${daysRangeStart}–${daysRangeEnd} of ${trainingDays.length}`}
             </span>
             <div className="exercises-list-page-actions">
-              <button
-                type="button"
-                className="exercises-list-page-btn"
-                disabled={daysSafePage <= 1}
-                onClick={() => setDaysPage((p) => Math.max(1, p - 1))}
-                aria-label="Previous page"
-              >
-                Previous
-              </button>
+              {showDaysPrev ? (
+                <button
+                  type="button"
+                  className="exercises-list-page-btn"
+                  onClick={() => setDaysPage((p) => Math.max(1, p - 1))}
+                  aria-label="Previous page"
+                >
+                  Previous
+                </button>
+              ) : null}
               <span className="exercises-list-page-indicator">
                 Page {daysSafePage} of {daysTotalPages}
               </span>
-              <button
-                type="button"
-                className="exercises-list-page-btn"
-                disabled={daysSafePage >= daysTotalPages}
-                onClick={() =>
-                  setDaysPage((p) => Math.min(daysTotalPages, p + 1))
-                }
-                aria-label="Next page"
-              >
-                Next
-              </button>
+              {showDaysNext ? (
+                <button
+                  type="button"
+                  className="exercises-list-page-btn"
+                  onClick={() =>
+                    setDaysPage((p) => Math.min(daysTotalPages, p + 1))
+                  }
+                  aria-label="Next page"
+                >
+                  Next
+                </button>
+              ) : null}
             </div>
           </div>
         </section>

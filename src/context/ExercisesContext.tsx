@@ -7,6 +7,7 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
+import { getAll } from '../services/api/api';
 import { normalizeExercise } from '../services/dynamo/normalize';
 import { exerciseToDynamoItem } from '../services/dynamo/serialize';
 import { EXERCISES_TABLE } from '../services/dynamo/tables';
@@ -46,19 +47,15 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
   const [dataError, setDataError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!dynamoClient) {
-      return;
-    }
     let cancelled = false;
     (async () => {
       setDataLoading(true);
       setDataError(null);
       try {
-        const { getAll } = dynamoApi(dynamoClient);
-        const raw = (await getAll(EXERCISES_TABLE)) ?? [];
+        const raw = await getAll<Record<string, unknown>>('exercises');
         if (cancelled) return;
         const ex = raw
-          .map((item) => normalizeExercise(item as Record<string, unknown>))
+          .map((item) => normalizeExercise(item))
           .filter((x): x is Exercise => x !== null);
         ex.sort((a, b) => a.name.localeCompare(b.name));
         setExercises(ex);
@@ -77,7 +74,7 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [dynamoClient, dynamoApi]);
+  }, []);
 
   const addExercise = useCallback(
     async (exercise: Exercise) => {

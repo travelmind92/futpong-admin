@@ -4,6 +4,7 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
+import type { S3Client } from '@aws-sdk/client-s3';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { init } from '../services/dynamo/init';
 import { ServicesContext, ServicesOutletContextValue } from './servicesOutletContext';
@@ -16,14 +17,16 @@ export function DynamoServicesProvider({ children }: { children: ReactNode }) {
   const [dynamoClient, setDynamoClient] = useState<
     DynamoDBDocumentClient | undefined
   >();
+  const [s3Client, setS3Client] = useState<S3Client | undefined>();
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const { dynamoClient: client } = await init();
+        const { dynamoClient: dClient, s3Client: sClient } = await init();
         if (!cancelled) {
-          setDynamoClient(client);
+          setDynamoClient(dClient);
+          setS3Client(sClient);
         }
       } catch (e) {
         console.error(e);
@@ -37,9 +40,10 @@ export function DynamoServicesProvider({ children }: { children: ReactNode }) {
   const servicesValue = useMemo(
     (): ServicesOutletContextValue => ({
       dynamoClient,
+      s3Client,
       setDynamoClient,
     }),
-    [dynamoClient]
+    [dynamoClient, s3Client]
   );
 
   return (

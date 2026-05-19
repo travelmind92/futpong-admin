@@ -2,28 +2,24 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Exercise } from '../types';
 import { ExercisesContextValue } from '../context/ExercisesContext';
+import {
+  listSortColumnAriaSort,
+  SortColumnHeaderButton,
+} from './SortColumnHeaderButton';
 
 const PAGE_SIZE = 20;
 const DESCRIPTION_PREVIEW_CHARS = 80;
 
-type SortColumn = 'name' | 'repType' | 'description' | 'video';
+type SortColumn =
+  | 'name'
+  | 'repType'
+  | 'description'
+  | 'video'
+  | 'thumbnail';
 
 type SortState =
   | { mode: 'none' }
   | { mode: 'asc' | 'desc'; column: SortColumn };
-
-function sortColumnAriaSort(
-  column: SortColumn,
-  state: SortState
-): 'none' | 'ascending' | 'descending' {
-  if (state.mode === 'none' || state.column !== column) {
-    return 'none';
-  }
-  return state.mode === 'asc' ? 'ascending' : 'descending';
-}
-
-const SORT_HEADER_TITLE =
-  'Sort: ascending, then descending, then default (database) order';
 
 function truncateDescription(text: string, maxChars: number): string {
   if (text.length <= maxChars) {
@@ -32,8 +28,12 @@ function truncateDescription(text: string, maxChars: number): string {
   return `${text.slice(0, maxChars)}...`;
 }
 
-function hasVideoUrl(url: string): boolean {
-  return url.trim().length > 0;
+function hasVideoUrl(url: string | undefined): boolean {
+  return (url?.trim() ?? '').length > 0;
+}
+
+function hasThumbnailUrl(url: string | undefined): boolean {
+  return (url?.trim() ?? '').length > 0;
 }
 
 type ExercisesListProps = {
@@ -63,6 +63,8 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
           return ex.description;
         case 'video':
           return hasVideoUrl(ex.videoUrl) ? '1' : '0';
+        case 'thumbnail':
+          return hasThumbnailUrl(ex.thumbnailUrl) ? '1' : '0';
         default:
           return '';
       }
@@ -99,19 +101,17 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
     setPage(1);
   };
 
-  const sortIndicator = (column: SortColumn) => {
-    if (sortState.mode === 'none' || sortState.column !== column) {
-      return '';
-    }
-    return sortState.mode === 'asc' ? ' ▲' : ' ▼';
-  };
-
   const safePage = Math.min(page, totalPages);
   const rangeStart =
     sortedExercises.length === 0
       ? 0
       : (safePage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(safePage * PAGE_SIZE, sortedExercises.length);
+
+  const showPaginationNav =
+    !dataLoading && sortedExercises.length > 0;
+  const showPrevPage = showPaginationNav && safePage > 1;
+  const showNextPage = showPaginationNav && safePage < totalPages;
 
   return (
     <div className="exercises-list">
@@ -127,54 +127,57 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
       </div>
 
       <div className="exercises-list-table-wrap">
-        <table className="exercises-list-table">
+        <table className="exercises-list-table list-data-table">
           <thead>
             <tr>
-              <th scope="col" aria-sort={sortColumnAriaSort('name', sortState)}>
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+              <th scope="col" aria-sort={listSortColumnAriaSort('name', sortState)}>
+                <SortColumnHeaderButton
+                  label="Name"
+                  column="name"
+                  sortState={sortState}
                   onClick={() => toggleSort('name')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Name{sortIndicator('name')}
-                </button>
+                />
               </th>
               <th
                 scope="col"
-                aria-sort={sortColumnAriaSort('repType', sortState)}
+                aria-sort={listSortColumnAriaSort('repType', sortState)}
               >
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+                <SortColumnHeaderButton
+                  label="Rep type"
+                  column="repType"
+                  sortState={sortState}
                   onClick={() => toggleSort('repType')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Rep type{sortIndicator('repType')}
-                </button>
+                />
               </th>
               <th
                 scope="col"
-                aria-sort={sortColumnAriaSort('description', sortState)}
+                aria-sort={listSortColumnAriaSort('description', sortState)}
               >
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+                <SortColumnHeaderButton
+                  label="Description"
+                  column="description"
+                  sortState={sortState}
                   onClick={() => toggleSort('description')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Description{sortIndicator('description')}
-                </button>
+                />
               </th>
-              <th scope="col" aria-sort={sortColumnAriaSort('video', sortState)}>
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+              <th scope="col" aria-sort={listSortColumnAriaSort('video', sortState)}>
+                <SortColumnHeaderButton
+                  label="Video"
+                  column="video"
+                  sortState={sortState}
                   onClick={() => toggleSort('video')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Video{sortIndicator('video')}
-                </button>
+                />
+              </th>
+              <th
+                scope="col"
+                aria-sort={listSortColumnAriaSort('thumbnail', sortState)}
+              >
+                <SortColumnHeaderButton
+                  label="Thumbnail"
+                  column="thumbnail"
+                  sortState={sortState}
+                  onClick={() => toggleSort('thumbnail')}
+                />
               </th>
               <th
                 scope="col"
@@ -186,7 +189,7 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
           <tbody>
             {dataLoading ? (
               <tr>
-                <td colSpan={5}>Loading exercises…</td>
+                <td colSpan={6}>Loading exercises…</td>
               </tr>
             ) : null}
             {!dataLoading &&
@@ -217,6 +220,28 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                     </span>
                   ) : (
                     <span className="exercises-list-video-no">-</span>
+                  )}
+                </td>
+                <td className="exercises-list-video-cell">
+                  {hasThumbnailUrl(exercise.thumbnailUrl) ? (
+                    <span
+                      className="exercises-list-thumb-yes"
+                      title="Thumbnail available"
+                      aria-label="Thumbnail available"
+                    >
+                      <svg
+                        className="exercises-list-thumb-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden
+                      >
+                        <path
+                          fill="currentColor"
+                          d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
+                        />
+                      </svg>
+                    </span>
+                  ) : (
+                    <span className="exercises-list-thumb-no">-</span>
                   )}
                 </td>
                 <td className="exercises-list-actions-cell">
@@ -295,27 +320,29 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
               : `Showing ${rangeStart}–${rangeEnd} of ${sortedExercises.length}`}
         </span>
         <div className="exercises-list-page-actions">
-          <button
-            type="button"
-            className="exercises-list-page-btn"
-            disabled={safePage <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            aria-label="Previous page"
-          >
-            Previous
-          </button>
+          {showPrevPage ? (
+            <button
+              type="button"
+              className="exercises-list-page-btn"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              aria-label="Previous page"
+            >
+              Previous
+            </button>
+          ) : null}
           <span className="exercises-list-page-indicator">
             Page {safePage} of {totalPages}
           </span>
-          <button
-            type="button"
-            className="exercises-list-page-btn"
-            disabled={safePage >= totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            aria-label="Next page"
-          >
-            Next
-          </button>
+          {showNextPage ? (
+            <button
+              type="button"
+              className="exercises-list-page-btn"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              aria-label="Next page"
+            >
+              Next
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

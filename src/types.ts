@@ -65,6 +65,7 @@ export type Exercise = {
   id: string
   name: string
   repType: RepType
-  videoUrl: string
+  videoUrl?: string
+  thumbnailUrl?: string
   description: string
 }

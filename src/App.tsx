@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
 import { ExerciseForm } from './components/ExerciseForm';
 import { ExercisesLayout } from './panels/ExercisesLayout';
@@ -8,6 +8,9 @@ import { RoutineForm } from './components/RoutineForm';
 import { RoutinesLayout } from './panels/RoutinesLayout';
 import { RoutinesListPage } from './panels/RoutinesListPage';
 import './App.css';
+import { buildCognitoLoginUrl, buildCognitoLogoutUrl } from './services/api/cognito';
+import { getEmailFromIdToken, isAuthenticated } from './auth/auth';
+import { exchangeCode } from './services/api/api';
 
 const menuItems: { to: string; label: string; icon: React.ReactNode }[] = [
   {
@@ -67,6 +70,48 @@ const menuItems: { to: string; label: string; icon: React.ReactNode }[] = [
 ];
 
 function App() {
+  const cognitoOauthCodeRef = useRef<string | null | undefined>(undefined);
+  if (cognitoOauthCodeRef.current === undefined) {
+    cognitoOauthCodeRef.current = new URLSearchParams(window.location.search).get('code');
+  }
+
+  const cognitoLoginUrl = buildCognitoLoginUrl();
+  const [authenticated, setAuthenticated] = useState(() => isAuthenticated());
+  const userEmail = authenticated ? getEmailFromIdToken() : null;
+
+  const handleLogout = () => {
+    localStorage.removeItem('id_token');
+    localStorage.removeItem('access_token');
+    setAuthenticated(false);
+    window.location.href = buildCognitoLogoutUrl();
+  };
+
+  useEffect(() => {
+    const code = cognitoOauthCodeRef.current;
+    if (!code) return;
+
+    const exchangeKey = `cognito_code_used_${code}`;
+    if (sessionStorage.getItem(exchangeKey)) return;
+
+    sessionStorage.setItem(exchangeKey, 'true');
+
+    const stripOAuthParamsFromUrl = () => {
+      window.history.replaceState({}, document.title, window.location.pathname || '/');
+    };
+
+    exchangeCode(code)
+      .then((tokens) => {
+        localStorage.setItem('id_token', tokens.id_token);
+        localStorage.setItem('access_token', tokens.access_token);
+        setAuthenticated(true);
+        stripOAuthParamsFromUrl();
+      })
+      .catch((err) => {
+        console.error(err);
+        stripOAuthParamsFromUrl();
+      });
+  }, []);
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -77,6 +122,29 @@ function App() {
           </span>
           <span className="app-title-admin">Admin</span>
         </h1>
+
+        <div className="app-header-actions">
+          {authenticated ? (
+            <>
+              {userEmail ? (
+                <span className="app-header-user-email" title={userEmail}>
+                  {userEmail}
+                </span>
+              ) : null}
+              <button
+                type="button"
+                className="app-header-auth-btn app-header-auth-btn--logout"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <a className="app-header-auth-btn app-header-auth-btn--login" href={cognitoLoginUrl}>
+              Login
+            </a>
+          )}
+        </div>
       </header>
 
       <div className="app-body">

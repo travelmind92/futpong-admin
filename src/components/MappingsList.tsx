@@ -1,6 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { PlayerType, Place, Routine, RoutineMapping, RoutineType } from '../types';
+import {
+  listSortColumnAriaSort,
+  SortColumnHeaderButton,
+} from './SortColumnHeaderButton';
+
+const PAGE_SIZE = 15;
 
 const playerTypeOptions = Object.values(PlayerType);
 const placeOptions = Object.values(Place);
@@ -31,19 +37,6 @@ type SortState =
   | { mode: 'none' }
   | { mode: 'asc' | 'desc'; column: SortColumn };
 
-function sortColumnAriaSort(
-  column: SortColumn,
-  state: SortState
-): 'none' | 'ascending' | 'descending' {
-  if (state.mode === 'none' || state.column !== column) {
-    return 'none';
-  }
-  return state.mode === 'asc' ? 'ascending' : 'descending';
-}
-
-const SORT_HEADER_TITLE =
-  'Sort: ascending, then descending, then default (database) order';
-
 function toDraftRows(mappings: RoutineMapping[]): DraftRoutineMappingRow[] {
   return mappings.map((mapping) => ({
     id: mapping.id,
@@ -70,6 +63,7 @@ export function MappingsList({
     Record<string, string>
   >({});
   const [sortState, setSortState] = useState<SortState>({ mode: 'none' });
+  const [page, setPage] = useState(1);
   const [savingRowId, setSavingRowId] = useState<string | null>(null);
   const [removingRowId, setRemovingRowId] = useState<string | null>(null);
 
@@ -125,6 +119,14 @@ export function MappingsList({
     });
   }, [rows, sortState, routinesById]);
 
+  const totalPages = Math.max(1, Math.ceil(displayRows.length / PAGE_SIZE));
+
+  const pageItems = useMemo(() => {
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * PAGE_SIZE;
+    return displayRows.slice(start, start + PAGE_SIZE);
+  }, [displayRows, page, totalPages]);
+
   const toggleSort = (column: SortColumn) => {
     setSortState((prev) => {
       if (prev.mode === 'none' || prev.column !== column) {
@@ -135,17 +137,12 @@ export function MappingsList({
       }
       return { mode: 'none' };
     });
-  };
-
-  const sortIndicator = (column: SortColumn) => {
-    if (sortState.mode === 'none' || sortState.column !== column) {
-      return '';
-    }
-    return sortState.mode === 'asc' ? ' ▲' : ' ▼';
+    setPage(1);
   };
 
   const addRow = () => {
     setSortState({ mode: 'none' });
+    setPage(1);
     setRows((prev) => [
       {
         id: uuidv4(),
@@ -265,6 +262,16 @@ export function MappingsList({
     });
   };
 
+  const safePage = Math.min(page, totalPages);
+  const rangeStart =
+    displayRows.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(safePage * PAGE_SIZE, displayRows.length);
+
+  const showPaginationNav =
+    !dataLoading && displayRows.length > 0;
+  const showPrevPage = showPaginationNav && safePage > 1;
+  const showNextPage = showPaginationNav && safePage < totalPages;
+
   return (
     <div className="exercises-list mappings-list">
       <div className="exercises-list-toolbar">
@@ -289,48 +296,40 @@ export function MappingsList({
       </div>
 
       <div className="exercises-list-table-wrap">
-        <table className="exercises-list-table">
+        <table className="exercises-list-table list-data-table mappings-list-table">
           <thead>
             <tr>
-              <th scope="col" aria-sort={sortColumnAriaSort('playerType', sortState)}>
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+              <th scope="col" aria-sort={listSortColumnAriaSort('playerType', sortState)}>
+                <SortColumnHeaderButton
+                  label="Player type"
+                  column="playerType"
+                  sortState={sortState}
                   onClick={() => toggleSort('playerType')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Player type{sortIndicator('playerType')}
-                </button>
+                />
               </th>
-              <th scope="col" aria-sort={sortColumnAriaSort('routineType', sortState)}>
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+              <th scope="col" aria-sort={listSortColumnAriaSort('routineType', sortState)}>
+                <SortColumnHeaderButton
+                  label="Routine type"
+                  column="routineType"
+                  sortState={sortState}
                   onClick={() => toggleSort('routineType')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Routine type{sortIndicator('routineType')}
-                </button>
+                />
               </th>
-              <th scope="col" aria-sort={sortColumnAriaSort('place', sortState)}>
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+              <th scope="col" aria-sort={listSortColumnAriaSort('place', sortState)}>
+                <SortColumnHeaderButton
+                  label="Place"
+                  column="place"
+                  sortState={sortState}
                   onClick={() => toggleSort('place')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Place{sortIndicator('place')}
-                </button>
+                />
               </th>
-              <th scope="col" aria-sort={sortColumnAriaSort('routine', sortState)}>
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+              <th scope="col" aria-sort={listSortColumnAriaSort('routine', sortState)}>
+                <SortColumnHeaderButton
+                  label="Routine"
+                  column="routine"
+                  sortState={sortState}
                   onClick={() => toggleSort('routine')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Routine{sortIndicator('routine')}
-                </button>
+                />
               </th>
               <th
                 scope="col"
@@ -353,7 +352,7 @@ export function MappingsList({
               </tr>
             ) : null}
             {!dataLoading &&
-              displayRows.map((row) => {
+              pageItems.map((row) => {
                 const routineLabel = routinesById.get(row.routineId)?.name ?? '-';
                 return (
                   <tr key={row.id}>
@@ -543,6 +542,41 @@ export function MappingsList({
               })}
           </tbody>
         </table>
+      </div>
+
+      <div className="exercises-list-pagination">
+        <span className="exercises-list-range">
+          {dataLoading
+            ? 'Loading…'
+            : displayRows.length === 0
+              ? 'No mappings'
+              : `Showing ${rangeStart}–${rangeEnd} of ${displayRows.length}`}
+        </span>
+        <div className="exercises-list-page-actions">
+          {showPrevPage ? (
+            <button
+              type="button"
+              className="exercises-list-page-btn"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              aria-label="Previous page"
+            >
+              Previous
+            </button>
+          ) : null}
+          <span className="exercises-list-page-indicator">
+            Page {safePage} of {totalPages}
+          </span>
+          {showNextPage ? (
+            <button
+              type="button"
+              className="exercises-list-page-btn"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              aria-label="Next page"
+            >
+              Next
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   );

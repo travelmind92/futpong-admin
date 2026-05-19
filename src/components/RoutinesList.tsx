@@ -2,6 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Routine } from '../types';
 import { RoutinesContextValue } from '../context/RoutinesContext';
+import {
+  listSortColumnAriaSort,
+  SortColumnHeaderButton,
+} from './SortColumnHeaderButton';
 
 const PAGE_SIZE = 20;
 
@@ -10,19 +14,6 @@ type SortColumn = 'name' | 'playerType' | 'place' | 'type';
 type SortState =
   | { mode: 'none' }
   | { mode: 'asc' | 'desc'; column: SortColumn };
-
-function sortColumnAriaSort(
-  column: SortColumn,
-  state: SortState
-): 'none' | 'ascending' | 'descending' {
-  if (state.mode === 'none' || state.column !== column) {
-    return 'none';
-  }
-  return state.mode === 'asc' ? 'ascending' : 'descending';
-}
-
-const SORT_HEADER_TITLE =
-  'Sort: ascending, then descending, then default (database) order';
 
 type RoutinesListProps = {
   routines: Routine[];
@@ -87,19 +78,17 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
     setPage(1);
   };
 
-  const sortIndicator = (column: SortColumn) => {
-    if (sortState.mode === 'none' || sortState.column !== column) {
-      return '';
-    }
-    return sortState.mode === 'asc' ? ' ▲' : ' ▼';
-  };
-
   const safePage = Math.min(page, totalPages);
   const rangeStart =
     sortedRoutines.length === 0
       ? 0
       : (safePage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(safePage * PAGE_SIZE, sortedRoutines.length);
+
+  const showPaginationNav =
+    !dataLoading && sortedRoutines.length > 0;
+  const showPrevPage = showPaginationNav && safePage > 1;
+  const showNextPage = showPaginationNav && safePage < totalPages;
 
   return (
     <div className="exercises-list">
@@ -115,51 +104,43 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
       </div>
 
       <div className="exercises-list-table-wrap">
-        <table className="exercises-list-table">
+        <table className="exercises-list-table list-data-table">
           <thead>
             <tr>
-              <th scope="col" aria-sort={sortColumnAriaSort('name', sortState)}>
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+              <th scope="col" aria-sort={listSortColumnAriaSort('name', sortState)}>
+                <SortColumnHeaderButton
+                  label="Name"
+                  column="name"
+                  sortState={sortState}
                   onClick={() => toggleSort('name')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Name{sortIndicator('name')}
-                </button>
+                />
               </th>
               <th
                 scope="col"
-                aria-sort={sortColumnAriaSort('playerType', sortState)}
+                aria-sort={listSortColumnAriaSort('playerType', sortState)}
               >
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+                <SortColumnHeaderButton
+                  label="Player type"
+                  column="playerType"
+                  sortState={sortState}
                   onClick={() => toggleSort('playerType')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Player type{sortIndicator('playerType')}
-                </button>
+                />
               </th>
-              <th scope="col" aria-sort={sortColumnAriaSort('place', sortState)}>
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+              <th scope="col" aria-sort={listSortColumnAriaSort('place', sortState)}>
+                <SortColumnHeaderButton
+                  label="Place"
+                  column="place"
+                  sortState={sortState}
                   onClick={() => toggleSort('place')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Place{sortIndicator('place')}
-                </button>
+                />
               </th>
-              <th scope="col" aria-sort={sortColumnAriaSort('type', sortState)}>
-                <button
-                  type="button"
-                  className="mappings-list-sort"
+              <th scope="col" aria-sort={listSortColumnAriaSort('type', sortState)}>
+                <SortColumnHeaderButton
+                  label="Routine type"
+                  column="type"
+                  sortState={sortState}
                   onClick={() => toggleSort('type')}
-                  title={SORT_HEADER_TITLE}
-                >
-                  Routine type{sortIndicator('type')}
-                </button>
+                />
               </th>
               <th
                 scope="col"
@@ -251,27 +232,29 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
               : `Showing ${rangeStart}–${rangeEnd} of ${sortedRoutines.length}`}
         </span>
         <div className="exercises-list-page-actions">
-          <button
-            type="button"
-            className="exercises-list-page-btn"
-            disabled={safePage <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            aria-label="Previous page"
-          >
-            Previous
-          </button>
+          {showPrevPage ? (
+            <button
+              type="button"
+              className="exercises-list-page-btn"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              aria-label="Previous page"
+            >
+              Previous
+            </button>
+          ) : null}
           <span className="exercises-list-page-indicator">
             Page {safePage} of {totalPages}
           </span>
-          <button
-            type="button"
-            className="exercises-list-page-btn"
-            disabled={safePage >= totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            aria-label="Next page"
-          >
-            Next
-          </button>
+          {showNextPage ? (
+            <button
+              type="button"
+              className="exercises-list-page-btn"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              aria-label="Next page"
+            >
+              Next
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

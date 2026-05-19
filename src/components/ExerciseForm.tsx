@@ -1,16 +1,53 @@
-import React, { FormEvent, useEffect, useId, useState } from 'react';
+import React, {
+  FormEvent,
+  useContext,
+  useEffect,
+  useId,
+  useState,
+} from 'react';
 import {
   useNavigate,
   useOutletContext,
   useParams,
 } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { RepType } from '../types';
+import { Exercise, RepType } from '../types';
 import { ExercisesContextValue } from '../context/ExercisesContext';
+import { ServicesContext } from '../context/servicesOutletContext';
+import { getS3MediaBucket } from '../services/awsConfig';
+import {
+  deleteExerciseMediaFromS3,
+  toS3ObjectKey,
+  uploadExerciseMediaToS3,
+} from '../services/s3/uploadExerciseMedia';
+import { ExerciseMediaDropZone } from './ExerciseMediaDropZone';
 
 const repTypeOptions = Object.values(RepType);
+const THUMBNAIL_ACCEPT =
+  'image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/tiff,image/svg+xml';
+const ALLOWED_THUMBNAIL_MIME = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'image/gif',
+  'image/bmp',
+  'image/tiff',
+  'image/svg+xml',
+]);
+const ALLOWED_THUMBNAIL_EXT = new Set([
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.webp',
+  '.gif',
+  '.bmp',
+  '.tif',
+  '.tiff',
+  '.svg',
+]);
 
-function videoNameFromUrl(rawUrl: string): string {
+function assetNameFromUrl(rawUrl: string): string {
   const url = rawUrl.trim();
   if (!url) {
     return '';
@@ -27,9 +64,25 @@ function videoNameFromUrl(rawUrl: string): string {
   }
 }
 
+function isAllowedThumbnailFile(file: File): boolean {
+  const mime = file.type.trim().toLowerCase();
+  if (mime && ALLOWED_THUMBNAIL_MIME.has(mime)) {
+    return true;
+  }
+  const dot = file.name.lastIndexOf('.');
+  if (dot < 0) {
+    return false;
+  }
+  const ext = file.name.slice(dot).toLowerCase();
+  return ALLOWED_THUMBNAIL_EXT.has(ext);
+}
+
 export function ExerciseForm() {
   const { id: editId } = useParams();
   const isEdit = editId != null;
+
+  const services = useContext(ServicesContext);
+  const s3Client = services?.s3Client;
 
   const { exercises, addExercise, updateExercise, dataError } =
     useOutletContext<ExercisesContextValue>();
@@ -38,26 +91,41 @@ export function ExerciseForm() {
   const descId = useId();
   const repId = useId();
   const videoId = useId();
+  const imageId = useId();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [repType, setRepType] = useState<RepType>(RepType.REPETITIONS);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [priorVideoUrl, setPriorVideoUrl] = useState('');
+  const [priorThumbnailUrl, setPriorThumbnailUrl] = useState('');
+  const [removeVideoOnSave, setRemoveVideoOnSave] = useState(false);
+  const [removeThumbnailOnSave, setRemoveThumbnailOnSave] = useState(false);
+  const [videoInputKey, setVideoInputKey] = useState(0);
+  const [imageInputKey, setImageInputKey] = useState(0);
   const [nameDuplicateError, setNameDuplicateError] = useState('');
+  const [mediaError, setMediaError] = useState('');
+  const [validationError, setValidationError] = useState('');
+  const [saveError, setSaveError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const selectedVideoLabel =
-    videoFile?.name ??
-    (isEdit && priorVideoUrl.trim() ? videoNameFromUrl(priorVideoUrl) : '');
-
   useEffect(() => {
     if (!isEdit) {
       setName('');
       setDescription('');
       setRepType(RepType.REPETITIONS);
       setVideoFile(null);
+      setImageFile(null);
       setPriorVideoUrl('');
+      setPriorThumbnailUrl('');
+      setRemoveVideoOnSave(false);
+      setRemoveThumbnailOnSave(false);
+      setVideoInputKey(0);
+      setImageInputKey(0);
       setNameDuplicateError('');
+      setMediaError('');
+      setValidationError('');
+      setSaveError('');
       return;
     }
     if (!editId) {
@@ -74,18 +142,35 @@ export function ExerciseForm() {
     setDescription(existing.description);
     setRepType(existing.repType);
     setVideoFile(null);
-    setPriorVideoUrl(existing.videoUrl);
+    setImageFile(null);
+    setPriorVideoUrl(existing.videoUrl ?? '');
+    setPriorThumbnailUrl(existing.thumbnailUrl ?? '');
+    setRemoveVideoOnSave(false);
+    setRemoveThumbnailOnSave(false);
     setNameDuplicateError('');
-    // Intentionally omit `exercises` from deps so list updates do not reset the form while editing.
+    setMediaError('');
+    setValidationError('');
+    setSaveError('');
+    // Intentionally omit `exercises` and `navigate` from deps: list updates must not reset the form
+    // while editing, and `navigate` is not stable in all router versions (would clear file picks on /new).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, editId, navigate]);
+  }, [isEdit, editId]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const trimmedName = name.trim();
-    if (!trimmedName || !description.trim()) {
+    const trimmedDescription = description.trim();
+    if (!trimmedName) {
+      setValidationError('Please enter a name.');
       return;
     }
+    if (!trimmedDescription) {
+      setValidationError(
+        'Please enter a description (spaces alone are not enough).'
+      );
+      return;
+    }
+    setValidationError('');
 
     if (!isEdit) {
       const taken = exercises.some(
@@ -100,35 +185,140 @@ export function ExerciseForm() {
     }
     setNameDuplicateError('');
 
-    const videoUrl =
-      videoFile != null
-        ? URL.createObjectURL(videoFile)
-        : isEdit
-          ? priorVideoUrl
-          : '';
+    const existingExercise =
+      isEdit && editId ? exercises.find((e) => e.id === editId) : undefined;
+    if (isEdit && editId && !existingExercise) {
+      navigate('..', { replace: true });
+      return;
+    }
+    const needsUpload = videoFile != null || imageFile != null;
+    const mightDeleteMedia =
+      isEdit &&
+      ((removeVideoOnSave &&
+        Boolean(existingExercise?.videoUrl?.trim())) ||
+        (removeThumbnailOnSave &&
+          Boolean(existingExercise?.thumbnailUrl?.trim())));
+    if (needsUpload || mightDeleteMedia) {
+      if (!s3Client) {
+        setMediaError('Storage is not ready. Try again in a moment.');
+        return;
+      }
+      if (!getS3MediaBucket()) {
+        setMediaError(
+          'Media uploads require REACT_APP_S3_MEDIA_BUCKET in your environment.'
+        );
+        return;
+      }
+    }
+    setMediaError('');
+    setSaveError('');
+
+    const exerciseId = isEdit && editId ? editId : uuidv4();
+    const bucket = getS3MediaBucket();
 
     setIsSaving(true);
     try {
-      if (isEdit && editId) {
-        await updateExercise({
+      let uploadedVideoUrl: string | undefined;
+      let uploadedThumbnailUrl: string | undefined;
+
+      if (needsUpload && s3Client && bucket) {
+        if (videoFile != null) {
+          uploadedVideoUrl = await uploadExerciseMediaToS3(s3Client, {
+            bucket,
+            exerciseId,
+            kind: 'video',
+            file: videoFile,
+          });
+        }
+        if (imageFile != null) {
+          uploadedThumbnailUrl = await uploadExerciseMediaToS3(s3Client, {
+            bucket,
+            exerciseId,
+            kind: 'thumbnail',
+            file: imageFile,
+          });
+        }
+      }
+
+      const resolvedVideoUrl =
+        videoFile != null
+          ? uploadedVideoUrl!
+          : isEdit
+            ? removeVideoOnSave || priorVideoUrl.trim() === ''
+              ? undefined
+              : priorVideoUrl.trim()
+            : undefined;
+
+      const resolvedThumbnailUrl =
+        imageFile != null
+          ? uploadedThumbnailUrl!
+          : isEdit
+            ? removeThumbnailOnSave || priorThumbnailUrl.trim() === ''
+              ? undefined
+              : priorThumbnailUrl.trim()
+            : undefined;
+
+      if (isEdit && editId && existingExercise) {
+        const existing = existingExercise;
+        const next: Exercise = {
+          ...existing,
           id: editId,
           name: trimmedName,
-          description,
+          description: trimmedDescription,
           repType,
-          videoUrl,
-        });
+        };
+        delete next.videoUrl;
+        delete next.thumbnailUrl;
+        if (resolvedVideoUrl !== undefined) {
+          next.videoUrl = resolvedVideoUrl;
+        }
+        if (resolvedThumbnailUrl !== undefined) {
+          next.thumbnailUrl = resolvedThumbnailUrl;
+        }
+        await updateExercise(next);
+
+        const keysToDelete: string[] = [];
+        const previousVideoKey = toS3ObjectKey(existing.videoUrl);
+        const nextVideoKey = toS3ObjectKey(next.videoUrl);
+        if (previousVideoKey && previousVideoKey !== nextVideoKey) {
+          keysToDelete.push(previousVideoKey);
+        }
+        const previousThumbnailKey = toS3ObjectKey(existing.thumbnailUrl);
+        const nextThumbnailKey = toS3ObjectKey(next.thumbnailUrl);
+        if (previousThumbnailKey && previousThumbnailKey !== nextThumbnailKey) {
+          keysToDelete.push(previousThumbnailKey);
+        }
+        if (keysToDelete.length > 0 && s3Client && bucket) {
+          const uniqueKeys = keysToDelete.filter(
+            (key, idx, arr) => arr.indexOf(key) === idx
+          );
+          for (let i = 0; i < uniqueKeys.length; i += 1) {
+            await deleteExerciseMediaFromS3(s3Client, {
+              bucket,
+              key: uniqueKeys[i],
+            });
+          }
+        }
       } else {
         await addExercise({
-          id: uuidv4(),
+          id: exerciseId,
           name: trimmedName,
-          description,
+          description: trimmedDescription,
           repType,
-          videoUrl,
+          ...(resolvedVideoUrl !== undefined ? { videoUrl: resolvedVideoUrl } : {}),
+          ...(resolvedThumbnailUrl !== undefined
+            ? { thumbnailUrl: resolvedThumbnailUrl }
+            : {}),
         });
       }
       navigate('..', { replace: false });
-    } catch {
-      // `dataError` is set on the context provider
+    } catch (err) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : 'Save failed. Check the console for details.';
+      setSaveError(msg);
+      console.error(err);
     } finally {
       setIsSaving(false);
     }
@@ -144,7 +334,33 @@ export function ExerciseForm() {
           {dataError}
         </p>
       ) : null}
-      <form className="exercise-form" onSubmit={(e) => void handleSubmit(e)}>
+      {mediaError ? (
+        <p className="app-data-banner app-data-banner--error" role="alert">
+          {mediaError}
+        </p>
+      ) : null}
+      {validationError ? (
+        <p className="app-data-banner app-data-banner--error" role="alert">
+          {validationError}
+        </p>
+      ) : null}
+      {saveError ? (
+        <p className="app-data-banner app-data-banner--error" role="alert">
+          {saveError}
+        </p>
+      ) : null}
+      <form
+        className="exercise-form"
+        noValidate
+        onSubmit={(e) => {
+          void handleSubmit(e).catch((err) => {
+            console.error(err);
+            setSaveError(
+              err instanceof Error ? err.message : 'Save failed unexpectedly.'
+            );
+          });
+        }}
+      >
         <div className="exercise-form-field">
           <label htmlFor={nameId}>Name</label>
           <input
@@ -154,6 +370,7 @@ export function ExerciseForm() {
             onChange={(e) => {
               setName(e.target.value);
               setNameDuplicateError('');
+              setValidationError('');
             }}
             required
             autoComplete="off"
@@ -179,7 +396,10 @@ export function ExerciseForm() {
             id={descId}
             className="exercise-form-textarea"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              setValidationError('');
+            }}
             rows={8}
             required
           />
@@ -200,29 +420,83 @@ export function ExerciseForm() {
           </select>
         </div>
 
-        <div className="exercise-form-field">
-          <label htmlFor={videoId}>Video</label>
-          <input
-            id={videoId}
-            type="file"
-            accept="video/*"
-            className="exercise-form-file"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              setVideoFile(file ?? null);
-            }}
-          />
-          {selectedVideoLabel ? (
-            <p className="exercise-form-hint">
-              Selected file: <strong>{selectedVideoLabel}</strong>
-            </p>
-          ) : null}
-          {isEdit && priorVideoUrl.trim() !== '' && videoFile == null && (
-            <p className="exercise-form-hint">
-              A video is already attached. Choose a file to replace it.
-            </p>
-          )}
-        </div>
+        <ExerciseMediaDropZone
+          id={videoId}
+          inputKey={videoInputKey}
+          accept="video/*"
+          fieldLabel="Video (optional)"
+          clearLabel="Clear video"
+          hintLine="MP4, WebM, or MOV — one file"
+          valueFile={videoFile}
+          savedDisplayName={
+            !videoFile && priorVideoUrl.trim()
+              ? assetNameFromUrl(priorVideoUrl)
+              : ''
+          }
+          onPickFile={(file) => {
+            setVideoFile(file);
+            if (file) {
+              setRemoveVideoOnSave(false);
+            }
+            setMediaError('');
+          }}
+          onClear={() => {
+            setVideoFile(null);
+            setPriorVideoUrl('');
+            setRemoveVideoOnSave(true);
+            setVideoInputKey((k) => k + 1);
+          }}
+          showClear={videoFile != null || priorVideoUrl.trim() !== ''}
+          replaceHint={
+            isEdit && priorVideoUrl.trim() !== '' && videoFile == null
+              ? 'Replace: drop or choose a file.'
+              : undefined
+          }
+        />
+
+        <ExerciseMediaDropZone
+          id={imageId}
+          inputKey={imageInputKey}
+          accept={THUMBNAIL_ACCEPT}
+          fieldLabel="Thumbnail image (optional)"
+          clearLabel="Clear thumbnail"
+          hintLine="PNG, JPG, WebP, GIF — one image"
+          valueFile={imageFile}
+          savedDisplayName={
+            !imageFile && priorThumbnailUrl.trim()
+              ? assetNameFromUrl(priorThumbnailUrl)
+              : ''
+          }
+          onPickFile={(file) => {
+            if (!file) {
+              setImageFile(null);
+              return;
+            }
+            if (!isAllowedThumbnailFile(file)) {
+              setImageFile(null);
+              setImageInputKey((k) => k + 1);
+              setMediaError(
+                'Thumbnail must be one of: PNG, JPG/JPEG, WEBP, GIF, BMP, TIFF, SVG.'
+              );
+              return;
+            }
+            setImageFile(file);
+            setRemoveThumbnailOnSave(false);
+            setMediaError('');
+          }}
+          onClear={() => {
+            setImageFile(null);
+            setPriorThumbnailUrl('');
+            setRemoveThumbnailOnSave(true);
+            setImageInputKey((k) => k + 1);
+          }}
+          showClear={imageFile != null || priorThumbnailUrl.trim() !== ''}
+          replaceHint={
+            isEdit && priorThumbnailUrl.trim() !== '' && imageFile == null
+              ? 'Replace: drop or choose a file.'
+              : undefined
+          }
+        />
 
         <div className="exercise-form-actions">
           <button

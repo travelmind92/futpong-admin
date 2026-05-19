@@ -8,6 +8,7 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
+import { getAll } from '../services/api/api';
 import {
   normalizeRoutine,
   normalizeRoutineMapping,
@@ -91,30 +92,26 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
   }, [routineMappings]);
 
   useEffect(() => {
-    if (!dynamoClient) {
-      return;
-    }
     let cancelled = false;
     (async () => {
       setDataLoading(true);
       setDataError(null);
       try {
-        const { getAll } = dynamoApi(dynamoClient);
         const [rawRoutines, rawMappings, rawDays, rawBlocks] = await Promise.all([
-          getAll(ROUTINES_TABLE),
-          getAll(ROUTINE_MAPPINGS_TABLE),
-          getAll(TRAINING_DAYS_TABLE),
-          getAll(TRAINING_BLOCKS_TABLE),
+          getAll<Record<string, unknown>>('routines'),
+          getAll<Record<string, unknown>>('routine-mappings'),
+          getAll<Record<string, unknown>>('training-days'),
+          getAll<Record<string, unknown>>('training-blocks'),
         ]);
         if (cancelled) return;
-        const rt = (rawRoutines ?? [])
-          .map((item) => normalizeRoutine(item as Record<string, unknown>))
+        const rt = rawRoutines
+          .map((item) => normalizeRoutine(item))
           .filter((x): x is Routine => x !== null);
         rt.sort((a, b) => a.name.localeCompare(b.name));
         setRoutines(rt);
 
-        const rm = (rawMappings ?? [])
-          .map((item) => normalizeRoutineMapping(item as Record<string, unknown>))
+        const rm = rawMappings
+          .map((item) => normalizeRoutineMapping(item))
           .filter((x): x is RoutineMapping => x !== null);
         rm.sort((a, b) => {
           const byPlayer = a.playerType.localeCompare(b.playerType);
@@ -127,8 +124,8 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         });
         setRoutineMappings(rm);
 
-        const td = (rawDays ?? [])
-          .map((item) => normalizeTrainingDay(item as Record<string, unknown>))
+        const td = rawDays
+          .map((item) => normalizeTrainingDay(item))
           .filter((x): x is TrainingDay => x !== null);
         td.sort((a, b) => {
           const byRoutine = a.routineId.localeCompare(b.routineId);
@@ -137,8 +134,8 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         });
         setTrainingDays(td);
 
-        const tb = (rawBlocks ?? [])
-          .map((item) => normalizeTrainingBlock(item as Record<string, unknown>))
+        const tb = rawBlocks
+          .map((item) => normalizeTrainingBlock(item))
           .filter((x): x is TrainingBlock => x !== null);
         tb.sort((a, b) => {
           const byDay = a.trainingDayId.localeCompare(b.trainingDayId);
@@ -161,7 +158,7 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [dynamoClient, dynamoApi]);
+  }, []);
 
   const addRoutine = useCallback(
     async (routine: Routine, days: TrainingDay[], blocks: TrainingBlock[]) => {

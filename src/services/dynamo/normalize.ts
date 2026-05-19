@@ -45,11 +45,24 @@ export function normalizeExercise(raw: Record<string, unknown>): Exercise | null
   if (typeof id !== 'string' || !id) {
     return null;
   }
+  const videoUrlRaw = raw.videoUrl;
+  const videoUrl =
+    typeof videoUrlRaw === 'string' && videoUrlRaw.trim() !== ''
+      ? videoUrlRaw
+      : undefined;
+
+  const thumbnailUrlRaw = raw.thumbnailUrl;
+  const thumbnailUrl =
+    typeof thumbnailUrlRaw === 'string' && thumbnailUrlRaw.trim() !== ''
+      ? thumbnailUrlRaw
+      : undefined;
+
   return {
     id,
     name: typeof raw.name === 'string' ? raw.name : '',
     repType: isRepType(raw.repType) ? raw.repType : RepType.REPETITIONS,
-    videoUrl: typeof raw.videoUrl === 'string' ? raw.videoUrl : '',
+    ...(videoUrl !== undefined ? { videoUrl } : {}),
+    ...(thumbnailUrl !== undefined ? { thumbnailUrl } : {}),
     description: typeof raw.description === 'string' ? raw.description : '',
   };
 }
