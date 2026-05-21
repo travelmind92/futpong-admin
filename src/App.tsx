@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
 import { ExerciseForm } from './components/ExerciseForm';
 import { ExercisesLayout } from './panels/ExercisesLayout';
@@ -9,13 +10,16 @@ import { RoutinesLayout } from './panels/RoutinesLayout';
 import { RoutinesListPage } from './panels/RoutinesListPage';
 import './App.css';
 import { buildCognitoLoginUrl, buildCognitoLogoutUrl } from './services/api/cognito';
-import { getEmailFromIdToken, isAuthenticated } from './auth/auth';
+import { clearSession, getEmailFromIdToken, isAuthenticated } from './auth/auth';
+import { AuthProvider } from './context/AuthContext';
+import { ExercisesProvider } from './context/ExercisesContext';
+import { RoutinesProvider } from './context/RoutinesContext';
 import { exchangeCode } from './services/api/api';
 
-const menuItems: { to: string; label: string; icon: React.ReactNode }[] = [
+const menuItems: { to: string; labelKey: string; icon: React.ReactNode }[] = [
   {
     to: '/routines',
-    label: 'Routines',
+    labelKey: 'nav.routines',
     icon: (
       <svg
         className="nav-icon"
@@ -33,7 +37,7 @@ const menuItems: { to: string; label: string; icon: React.ReactNode }[] = [
   },
   {
     to: '/exercises',
-    label: 'Exercises',
+    labelKey: 'nav.exercises',
     icon: (
       <svg
         className="nav-icon"
@@ -51,7 +55,7 @@ const menuItems: { to: string; label: string; icon: React.ReactNode }[] = [
   },
   {
     to: '/mappings',
-    label: 'Mappings',
+    labelKey: 'nav.mappings',
     icon: (
       <svg
         className="nav-icon"
@@ -69,48 +73,9 @@ const menuItems: { to: string; label: string; icon: React.ReactNode }[] = [
   },
 ];
 
-function App() {
-  const cognitoOauthCodeRef = useRef<string | null | undefined>(undefined);
-  if (cognitoOauthCodeRef.current === undefined) {
-    cognitoOauthCodeRef.current = new URLSearchParams(window.location.search).get('code');
-  }
-
-  const cognitoLoginUrl = buildCognitoLoginUrl();
-  const [authenticated, setAuthenticated] = useState(() => isAuthenticated());
-  const userEmail = authenticated ? getEmailFromIdToken() : null;
-
-  const handleLogout = () => {
-    localStorage.removeItem('id_token');
-    localStorage.removeItem('access_token');
-    setAuthenticated(false);
-    window.location.href = buildCognitoLogoutUrl();
-  };
-
-  useEffect(() => {
-    const code = cognitoOauthCodeRef.current;
-    if (!code) return;
-
-    const exchangeKey = `cognito_code_used_${code}`;
-    if (sessionStorage.getItem(exchangeKey)) return;
-
-    sessionStorage.setItem(exchangeKey, 'true');
-
-    const stripOAuthParamsFromUrl = () => {
-      window.history.replaceState({}, document.title, window.location.pathname || '/');
-    };
-
-    exchangeCode(code)
-      .then((tokens) => {
-        localStorage.setItem('id_token', tokens.id_token);
-        localStorage.setItem('access_token', tokens.access_token);
-        setAuthenticated(true);
-        stripOAuthParamsFromUrl();
-      })
-      .catch((err) => {
-        console.error(err);
-        stripOAuthParamsFromUrl();
-      });
-  }, []);
+function AppShell({ onLogout }: { onLogout: () => void }) {
+  const { t } = useTranslation();
+  const userEmail = getEmailFromIdToken();
 
   return (
     <div className="app-shell">
@@ -120,38 +85,30 @@ function App() {
             <span className="app-title-brand-fut">FUT</span>
             <span className="app-title-brand-rest">PONG APP</span>
           </span>
-          <span className="app-title-admin">Admin</span>
+          <span className="app-title-admin">{t('common.admin')}</span>
         </h1>
 
         <div className="app-header-actions">
-          {authenticated ? (
-            <>
-              {userEmail ? (
-                <span className="app-header-user-email" title={userEmail}>
-                  {userEmail}
-                </span>
-              ) : null}
-              <button
-                type="button"
-                className="app-header-auth-btn app-header-auth-btn--logout"
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <a className="app-header-auth-btn app-header-auth-btn--login" href={cognitoLoginUrl}>
-              Login
-            </a>
-          )}
+          {userEmail ? (
+            <span className="app-header-user-email" title={userEmail}>
+              {userEmail}
+            </span>
+          ) : null}
+          <button
+            type="button"
+            className="app-header-auth-btn app-header-auth-btn--logout"
+            onClick={onLogout}
+          >
+            {t('auth.logout')}
+          </button>
         </div>
       </header>
 
       <div className="app-body">
-        <aside className="app-sidebar" aria-label="Main navigation">
+        <aside className="app-sidebar" aria-label={t('nav.main')}>
           <nav className="app-nav">
             <ul className="app-nav-list">
-              {menuItems.map(({ to, label, icon }) => (
+              {menuItems.map(({ to, labelKey, icon }) => (
                 <li key={to}>
                   <NavLink
                     to={to}
@@ -160,7 +117,7 @@ function App() {
                     }
                   >
                     {icon}
-                    <span>{label}</span>
+                    <span>{t(labelKey)}</span>
                   </NavLink>
                 </li>
               ))}
@@ -187,6 +144,83 @@ function App() {
         </main>
       </div>
     </div>
+  );
+}
+
+function App() {
+  const cognitoOauthCodeRef = useRef<string | null | undefined>(undefined);
+  if (cognitoOauthCodeRef.current === undefined) {
+    cognitoOauthCodeRef.current = new URLSearchParams(window.location.search).get(
+      'code'
+    );
+  }
+
+  const oauthCode = cognitoOauthCodeRef.current;
+  const [authenticated, setAuthenticated] = useState(() => isAuthenticated());
+  const [authLoading, setAuthLoading] = useState(
+    () => Boolean(oauthCode) && !isAuthenticated()
+  );
+
+  const handleLogout = () => {
+    clearSession();
+    setAuthenticated(false);
+    window.location.href = buildCognitoLogoutUrl();
+  };
+
+  useEffect(() => {
+    if (authenticated || authLoading) {
+      return;
+    }
+    window.location.replace(buildCognitoLoginUrl());
+  }, [authenticated, authLoading]);
+
+  useEffect(() => {
+    const code = oauthCode;
+    if (!code || authenticated) {
+      return;
+    }
+
+    const exchangeKey = `cognito_code_used_${code}`;
+    if (sessionStorage.getItem(exchangeKey)) {
+      return;
+    }
+
+    sessionStorage.setItem(exchangeKey, 'true');
+    setAuthLoading(true);
+
+    const stripOAuthParamsFromUrl = () => {
+      window.history.replaceState({}, document.title, window.location.pathname || '/');
+    };
+
+    exchangeCode(code)
+      .then((tokens) => {
+        localStorage.setItem('id_token', tokens.id_token);
+        localStorage.setItem('access_token', tokens.access_token);
+        setAuthenticated(true);
+        stripOAuthParamsFromUrl();
+      })
+      .catch((err) => {
+        console.error(err);
+        stripOAuthParamsFromUrl();
+        window.location.replace(buildCognitoLoginUrl());
+      })
+      .finally(() => {
+        setAuthLoading(false);
+      });
+  }, [oauthCode, authenticated]);
+
+  if (!authenticated) {
+    return null;
+  }
+
+  return (
+    <AuthProvider isAuthenticated>
+      <RoutinesProvider>
+        <ExercisesProvider>
+          <AppShell onLogout={handleLogout} />
+        </ExercisesProvider>
+      </RoutinesProvider>
+    </AuthProvider>
   );
 }
 

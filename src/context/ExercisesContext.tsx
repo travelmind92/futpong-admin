@@ -7,20 +7,30 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
-import { getAll } from '../services/api/api';
+import {
+  getAll,
+  remove,
+  save,
+} from '../services/api/api';
+import {
+  buildExerciseFormData,
+  parseSavedExerciseBody,
+  type SaveExerciseInput,
+} from '../services/api/exerciseSave';
 import { normalizeExercise } from '../services/dynamo/normalize';
 import { exerciseToDynamoItem } from '../services/dynamo/serialize';
-import { EXERCISES_TABLE } from '../services/dynamo/tables';
-import { useDynamoActions } from '../services/dynamo/dynamoActions';
 import { Exercise } from '../types';
 import { isExerciseIdUsedInTrainingBlocks } from '../utils/exerciseTrainingBlockRefs';
-import { ServicesContext } from './servicesOutletContext';
+import { translate } from '../i18n/translate';
+import { EXERCISE_IN_USE_ERROR_CODE } from '../i18n/errorCodes';
 import { useRoutines } from './RoutinesContext';
+
+export type { SaveExerciseInput } from '../services/api/exerciseSave';
 
 export type ExercisesContextValue = {
   exercises: Exercise[];
-  addExercise: (exercise: Exercise) => Promise<void>;
-  updateExercise: (exercise: Exercise) => Promise<void>;
+  addExercise: (input: SaveExerciseInput) => Promise<void>;
+  updateExercise: (input: SaveExerciseInput) => Promise<void>;
   removeExercise: (id: string) => Promise<void>;
   dataLoading: boolean;
   dataError: string | null;
@@ -36,11 +46,26 @@ export function useExercises(): ExercisesContextValue {
   return v;
 }
 
+function resolveSavedExercise(
+  body: unknown,
+  fallback: Exercise
+): Exercise {
+  return parseSavedExerciseBody(body) ?? fallback;
+}
+
+async function persistExercise(input: SaveExerciseInput): Promise<Exercise> {
+  const hasMedia = input.media !== undefined;
+
+  const body = hasMedia
+    ? buildExerciseFormData(input)
+    : exerciseToDynamoItem(input.exercise);
+
+  const responseBody = await save('exercises', input.exercise.id, body);
+  return resolveSavedExercise(responseBody, input.exercise);
+}
+
 export function ExercisesProvider({ children }: { children: ReactNode }) {
   const { trainingBlocks } = useRoutines();
-  const services = useContext(ServicesContext);
-  const dynamoClient = services?.dynamoClient;
-  const dynamoApi = useDynamoActions();
 
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
@@ -52,7 +77,7 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
       setDataLoading(true);
       setDataError(null);
       try {
-        const raw = await getAll<Record<string, unknown>>('exercises');
+        const raw = await getAll<Record<string, unknown>>('exercises', true);
         if (cancelled) return;
         const ex = raw
           .map((item) => normalizeExercise(item))
@@ -62,7 +87,7 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         if (!cancelled) {
           setDataError(
-            e instanceof Error ? e.message : 'Failed to load exercises'
+            e instanceof Error ? e.message : translate('errors.loadExercises')
           );
         }
       } finally {
@@ -76,84 +101,61 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const addExercise = useCallback(
-    async (exercise: Exercise) => {
-      if (!dynamoClient) {
-        const msg = 'Database client not ready. Try again in a moment.';
-        setDataError(msg);
-        throw new Error(msg);
-      }
-      const { save } = dynamoApi(dynamoClient);
-      try {
-        await save(EXERCISES_TABLE, [exerciseToDynamoItem(exercise)]);
-      } catch (e) {
-        const msg =
-          e instanceof Error
-            ? e.message
-            : 'Failed to save exercise to the database.';
-        setDataError(msg);
-        throw e instanceof Error ? e : new Error(msg);
-      }
+  const addExercise = useCallback(async (input: SaveExerciseInput) => {
+    try {
+      const saved = await persistExercise(input);
       setDataError(null);
-      setExercises((prev) => [exercise, ...prev]);
-    },
-    [dynamoApi, dynamoClient]
-  );
+      setExercises((prev) => [saved, ...prev]);
+    } catch (e) {
+      const msg =
+        e instanceof Error
+          ? e.message
+          : translate('errors.saveExercise');
+      setDataError(msg);
+      throw e instanceof Error ? e : new Error(msg);
+    }
+  }, []);
 
-  const updateExercise = useCallback(
-    async (exercise: Exercise) => {
-      if (!dynamoClient) {
-        const msg = 'Database client not ready. Try again in a moment.';
-        setDataError(msg);
-        throw new Error(msg);
-      }
-      const { save } = dynamoApi(dynamoClient);
-      try {
-        await save(EXERCISES_TABLE, [exerciseToDynamoItem(exercise)]);
-      } catch (e) {
-        const msg =
-          e instanceof Error
-            ? e.message
-            : 'Failed to update exercise in the database.';
-        setDataError(msg);
-        throw e instanceof Error ? e : new Error(msg);
-      }
+  const updateExercise = useCallback(async (input: SaveExerciseInput) => {
+    try {
+      const saved = await persistExercise(input);
       setDataError(null);
       setExercises((prev) =>
-        prev.map((e) => (e.id === exercise.id ? exercise : e))
+        prev.map((e) => (e.id === saved.id ? saved : e))
       );
-    },
-    [dynamoApi, dynamoClient]
-  );
+    } catch (e) {
+      const msg =
+        e instanceof Error
+          ? e.message
+          : translate('errors.updateExercise');
+      setDataError(msg);
+      throw e instanceof Error ? e : new Error(msg);
+    }
+  }, []);
 
   const removeExercise = useCallback(
     async (id: string) => {
       if (isExerciseIdUsedInTrainingBlocks(id, trainingBlocks)) {
-        const msg =
-          'This exercise is still used in one or more training blocks. Remove it from those blocks before deleting.';
+        const msg = translate('errors.exerciseInUse');
+        const err = new Error(msg) as Error & { code: string };
+        err.code = EXERCISE_IN_USE_ERROR_CODE;
         setDataError(msg);
-        throw new Error(msg);
+        throw err;
       }
-      if (!dynamoClient) {
-        const msg = 'Database client not ready. Try again in a moment.';
-        setDataError(msg);
-        throw new Error(msg);
-      }
-      const { remove } = dynamoApi(dynamoClient);
       try {
-        await remove(EXERCISES_TABLE, [id]);
+        await remove('exercises', id);
       } catch (e) {
         const msg =
           e instanceof Error
             ? e.message
-            : 'Failed to remove exercise from the database.';
+            : translate('errors.removeExercise');
         setDataError(msg);
         throw e instanceof Error ? e : new Error(msg);
       }
       setDataError(null);
       setExercises((prev) => prev.filter((e) => e.id !== id));
     },
-    [dynamoApi, dynamoClient, trainingBlocks]
+    [trainingBlocks]
   );
 
   const value = useMemo(

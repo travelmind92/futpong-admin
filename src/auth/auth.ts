@@ -2,8 +2,21 @@ export const getIdToken = () => {
   return localStorage.getItem('id_token');
 };
 
+export const clearSession = () => {
+  localStorage.removeItem('id_token');
+  localStorage.removeItem('access_token');
+};
+
 export const isAuthenticated = () => {
-  return !!getIdToken();
+  const token = getIdToken();
+  if (!token) {
+    return false;
+  }
+  if (isTokenExpired(token)) {
+    clearSession();
+    return false;
+  }
+  return true;
 };
 
 /** Subject email from Cognito ID token payload (if present). */

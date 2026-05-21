@@ -1,4 +1,3 @@
-import type { NativeAttributeValue } from '@aws-sdk/lib-dynamodb';
 import type {
   Exercise,
   Routine,
@@ -7,7 +6,7 @@ import type {
   TrainingDay,
 } from '../../types';
 
-type DynamoItem = Record<string, NativeAttributeValue>;
+type DynamoItem = Record<string, unknown>;
 
 export function exerciseToDynamoItem(exercise: Exercise): DynamoItem {
   const item: DynamoItem = {
@@ -64,6 +63,6 @@ export function trainingBlockToDynamoItem(block: TrainingBlock): DynamoItem {
     index: block.index,
     name: block.name,
     series: block.series,
-    exercises: block.exercises as unknown as NativeAttributeValue,
+    exercises: block.exercises,
   };
 }

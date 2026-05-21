@@ -1,10 +1,17 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
+import { useAuth } from '../context/AuthContext';
 import { PlayerType, Place, Routine, RoutineMapping, RoutineType } from '../types';
 import {
   listSortColumnAriaSort,
   SortColumnHeaderButton,
 } from './SortColumnHeaderButton';
+import {
+  translatePlace,
+  translatePlayerType,
+  translateRoutineType,
+} from '../i18n/enumLabels';
 
 const PAGE_SIZE = 15;
 
@@ -56,6 +63,8 @@ export function MappingsList({
   onSaveRow,
   onRemoveRow,
 }: MappingsListProps) {
+  const { t } = useTranslation();
+  const { readOnly } = useAuth();
   const [rows, setRows] = useState<DraftRoutineMappingRow[]>(() =>
     toDraftRows(routineMappings)
   );
@@ -178,7 +187,7 @@ export function MappingsList({
     if (!row.routineId.trim()) {
       setRoutineErrorsByRowId((prev) => ({
         ...prev,
-        [id]: 'Routine is required.',
+        [id]: t('mappings.routineRequired'),
       }));
       return;
     }
@@ -237,7 +246,7 @@ export function MappingsList({
       const mappingId = row.serverId ?? row.id;
       if (
         !window.confirm(
-          'Delete this mapping from the database? This cannot be undone.'
+          t('mappings.deleteConfirm')
         )
       ) {
         return;
@@ -271,28 +280,31 @@ export function MappingsList({
     !dataLoading && displayRows.length > 0;
   const showPrevPage = showPaginationNav && safePage > 1;
   const showNextPage = showPaginationNav && safePage < totalPages;
+  const columnCount = readOnly ? 4 : 5;
 
   return (
     <div className="exercises-list mappings-list">
       <div className="exercises-list-toolbar">
-        <h2 className="exercises-list-title">Mappings</h2>
-        <button
-          type="button"
-          className="exercises-list-create"
-          onClick={addRow}
-          disabled={
-            hasDraftRow || routines.length === 0 || savingRowId !== null
-          }
-          title={
-            routines.length === 0
-              ? 'Create at least one routine before adding mappings'
-              : hasDraftRow
-                ? 'Save or remove the row being edited before adding another'
-                : undefined
-          }
-        >
-          Create
-        </button>
+        <h2 className="exercises-list-title">{t('mappings.title')}</h2>
+        {!readOnly ? (
+          <button
+            type="button"
+            className="exercises-list-create"
+            onClick={addRow}
+            disabled={
+              hasDraftRow || routines.length === 0 || savingRowId !== null
+            }
+            title={
+              routines.length === 0
+                ? t('mappings.createRoutineFirst')
+                : hasDraftRow
+                  ? t('mappings.saveBeforeAdd')
+                  : undefined
+            }
+          >
+            {t('common.create')}
+          </button>
+        ) : null}
       </div>
 
       <div className="exercises-list-table-wrap">
@@ -301,7 +313,7 @@ export function MappingsList({
             <tr>
               <th scope="col" aria-sort={listSortColumnAriaSort('playerType', sortState)}>
                 <SortColumnHeaderButton
-                  label="Player type"
+                  label={t('routines.playerType')}
                   column="playerType"
                   sortState={sortState}
                   onClick={() => toggleSort('playerType')}
@@ -309,7 +321,7 @@ export function MappingsList({
               </th>
               <th scope="col" aria-sort={listSortColumnAriaSort('routineType', sortState)}>
                 <SortColumnHeaderButton
-                  label="Routine type"
+                  label={t('routines.routineType')}
                   column="routineType"
                   sortState={sortState}
                   onClick={() => toggleSort('routineType')}
@@ -317,7 +329,7 @@ export function MappingsList({
               </th>
               <th scope="col" aria-sort={listSortColumnAriaSort('place', sortState)}>
                 <SortColumnHeaderButton
-                  label="Place"
+                  label={t('routines.place')}
                   column="place"
                   sortState={sortState}
                   onClick={() => toggleSort('place')}
@@ -325,29 +337,31 @@ export function MappingsList({
               </th>
               <th scope="col" aria-sort={listSortColumnAriaSort('routine', sortState)}>
                 <SortColumnHeaderButton
-                  label="Routine"
+                  label={t('mappings.routine')}
                   column="routine"
                   sortState={sortState}
                   onClick={() => toggleSort('routine')}
                 />
               </th>
-              <th
-                scope="col"
-                className="exercises-list-actions-header"
-                aria-label="Actions"
-              />
+              {!readOnly ? (
+                <th
+                  scope="col"
+                  className="exercises-list-actions-header"
+                  aria-label={t('common.actions')}
+                />
+              ) : null}
             </tr>
           </thead>
           <tbody>
             {dataLoading ? (
               <tr>
-                <td colSpan={5}>Loading mappings...</td>
+                <td colSpan={columnCount}>{t('mappings.loadingList')}</td>
               </tr>
             ) : null}
             {!dataLoading && rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="routine-form-days-empty">
-                  No mappings yet. Use Create to add a row.
+                <td colSpan={columnCount} className="routine-form-days-empty">
+                  {readOnly ? t('mappings.noMappingsYet') : t('mappings.noMappingsCreate')}
                 </td>
               </tr>
             ) : null}
@@ -357,8 +371,8 @@ export function MappingsList({
                 return (
                   <tr key={row.id}>
                     <td>
-                      {row.status === 'saved' ? (
-                        row.playerType
+                      {readOnly || row.status === 'saved' ? (
+                        translatePlayerType(t, row.playerType)
                       ) : (
                         <select
                           className="routine-form-days-select"
@@ -371,15 +385,15 @@ export function MappingsList({
                         >
                           {playerTypeOptions.map((opt) => (
                             <option key={opt} value={opt}>
-                              {opt}
+                              {translatePlayerType(t, opt)}
                             </option>
                           ))}
                         </select>
                       )}
                     </td>
                     <td>
-                      {row.status === 'saved' ? (
-                        row.routineType
+                      {readOnly || row.status === 'saved' ? (
+                        translateRoutineType(t, row.routineType)
                       ) : (
                         <select
                           className="routine-form-days-select"
@@ -392,15 +406,15 @@ export function MappingsList({
                         >
                           {routineTypeOptions.map((opt) => (
                             <option key={opt} value={opt}>
-                              {opt}
+                              {translateRoutineType(t, opt)}
                             </option>
                           ))}
                         </select>
                       )}
                     </td>
                     <td>
-                      {row.status === 'saved' ? (
-                        row.place
+                      {readOnly || row.status === 'saved' ? (
+                        translatePlace(t, row.place)
                       ) : (
                         <select
                           className="routine-form-days-select"
@@ -413,14 +427,14 @@ export function MappingsList({
                         >
                           {placeOptions.map((opt) => (
                             <option key={opt} value={opt}>
-                              {opt}
+                              {translatePlace(t, opt)}
                             </option>
                           ))}
                         </select>
                       )}
                     </td>
                     <td>
-                      {row.status === 'saved' ? (
+                      {readOnly || row.status === 'saved' ? (
                         routineLabel
                       ) : (
                         <div className="routine-form-days-day-field">
@@ -437,7 +451,7 @@ export function MappingsList({
                               routineErrorsByRowId[row.id] ? true : undefined
                             }
                           >
-                            <option value="">Select routine</option>
+                            <option value="">{t('mappings.selectRoutine')}</option>
                             {routines.map((routine) => (
                               <option key={routine.id} value={routine.id}>
                                 {routine.name}
@@ -455,6 +469,7 @@ export function MappingsList({
                         </div>
                       )}
                     </td>
+                    {!readOnly ? (
                     <td className="exercises-list-actions-cell">
                       {row.status === 'draft' ? (
                         <div className="routine-form-days-row-actions">
@@ -464,13 +479,13 @@ export function MappingsList({
                             disabled={savingRowId === row.id}
                             onClick={() => void saveRow(row.id)}
                           >
-                            {savingRowId === row.id ? 'Saving…' : 'Save'}
+                            {savingRowId === row.id ? t('common.saving') : t('common.save')}
                           </button>
                           <button
                             type="button"
                             className="routine-form-day-remove"
-                            aria-label="Remove draft mapping row"
-                            title="Remove row"
+                            aria-label={t('mappings.removeDraftAria')}
+                            title={t('routines.removeRow')}
                             disabled={removingRowId === row.id}
                             onClick={() => void removeRow(row.id)}
                           >
@@ -491,11 +506,11 @@ export function MappingsList({
                           <button
                             type="button"
                             className="exercises-list-icon-btn exercises-list-icon-btn--edit routine-form-days-icon-btn"
-                            aria-label="Edit mapping row"
+                            aria-label={t('mappings.editAria')}
                             title={
                               hasDraftRow
-                                ? 'Finish editing the row in progress first'
-                                : 'Edit'
+                                ? t('mappings.finishEditing')
+                                : t('common.edit')
                             }
                             disabled={
                               hasDraftRow ||
@@ -518,8 +533,8 @@ export function MappingsList({
                           <button
                             type="button"
                             className="exercises-list-icon-btn exercises-list-icon-btn--remove routine-form-days-icon-btn"
-                            aria-label="Remove mapping row"
-                            title="Remove"
+                            aria-label={t('mappings.removeAria')}
+                            title={t('common.remove')}
                             disabled={removingRowId === row.id}
                             onClick={() => void removeRow(row.id)}
                           >
@@ -537,6 +552,7 @@ export function MappingsList({
                         </div>
                       )}
                     </td>
+                    ) : null}
                   </tr>
                 );
               })}
@@ -547,10 +563,14 @@ export function MappingsList({
       <div className="exercises-list-pagination">
         <span className="exercises-list-range">
           {dataLoading
-            ? 'Loading…'
+            ? t('common.loading')
             : displayRows.length === 0
-              ? 'No mappings'
-              : `Showing ${rangeStart}–${rangeEnd} of ${displayRows.length}`}
+              ? t('mappings.noMappings')
+              : t('common.showingRange', {
+                  start: rangeStart,
+                  end: rangeEnd,
+                  total: displayRows.length,
+                })}
         </span>
         <div className="exercises-list-page-actions">
           {showPrevPage ? (
@@ -558,22 +578,22 @@ export function MappingsList({
               type="button"
               className="exercises-list-page-btn"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              aria-label="Previous page"
+              aria-label={t('common.previousPage')}
             >
-              Previous
+              {t('common.previous')}
             </button>
           ) : null}
           <span className="exercises-list-page-indicator">
-            Page {safePage} of {totalPages}
+            {t('common.pageOf', { current: safePage, total: totalPages })}
           </span>
           {showNextPage ? (
             <button
               type="button"
               className="exercises-list-page-btn"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              aria-label="Next page"
+              aria-label={t('common.nextPage')}
             >
-              Next
+              {t('common.next')}
             </button>
           ) : null}
         </div>

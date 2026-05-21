@@ -1,11 +1,15 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Exercise } from '../types';
+import { useAuth } from '../context/AuthContext';
 import { ExercisesContextValue } from '../context/ExercisesContext';
 import {
   listSortColumnAriaSort,
   SortColumnHeaderButton,
 } from './SortColumnHeaderButton';
+import { translateRepType } from '../i18n/enumLabels';
+import { isExerciseInUseError } from '../i18n/errorCodes';
 
 const PAGE_SIZE = 20;
 const DESCRIPTION_PREVIEW_CHARS = 80;
@@ -42,7 +46,9 @@ type ExercisesListProps = {
 };
 
 export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const { readOnly } = useAuth();
   const { removeExercise } = useOutletContext<ExercisesContextValue>();
   const [page, setPage] = useState(1);
   const [sortState, setSortState] = useState<SortState>({ mode: 'none' });
@@ -112,18 +118,21 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
     !dataLoading && sortedExercises.length > 0;
   const showPrevPage = showPaginationNav && safePage > 1;
   const showNextPage = showPaginationNav && safePage < totalPages;
+  const columnCount = readOnly ? 5 : 6;
 
   return (
     <div className="exercises-list">
       <div className="exercises-list-toolbar">
-        <h2 className="exercises-list-title">Exercises</h2>
-        <button
-          type="button"
-          className="exercises-list-create"
-          onClick={() => navigate('new')}
-        >
-          Create
-        </button>
+        <h2 className="exercises-list-title">{t('exercises.title')}</h2>
+        {!readOnly ? (
+          <button
+            type="button"
+            className="exercises-list-create"
+            onClick={() => navigate('new')}
+          >
+            {t('common.create')}
+          </button>
+        ) : null}
       </div>
 
       <div className="exercises-list-table-wrap">
@@ -132,7 +141,7 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
             <tr>
               <th scope="col" aria-sort={listSortColumnAriaSort('name', sortState)}>
                 <SortColumnHeaderButton
-                  label="Name"
+                  label={t('common.name')}
                   column="name"
                   sortState={sortState}
                   onClick={() => toggleSort('name')}
@@ -143,7 +152,7 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                 aria-sort={listSortColumnAriaSort('repType', sortState)}
               >
                 <SortColumnHeaderButton
-                  label="Rep type"
+                  label={t('exercises.repType')}
                   column="repType"
                   sortState={sortState}
                   onClick={() => toggleSort('repType')}
@@ -154,7 +163,7 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                 aria-sort={listSortColumnAriaSort('description', sortState)}
               >
                 <SortColumnHeaderButton
-                  label="Description"
+                  label={t('common.description')}
                   column="description"
                   sortState={sortState}
                   onClick={() => toggleSort('description')}
@@ -162,7 +171,7 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
               </th>
               <th scope="col" aria-sort={listSortColumnAriaSort('video', sortState)}>
                 <SortColumnHeaderButton
-                  label="Video"
+                  label={t('exercises.video')}
                   column="video"
                   sortState={sortState}
                   onClick={() => toggleSort('video')}
@@ -173,30 +182,32 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                 aria-sort={listSortColumnAriaSort('thumbnail', sortState)}
               >
                 <SortColumnHeaderButton
-                  label="Thumbnail"
+                  label={t('exercises.thumbnail')}
                   column="thumbnail"
                   sortState={sortState}
                   onClick={() => toggleSort('thumbnail')}
                 />
               </th>
-              <th
-                scope="col"
-                className="exercises-list-actions-header"
-                aria-label="Actions"
-              />
+              {!readOnly ? (
+                <th
+                  scope="col"
+                  className="exercises-list-actions-header"
+                  aria-label={t('common.actions')}
+                />
+              ) : null}
             </tr>
           </thead>
           <tbody>
             {dataLoading ? (
               <tr>
-                <td colSpan={6}>Loading exercises…</td>
+                <td colSpan={columnCount}>{t('exercises.loadingList')}</td>
               </tr>
             ) : null}
             {!dataLoading &&
               pageItems.map((exercise) => (
               <tr key={exercise.id}>
                 <td>{exercise.name}</td>
-                <td>{exercise.repType}</td>
+                <td>{translateRepType(t, exercise.repType)}</td>
                 <td className="exercises-list-desc">
                   {truncateDescription(
                     exercise.description,
@@ -207,8 +218,8 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                   {hasVideoUrl(exercise.videoUrl) ? (
                     <span
                       className="exercises-list-video-yes"
-                      title="Video available"
-                      aria-label="Video available"
+                      title={t('exercises.videoAvailable')}
+                      aria-label={t('exercises.videoAvailable')}
                     >
                       <svg
                         className="exercises-list-video-icon"
@@ -226,8 +237,8 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                   {hasThumbnailUrl(exercise.thumbnailUrl) ? (
                     <span
                       className="exercises-list-thumb-yes"
-                      title="Thumbnail available"
-                      aria-label="Thumbnail available"
+                      title={t('exercises.thumbnailAvailable')}
+                      aria-label={t('exercises.thumbnailAvailable')}
                     >
                       <svg
                         className="exercises-list-thumb-icon"
@@ -244,13 +255,14 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                     <span className="exercises-list-thumb-no">-</span>
                   )}
                 </td>
+                {!readOnly ? (
                 <td className="exercises-list-actions-cell">
                   <div className="exercises-list-actions">
                     <button
                       type="button"
                       className="exercises-list-icon-btn exercises-list-icon-btn--edit"
-                      aria-label={`Edit ${exercise.name}`}
-                      title="Edit"
+                      aria-label={t('exercises.editAria', { name: exercise.name })}
+                      title={t('common.edit')}
                       onClick={() => navigate(`${exercise.id}/edit`)}
                     >
                       <svg
@@ -267,13 +279,13 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                     <button
                       type="button"
                       className="exercises-list-icon-btn exercises-list-icon-btn--remove"
-                      aria-label={`Remove ${exercise.name}`}
-                      title="Remove"
+                      aria-label={t('exercises.removeAria', { name: exercise.name })}
+                      title={t('common.remove')}
                       onClick={() => {
                         void (async () => {
                           if (
                             !window.confirm(
-                              `Remove "${exercise.name}"? This cannot be undone.`
+                              t('exercises.removeConfirm', { name: exercise.name })
                             )
                           ) {
                             return;
@@ -281,11 +293,10 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                           try {
                             await removeExercise(exercise.id);
                           } catch (e) {
-                            if (
-                              e instanceof Error &&
-                              e.message.includes('training block')
-                            ) {
-                              window.alert(e.message);
+                            if (isExerciseInUseError(e)) {
+                              window.alert(
+                                e instanceof Error ? e.message : t('errors.exerciseInUse')
+                              );
                             }
                             // Other failures: `dataError` is set on the context provider
                           }
@@ -305,6 +316,7 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                     </button>
                   </div>
                 </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
@@ -314,10 +326,14 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
       <div className="exercises-list-pagination">
         <span className="exercises-list-range">
           {dataLoading
-            ? 'Loading…'
+            ? t('common.loading')
             : sortedExercises.length === 0
-              ? 'No exercises'
-              : `Showing ${rangeStart}–${rangeEnd} of ${sortedExercises.length}`}
+              ? t('exercises.noExercises')
+              : t('common.showingRange', {
+                  start: rangeStart,
+                  end: rangeEnd,
+                  total: sortedExercises.length,
+                })}
         </span>
         <div className="exercises-list-page-actions">
           {showPrevPage ? (
@@ -325,22 +341,22 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
               type="button"
               className="exercises-list-page-btn"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              aria-label="Previous page"
+              aria-label={t('common.previousPage')}
             >
-              Previous
+              {t('common.previous')}
             </button>
           ) : null}
           <span className="exercises-list-page-indicator">
-            Page {safePage} of {totalPages}
+            {t('common.pageOf', { current: safePage, total: totalPages })}
           </span>
           {showNextPage ? (
             <button
               type="button"
               className="exercises-list-page-btn"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              aria-label="Next page"
+              aria-label={t('common.nextPage')}
             >
-              Next
+              {t('common.next')}
             </button>
           ) : null}
         </div>

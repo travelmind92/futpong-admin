@@ -1,11 +1,18 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Routine } from '../types';
+import { useAuth } from '../context/AuthContext';
 import { RoutinesContextValue } from '../context/RoutinesContext';
 import {
   listSortColumnAriaSort,
   SortColumnHeaderButton,
 } from './SortColumnHeaderButton';
+import {
+  translatePlace,
+  translatePlayerType,
+  translateRoutineType,
+} from '../i18n/enumLabels';
 
 const PAGE_SIZE = 20;
 
@@ -21,7 +28,9 @@ type RoutinesListProps = {
 };
 
 export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const { readOnly } = useAuth();
   const { removeRoutine } = useOutletContext<RoutinesContextValue>();
   const [page, setPage] = useState(1);
   const [sortState, setSortState] = useState<SortState>({ mode: 'none' });
@@ -89,18 +98,21 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
     !dataLoading && sortedRoutines.length > 0;
   const showPrevPage = showPaginationNav && safePage > 1;
   const showNextPage = showPaginationNav && safePage < totalPages;
+  const columnCount = readOnly ? 4 : 5;
 
   return (
     <div className="exercises-list">
       <div className="exercises-list-toolbar">
-        <h2 className="exercises-list-title">Routines</h2>
-        <button
-          type="button"
-          className="exercises-list-create"
-          onClick={() => navigate('new')}
-        >
-          Create
-        </button>
+        <h2 className="exercises-list-title">{t('routines.title')}</h2>
+        {!readOnly ? (
+          <button
+            type="button"
+            className="exercises-list-create"
+            onClick={() => navigate('new')}
+          >
+            {t('common.create')}
+          </button>
+        ) : null}
       </div>
 
       <div className="exercises-list-table-wrap">
@@ -109,7 +121,7 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
             <tr>
               <th scope="col" aria-sort={listSortColumnAriaSort('name', sortState)}>
                 <SortColumnHeaderButton
-                  label="Name"
+                  label={t('common.name')}
                   column="name"
                   sortState={sortState}
                   onClick={() => toggleSort('name')}
@@ -120,7 +132,7 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
                 aria-sort={listSortColumnAriaSort('playerType', sortState)}
               >
                 <SortColumnHeaderButton
-                  label="Player type"
+                  label={t('routines.playerType')}
                   column="playerType"
                   sortState={sortState}
                   onClick={() => toggleSort('playerType')}
@@ -128,7 +140,7 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
               </th>
               <th scope="col" aria-sort={listSortColumnAriaSort('place', sortState)}>
                 <SortColumnHeaderButton
-                  label="Place"
+                  label={t('routines.place')}
                   column="place"
                   sortState={sortState}
                   onClick={() => toggleSort('place')}
@@ -136,39 +148,42 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
               </th>
               <th scope="col" aria-sort={listSortColumnAriaSort('type', sortState)}>
                 <SortColumnHeaderButton
-                  label="Routine type"
+                  label={t('routines.routineType')}
                   column="type"
                   sortState={sortState}
                   onClick={() => toggleSort('type')}
                 />
               </th>
-              <th
-                scope="col"
-                className="exercises-list-actions-header"
-                aria-label="Actions"
-              />
+              {!readOnly ? (
+                <th
+                  scope="col"
+                  className="exercises-list-actions-header"
+                  aria-label={t('common.actions')}
+                />
+              ) : null}
             </tr>
           </thead>
           <tbody>
             {dataLoading ? (
               <tr>
-                <td colSpan={5}>Loading routines…</td>
+                <td colSpan={columnCount}>{t('routines.loadingList')}</td>
               </tr>
             ) : null}
             {!dataLoading &&
               pageItems.map((routine) => (
               <tr key={routine.id}>
                 <td>{routine.name}</td>
-                <td>{routine.playerType}</td>
-                <td>{routine.place}</td>
-                <td>{routine.type}</td>
+                <td>{translatePlayerType(t, routine.playerType)}</td>
+                <td>{translatePlace(t, routine.place)}</td>
+                <td>{translateRoutineType(t, routine.type)}</td>
+                {!readOnly ? (
                 <td className="exercises-list-actions-cell">
                   <div className="exercises-list-actions">
                     <button
                       type="button"
                       className="exercises-list-icon-btn exercises-list-icon-btn--edit"
-                      aria-label={`Edit ${routine.name}`}
-                      title="Edit"
+                      aria-label={t('routines.editAria', { name: routine.name })}
+                      title={t('common.edit')}
                       onClick={() => navigate(`${routine.id}/edit`)}
                     >
                       <svg
@@ -185,13 +200,13 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
                     <button
                       type="button"
                       className="exercises-list-icon-btn exercises-list-icon-btn--remove"
-                      aria-label={`Remove ${routine.name}`}
-                      title="Remove"
+                      aria-label={t('routines.removeAria', { name: routine.name })}
+                      title={t('common.remove')}
                       onClick={() => {
                         void (async () => {
                           if (
                             !window.confirm(
-                              `Remove "${routine.name}"? This cannot be undone.`
+                              t('routines.removeConfirm', { name: routine.name })
                             )
                           ) {
                             return;
@@ -217,6 +232,7 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
                     </button>
                   </div>
                 </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
@@ -226,10 +242,14 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
       <div className="exercises-list-pagination">
         <span className="exercises-list-range">
           {dataLoading
-            ? 'Loading…'
+            ? t('common.loading')
             : sortedRoutines.length === 0
-              ? 'No routines'
-              : `Showing ${rangeStart}–${rangeEnd} of ${sortedRoutines.length}`}
+              ? t('routines.noRoutines')
+              : t('common.showingRange', {
+                  start: rangeStart,
+                  end: rangeEnd,
+                  total: sortedRoutines.length,
+                })}
         </span>
         <div className="exercises-list-page-actions">
           {showPrevPage ? (
@@ -237,22 +257,22 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
               type="button"
               className="exercises-list-page-btn"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              aria-label="Previous page"
+              aria-label={t('common.previousPage')}
             >
-              Previous
+              {t('common.previous')}
             </button>
           ) : null}
           <span className="exercises-list-page-indicator">
-            Page {safePage} of {totalPages}
+            {t('common.pageOf', { current: safePage, total: totalPages })}
           </span>
           {showNextPage ? (
             <button
               type="button"
               className="exercises-list-page-btn"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              aria-label="Next page"
+              aria-label={t('common.nextPage')}
             >
-              Next
+              {t('common.next')}
             </button>
           ) : null}
         </div>

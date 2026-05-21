@@ -8,7 +8,7 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
-import { getAll } from '../services/api/api';
+import { getAll, remove, save } from '../services/api/api';
 import {
   normalizeRoutine,
   normalizeRoutineMapping,
@@ -16,20 +16,32 @@ import {
   normalizeTrainingDay,
 } from '../services/dynamo/normalize';
 import {
-  ROUTINE_MAPPINGS_TABLE,
-  ROUTINES_TABLE,
-  TRAINING_BLOCKS_TABLE,
-  TRAINING_DAYS_TABLE,
-} from '../services/dynamo/tables';
-import { useDynamoActions } from '../services/dynamo/dynamoActions';
-import {
   routineMappingToDynamoItem,
   routineToDynamoItem,
   trainingBlockToDynamoItem,
   trainingDayToDynamoItem,
 } from '../services/dynamo/serialize';
 import { Routine, RoutineMapping, TrainingBlock, TrainingDay } from '../types';
-import { ServicesContext } from './servicesOutletContext';
+import { translate } from '../i18n/translate';
+
+async function saveAll(
+  resource: string,
+  items: { id: string; payload: unknown }[]
+): Promise<void> {
+  if (items.length === 0) {
+    return;
+  }
+  await Promise.all(
+    items.map(({ id, payload }) => save(resource, id, payload))
+  );
+}
+
+async function removeAll(resource: string, ids: string[]): Promise<void> {
+  if (ids.length === 0) {
+    return;
+  }
+  await Promise.all(ids.map((id) => remove(resource, id)));
+}
 
 export type RoutinesContextValue = {
   routines: Routine[];
@@ -64,10 +76,6 @@ export function useRoutines(): RoutinesContextValue {
 }
 
 export function RoutinesProvider({ children }: { children: ReactNode }) {
-  const services = useContext(ServicesContext);
-  const dynamoClient = services?.dynamoClient;
-  const dynamoApi = useDynamoActions();
-
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [routineMappings, setRoutineMappings] = useState<RoutineMapping[]>([]);
   const [trainingDays, setTrainingDays] = useState<TrainingDay[]>([]);
@@ -98,10 +106,10 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
       setDataError(null);
       try {
         const [rawRoutines, rawMappings, rawDays, rawBlocks] = await Promise.all([
-          getAll<Record<string, unknown>>('routines'),
-          getAll<Record<string, unknown>>('routine-mappings'),
-          getAll<Record<string, unknown>>('training-days'),
-          getAll<Record<string, unknown>>('training-blocks'),
+          getAll<Record<string, unknown>>('routines', true),
+          getAll<Record<string, unknown>>('routine-mappings', true),
+          getAll<Record<string, unknown>>('training-days', true),
+          getAll<Record<string, unknown>>('training-blocks', true),
         ]);
         if (cancelled) return;
         const rt = rawRoutines
@@ -146,7 +154,7 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         if (!cancelled) {
           setDataError(
-            e instanceof Error ? e.message : 'Failed to load routines'
+            e instanceof Error ? e.message : translate('errors.loadRoutines')
           );
         }
       } finally {
@@ -162,23 +170,25 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
 
   const addRoutine = useCallback(
     async (routine: Routine, days: TrainingDay[], blocks: TrainingBlock[]) => {
-      if (!dynamoClient) {
-        const msg = 'Database client not ready. Try again in a moment.';
-        setDataError(msg);
-        throw new Error(msg);
-      }
-      const { save } = dynamoApi(dynamoClient);
       try {
-        await save(ROUTINES_TABLE, [routineToDynamoItem(routine)]);
-        if (days.length > 0) {
-          await save(TRAINING_DAYS_TABLE, days.map(trainingDayToDynamoItem));
-        }
-        if (blocks.length > 0) {
-          await save(TRAINING_BLOCKS_TABLE, blocks.map(trainingBlockToDynamoItem));
-        }
+        await save('routines', routine.id, routineToDynamoItem(routine));
+        await saveAll(
+          'training-days',
+          days.map((day) => ({
+            id: day.id,
+            payload: trainingDayToDynamoItem(day),
+          }))
+        );
+        await saveAll(
+          'training-blocks',
+          blocks.map((block) => ({
+            id: block.id,
+            payload: trainingBlockToDynamoItem(block),
+          }))
+        );
       } catch (e) {
         const msg =
-          e instanceof Error ? e.message : 'Failed to save routine to the database.';
+          e instanceof Error ? e.message : translate('errors.saveRoutine');
         setDataError(msg);
         throw e instanceof Error ? e : new Error(msg);
       }
@@ -187,17 +197,11 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
       setTrainingDays((prev) => [...days, ...prev]);
       setTrainingBlocks((prev) => [...blocks, ...prev]);
     },
-    [dynamoApi, dynamoClient]
+    []
   );
 
   const updateRoutine = useCallback(
     async (routine: Routine, days: TrainingDay[], blocks: TrainingBlock[]) => {
-      if (!dynamoClient) {
-        const msg = 'Database client not ready. Try again in a moment.';
-        setDataError(msg);
-        throw new Error(msg);
-      }
-      const { save, remove } = dynamoApi(dynamoClient);
       const oldDayIds = trainingDaysRef.current
         .filter((td) => td.routineId === routine.id)
         .map((td) => td.id);
@@ -208,18 +212,26 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         .map((tb) => tb.id);
 
       try {
-        await remove(TRAINING_BLOCKS_TABLE, oldBlockIds);
-        await remove(TRAINING_DAYS_TABLE, removedDayIds);
-        await save(ROUTINES_TABLE, [routineToDynamoItem(routine)]);
-        if (days.length > 0) {
-          await save(TRAINING_DAYS_TABLE, days.map(trainingDayToDynamoItem));
-        }
-        if (blocks.length > 0) {
-          await save(TRAINING_BLOCKS_TABLE, blocks.map(trainingBlockToDynamoItem));
-        }
+        await removeAll('training-blocks', oldBlockIds);
+        await removeAll('training-days', removedDayIds);
+        await save('routines', routine.id, routineToDynamoItem(routine));
+        await saveAll(
+          'training-days',
+          days.map((day) => ({
+            id: day.id,
+            payload: trainingDayToDynamoItem(day),
+          }))
+        );
+        await saveAll(
+          'training-blocks',
+          blocks.map((block) => ({
+            id: block.id,
+            payload: trainingBlockToDynamoItem(block),
+          }))
+        );
       } catch (e) {
         const msg =
-          e instanceof Error ? e.message : 'Failed to update routine in the database.';
+          e instanceof Error ? e.message : translate('errors.updateRoutine');
         setDataError(msg);
         throw e instanceof Error ? e : new Error(msg);
       }
@@ -240,17 +252,11 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         return [...days, ...rest];
       });
     },
-    [dynamoApi, dynamoClient]
+    []
   );
 
   const removeRoutine = useCallback(
     async (routineId: string) => {
-      if (!dynamoClient) {
-        const msg = 'Database client not ready. Try again in a moment.';
-        setDataError(msg);
-        throw new Error(msg);
-      }
-      const { remove } = dynamoApi(dynamoClient);
       const dayIds = trainingDaysRef.current
         .filter((td) => td.routineId === routineId)
         .map((td) => td.id);
@@ -262,13 +268,13 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         .map((m) => m.id);
 
       try {
-        await remove(TRAINING_BLOCKS_TABLE, blockIds);
-        await remove(TRAINING_DAYS_TABLE, dayIds);
-        await remove(ROUTINE_MAPPINGS_TABLE, mappingIds);
-        await remove(ROUTINES_TABLE, [routineId]);
+        await removeAll('training-blocks', blockIds);
+        await removeAll('training-days', dayIds);
+        await removeAll('routine-mappings', mappingIds);
+        await remove('routines', routineId);
       } catch (e) {
         const msg =
-          e instanceof Error ? e.message : 'Failed to remove routine from the database.';
+          e instanceof Error ? e.message : translate('errors.removeRoutine');
         setDataError(msg);
         throw e instanceof Error ? e : new Error(msg);
       }
@@ -290,64 +296,48 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         return prev.filter((td) => td.routineId !== routineId);
       });
     },
-    [dynamoApi, dynamoClient]
+    []
   );
 
-  const upsertRoutineMapping = useCallback(
-    async (mapping: RoutineMapping) => {
-      if (!dynamoClient) {
-        const msg = 'Database client not ready. Try again in a moment.';
-        setDataError(msg);
-        throw new Error(msg);
+  const upsertRoutineMapping = useCallback(async (mapping: RoutineMapping) => {
+    try {
+      await save(
+        'routine-mappings',
+        mapping.id,
+        routineMappingToDynamoItem(mapping)
+      );
+    } catch (e) {
+      const msg =
+        e instanceof Error
+          ? e.message
+          : translate('errors.saveMapping');
+      setDataError(msg);
+      throw e instanceof Error ? e : new Error(msg);
+    }
+    setDataError(null);
+    setRoutineMappings((prev) => {
+      const exists = prev.some((m) => m.id === mapping.id);
+      if (!exists) {
+        return [mapping, ...prev];
       }
-      const { save } = dynamoApi(dynamoClient);
-      try {
-        await save(ROUTINE_MAPPINGS_TABLE, [
-          routineMappingToDynamoItem(mapping),
-        ]);
-      } catch (e) {
-        const msg =
-          e instanceof Error
-            ? e.message
-            : 'Failed to save mapping to the database.';
-        setDataError(msg);
-        throw e instanceof Error ? e : new Error(msg);
-      }
-      setDataError(null);
-      setRoutineMappings((prev) => {
-        const exists = prev.some((m) => m.id === mapping.id);
-        if (!exists) {
-          return [mapping, ...prev];
-        }
-        return prev.map((m) => (m.id === mapping.id ? mapping : m));
-      });
-    },
-    [dynamoApi, dynamoClient]
-  );
+      return prev.map((m) => (m.id === mapping.id ? mapping : m));
+    });
+  }, []);
 
-  const removeRoutineMapping = useCallback(
-    async (mappingId: string) => {
-      if (!dynamoClient) {
-        const msg = 'Database client not ready. Try again in a moment.';
-        setDataError(msg);
-        throw new Error(msg);
-      }
-      const { remove } = dynamoApi(dynamoClient);
-      try {
-        await remove(ROUTINE_MAPPINGS_TABLE, [mappingId]);
-      } catch (e) {
-        const msg =
-          e instanceof Error
-            ? e.message
-            : 'Failed to remove mapping from the database.';
-        setDataError(msg);
-        throw e instanceof Error ? e : new Error(msg);
-      }
-      setDataError(null);
-      setRoutineMappings((prev) => prev.filter((m) => m.id !== mappingId));
-    },
-    [dynamoApi, dynamoClient]
-  );
+  const removeRoutineMapping = useCallback(async (mappingId: string) => {
+    try {
+      await remove('routine-mappings', mappingId);
+    } catch (e) {
+      const msg =
+        e instanceof Error
+          ? e.message
+          : translate('errors.removeMapping');
+      setDataError(msg);
+      throw e instanceof Error ? e : new Error(msg);
+    }
+    setDataError(null);
+    setRoutineMappings((prev) => prev.filter((m) => m.id !== mappingId));
+  }, []);
 
   const value = useMemo(
     (): RoutinesContextValue => ({

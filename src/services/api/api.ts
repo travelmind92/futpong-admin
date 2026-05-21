@@ -2,7 +2,7 @@ import { ENV } from "../../constants/env";
 import { apiFetch } from "./fetch";
 
 export const exchangeCode = async (code: string) => {
-  const res = await fetch(`${ENV.AWS_API_GATEWAY_URL}/auth/exchange-code`, {
+  const res = await fetch(`${ENV.API_BASE_URL}/auth/exchange-code`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -49,17 +49,41 @@ export async function getAll<T>(
 export async function save(
   resource: string,
   id: string,
-  payload: unknown,
+  payload: unknown | FormData,
+  auth: boolean = true
+): Promise<unknown> {
+  const segment = resource.replace(/^\/+/, "").replace(/\/+$/, "");
+  const path = `/${segment}/${encodeURIComponent(id)}`;
+  const body =
+    payload instanceof FormData ? payload : JSON.stringify(payload);
+  const res = await apiFetch(path, auth, {
+    method: "PUT",
+    body,
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(text || `Failed to save ${segment} (${res.status})`);
+  }
+  if (!text) {
+    return undefined;
+  }
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function remove(
+  resource: string,
+  id: string,
   auth: boolean = true
 ): Promise<void> {
   const segment = resource.replace(/^\/+/, "").replace(/\/+$/, "");
   const path = `/${segment}/${encodeURIComponent(id)}`;
-  const res = await apiFetch(path, auth, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
+  const res = await apiFetch(path, auth, { method: "DELETE" });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || `Failed to save ${segment} (${res.status})`);
+    throw new Error(text || `Failed to remove ${segment} (${res.status})`);
   }
 }

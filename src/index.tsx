@@ -1,9 +1,7 @@
+import './bootstrapI18n';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { DynamoServicesProvider } from './context/DynamoServicesProvider';
-import { ExercisesProvider } from './context/ExercisesContext';
-import { RoutinesProvider } from './context/RoutinesContext';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -14,13 +12,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <DynamoServicesProvider>
-        <RoutinesProvider>
-          <ExercisesProvider>
-            <App />
-          </ExercisesProvider>
-        </RoutinesProvider>
-      </DynamoServicesProvider>
+      <App />
     </BrowserRouter>
   </React.StrictMode>
 );

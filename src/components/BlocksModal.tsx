@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { v4 as uuidv4 } from 'uuid';
 import type { Exercise } from '../types';
@@ -136,6 +137,7 @@ function ExerciseSearchField({
   onBlurCombo,
   onPick,
 }: ExerciseSearchFieldProps) {
+  const { t } = useTranslation();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [fixedPos, setFixedPos] = useState<{
     top: number;
@@ -191,7 +193,7 @@ function ExerciseSearchField({
         type="text"
         className="blocks-modal-field-input blocks-modal-field-exercise-search"
         value={searchDisplay}
-        placeholder="Search exercise…"
+        placeholder={t('blocksModal.searchExercise')}
         autoComplete="off"
         onChange={(e) => onSearchChange(e.target.value)}
         onFocus={onFocusCombo}
@@ -248,6 +250,7 @@ export function BlocksModal({
   onSave,
   onCancel,
 }: BlocksModalProps) {
+  const { t } = useTranslation();
   const [activeExerciseComboKey, setActiveExerciseComboKey] = useState<
     string | null
   >(null);
@@ -448,7 +451,7 @@ export function BlocksModal({
           <button
             type="button"
             className="blocks-modal-close"
-            aria-label="Close"
+            aria-label={t('common.close')}
             onClick={onCancel}
           >
             ×
@@ -462,7 +465,7 @@ export function BlocksModal({
                 <tbody>
                   <tr>
                     <td colSpan={4} className="blocks-modal-empty">
-                      No blocks yet. Add one below.
+                      {t('blocksModal.empty')}
                     </td>
                   </tr>
                 </tbody>
@@ -496,8 +499,10 @@ export function BlocksModal({
                                 type="button"
                                 className="blocks-modal-drag"
                                 draggable
-                                title="Drag to reorder"
-                                aria-label={`Reorder block ${block.index}`}
+                                title={t('blocksModal.dragToReorder')}
+                                aria-label={t('blocksModal.reorderBlockAria', {
+                                  index: block.index,
+                                })}
                                 onDragStart={(e) => {
                                   e.dataTransfer.effectAllowed = 'move';
                                   e.dataTransfer.setData(
@@ -523,7 +528,7 @@ export function BlocksModal({
                                 className="blocks-modal-block-inline-label"
                                 htmlFor={`block-name-${block.id}`}
                               >
-                                Name
+                                {t('common.name')}
                               </label>
                               <input
                                 id={`block-name-${block.id}`}
@@ -540,7 +545,7 @@ export function BlocksModal({
                                 className="blocks-modal-block-inline-label"
                                 htmlFor={`block-series-${block.id}`}
                               >
-                                Series
+                                {t('blocksModal.series')}
                               </label>
                               <input
                                 id={`block-series-${block.id}`}
@@ -556,7 +561,9 @@ export function BlocksModal({
                               <button
                                 type="button"
                                 className="blocks-modal-remove"
-                                aria-label={`Remove block ${block.index}`}
+                                aria-label={t('blocksModal.removeBlockAria', {
+                                  index: block.index,
+                                })}
                                 onClick={() => removeRow(index)}
                               >
                                 ×
@@ -573,7 +580,7 @@ export function BlocksModal({
                                       colSpan={3}
                                       className="blocks-modal-exercise-empty"
                                     >
-                                      No exercises yet. Add one below.
+                                      {t('blocksModal.noExercisesYet')}
                                     </td>
                                   </tr>
                                 ) : (
@@ -602,7 +609,7 @@ export function BlocksModal({
                                               className="blocks-modal-block-inline-label"
                                               htmlFor={exerciseInputId}
                                             >
-                                              Exercise
+                                              {t('blocksModal.exercise')}
                                             </label>
                                             <ExerciseSearchField
                                               inputId={exerciseInputId}
@@ -650,7 +657,7 @@ export function BlocksModal({
                                               className="blocks-modal-block-inline-label"
                                               htmlFor={repsInputId}
                                             >
-                                              Reps
+                                              {t('blocksModal.reps')}
                                             </label>
                                             <input
                                               id={repsInputId}
@@ -672,7 +679,13 @@ export function BlocksModal({
                                             <button
                                               type="button"
                                               className="blocks-modal-remove"
-                                              aria-label={`Remove exercise ${ex.index} from block ${block.index}`}
+                                              aria-label={t(
+                                                'blocksModal.removeExerciseAria',
+                                                {
+                                                  exerciseIndex: ex.index,
+                                                  blockIndex: block.index,
+                                                }
+                                              )}
                                               onClick={() =>
                                                 removeExerciseRow(
                                                   index,
@@ -698,7 +711,7 @@ export function BlocksModal({
                               className="blocks-modal-add"
                               onClick={() => addExerciseRow(index)}
                             >
-                              Add exercise
+                              {t('blocksModal.addExercise')}
                             </button>
                           </div>
                           </div>
@@ -716,7 +729,7 @@ export function BlocksModal({
                 className="blocks-modal-add"
                 onClick={addRow}
               >
-                Add block
+                {t('blocksModal.addBlock')}
               </button>
             </div>
           </div>
@@ -728,20 +741,18 @@ export function BlocksModal({
             className="blocks-modal-btn blocks-modal-btn--secondary"
             onClick={onCancel}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="button"
             className="blocks-modal-btn blocks-modal-btn--primary"
             disabled={cannotSaveBlocks}
             title={
-              cannotSaveBlocks
-                ? 'Fill in name, series, and every exercise row (pick or type a matching exercise name + reps), or remove incomplete rows'
-                : undefined
+              cannotSaveBlocks ? t('blocksModal.saveDisabledTitle') : undefined
             }
             onClick={onSave}
           >
-            Save
+            {t('common.save')}
           </button>
         </div>
       </div>

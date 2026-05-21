@@ -1,6 +1,5 @@
-import { getIdToken, isTokenExpired } from "../../auth/auth";
+import { clearSession, getIdToken, isTokenExpired } from "../../auth/auth";
 import { ENV } from "../../constants/env";
-import { buildCognitoLogoutUrl } from "./cognito";
 
 export const apiFetch = async (
   path: string,
@@ -13,16 +12,20 @@ export const apiFetch = async (
     idToken = getIdToken();
 
     if (!idToken || isTokenExpired(idToken)) {
-      localStorage.removeItem("id_token");
-      localStorage.removeItem("access_token");
-      window.location.href = buildCognitoLogoutUrl();
+      clearSession();
+      window.location.assign(
+        `${window.location.origin}${window.location.pathname}`
+      );
+      throw new Error("Session expired");
     }
   }
 
-  return fetch(`${ENV.AWS_API_GATEWAY_URL}${path}`, {
+  const isFormData = options.body instanceof FormData;
+
+  return fetch(`${ENV.API_BASE_URL}${path}`, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(options.headers ?? {}),
       ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
     },

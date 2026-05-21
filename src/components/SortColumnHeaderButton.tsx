@@ -1,7 +1,5 @@
 import React from 'react';
-
-export const LIST_SORT_HEADER_TITLE =
-  'Sort: ascending, then descending, then default (database) order';
+import { useTranslation } from 'react-i18next';
 
 export type ListSortState<C extends string> =
   | { mode: 'none' }
@@ -102,15 +100,17 @@ export function SortColumnHeaderButton<C extends string>({
   column,
   sortState,
   onClick,
-  title = LIST_SORT_HEADER_TITLE,
+  title,
 }: SortColumnHeaderButtonProps<C>) {
+  const { t } = useTranslation();
+  const sortTitle = title ?? t('sort.headerTitle');
   const direction: 'inactive' | 'asc' | 'desc' =
     sortState.mode === 'none' || sortState.column !== column
       ? 'inactive'
       : sortState.mode;
 
   return (
-    <button type="button" className="list-sort-btn" onClick={onClick} title={title}>
+    <button type="button" className="list-sort-btn" onClick={onClick} title={sortTitle}>
       <span className="list-sort-btn__label">{label}</span>
       <span className="list-sort-btn__icon" aria-hidden>
         {direction === 'inactive' ? (

@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 function UploadTrayIcon() {
   return (
@@ -60,6 +61,7 @@ export function ExerciseMediaDropZone({
   showClear,
   replaceHint,
 }: ExerciseMediaDropZoneProps) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const dragDepth = useRef(0);
 
@@ -140,7 +142,7 @@ export function ExerciseMediaDropZone({
               <UploadTrayIcon />
             </span>
             <span className="exercise-form-dropzone__title">
-              {hasFileLabel ? displayName : 'Drop or click to choose'}
+              {hasFileLabel ? displayName : t('exercises.dropOrClick')}
             </span>
             <span id={hintId} className="exercise-form-dropzone__hint">
               {hintLine}

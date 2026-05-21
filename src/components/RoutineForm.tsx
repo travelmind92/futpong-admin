@@ -11,6 +11,7 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import {
   Place,
@@ -29,6 +30,11 @@ import {
   normalizeBlocksForSave,
 } from './BlocksModal';
 import { RoutinesContextValue } from '../context/RoutinesContext';
+import {
+  translatePlace,
+  translatePlayerType,
+  translateRoutineType,
+} from '../i18n/enumLabels';
 
 const playerTypeOptions = Object.values(PlayerType);
 const placeOptions = Object.values(Place);
@@ -68,10 +74,6 @@ function maxExistingDay(days: DraftTrainingDay[]): number {
 
 function nextFreeDayNumber(days: DraftTrainingDay[]): number {
   return maxExistingDay(days) + 1;
-}
-
-function defaultDayLabel(dayNum: number): string {
-  return `Día ${dayNum}`;
 }
 
 function defaultNewDay(existing: DraftTrainingDay[]): DraftTrainingDay {
@@ -123,6 +125,7 @@ function trainingBlocksToLocal(blocks: TrainingBlock[]): LocalTrainingBlock[] {
 }
 
 export function RoutineForm() {
+  const { t } = useTranslation();
   const { id: editRoutineId } = useParams();
   const isEdit = Boolean(editRoutineId);
 
@@ -244,8 +247,8 @@ export function RoutineForm() {
     }
     const row = trainingDays.find((r) => r.id === blocksModalDayRowId);
     const n = row && typeof row.day === 'number' ? row.day : '—';
-    return `Day ${n} - Blocks`;
-  }, [blocksModalDayRowId, trainingDays]);
+    return t('routines.blocksModalTitle', { day: n });
+  }, [blocksModalDayRowId, trainingDays, t]);
 
   const daysTotalPages = Math.max(
     1,
@@ -308,7 +311,7 @@ export function RoutineForm() {
     if (dayInvalid) {
       setDayNumberErrors((prev) => ({
         ...prev,
-        [id]: 'This field is required.',
+        [id]: t('routines.fieldRequired'),
       }));
       return;
     }
@@ -403,9 +406,7 @@ export function RoutineForm() {
         : r.name.trim() === trimmedName
     );
     if (nameTaken) {
-      setRoutineNameDuplicateError(
-        'A routine with this name already exists. Choose a different name.'
-      );
+      setRoutineNameDuplicateError(t('routines.duplicateName'));
       return;
     }
     setRoutineNameDuplicateError('');
@@ -433,7 +434,7 @@ export function RoutineForm() {
         if (isBlank(b.name) || isBlank(b.series)) {
           const d = typeof row.day === 'number' ? row.day : '—';
           setRoutineBlocksSubmitError(
-            `Each training block must have a name and a series. Complete or remove incomplete blocks for day ${d}.`
+            t('routines.blocksIncomplete', { day: d })
           );
           return;
         }
@@ -441,7 +442,7 @@ export function RoutineForm() {
           if (!isLocalExerciseRowComplete(ex, exerciseCatalog)) {
             const d = typeof row.day === 'number' ? row.day : '—';
             setRoutineBlocksSubmitError(
-              `Each exercise in a block must have an exercise and reps. Complete or remove incomplete rows for day ${d}.`
+              t('routines.exercisesIncomplete', { day: d })
             );
             return;
           }
@@ -465,7 +466,7 @@ export function RoutineForm() {
         id: row.serverDayId ?? row.id,
         routineId,
         day: row.day as number,
-        name: defaultDayLabel(row.day as number),
+        name: t('routines.dayLabel', { day: row.day as number }),
         matchday: row.matchday,
       }));
 
@@ -502,9 +503,7 @@ export function RoutineForm() {
       navigate('..');
     } catch (err) {
       setRoutineBlocksSubmitError(
-        err instanceof Error
-          ? err.message
-          : 'Could not save the routine. Please try again.'
+        err instanceof Error ? err.message : t('routines.saveFailed')
       );
     } finally {
       setRoutineSaveInProgress(false);
@@ -514,11 +513,11 @@ export function RoutineForm() {
   return (
     <div className="app-panel exercise-form-panel">
       <h2 className="exercise-form-title">
-        {isEdit ? 'Edit routine' : 'New routine'}
+        {isEdit ? t('routines.editRoutine') : t('routines.newRoutine')}
       </h2>
       <form className="exercise-form routine-form" onSubmit={handleSubmit}>
         <div className="exercise-form-field">
-          <label htmlFor={nameId}>Name</label>
+          <label htmlFor={nameId}>{t('common.name')}</label>
           <input
             id={nameId}
             type="text"
@@ -548,7 +547,7 @@ export function RoutineForm() {
 
         <div className="routine-form-selects-row">
           <div className="exercise-form-field routine-form-meta-field">
-            <label htmlFor={playerTypeId}>Player type</label>
+            <label htmlFor={playerTypeId}>{t('routines.playerType')}</label>
             <select
               id={playerTypeId}
               value={playerType}
@@ -556,14 +555,14 @@ export function RoutineForm() {
             >
               {playerTypeOptions.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt}
+                  {translatePlayerType(t, opt)}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="exercise-form-field routine-form-meta-field">
-            <label htmlFor={placeId}>Place</label>
+            <label htmlFor={placeId}>{t('routines.place')}</label>
             <select
               id={placeId}
               value={place}
@@ -571,14 +570,14 @@ export function RoutineForm() {
             >
               {placeOptions.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt}
+                  {translatePlace(t, opt)}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="exercise-form-field routine-form-meta-field">
-            <label htmlFor={routineTypeId}>Routine type</label>
+            <label htmlFor={routineTypeId}>{t('routines.routineType')}</label>
             <select
               id={routineTypeId}
               value={routineType}
@@ -588,7 +587,7 @@ export function RoutineForm() {
             >
               {routineTypeOptions.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt}
+                  {translateRoutineType(t, opt)}
                 </option>
               ))}
             </select>
@@ -601,7 +600,7 @@ export function RoutineForm() {
         >
           <div className="exercises-list-toolbar">
             <h3 id="routine-form-days-heading" className="exercises-list-title">
-              Days
+              {t('routines.days')}
             </h3>
             <button
               type="button"
@@ -609,12 +608,10 @@ export function RoutineForm() {
               onClick={addTrainingDay}
               disabled={hasDraftDayRow}
               title={
-                hasDraftDayRow
-                  ? 'Save or remove the day row being edited before adding another'
-                  : undefined
+                hasDraftDayRow ? t('routines.saveBeforeAddDay') : undefined
               }
             >
-              Create
+              {t('common.create')}
             </button>
           </div>
 
@@ -622,13 +619,13 @@ export function RoutineForm() {
             <table className="exercises-list-table list-data-table">
               <thead>
                 <tr>
-                  <th scope="col">Day</th>
-                  <th scope="col">Matchday</th>
-                  <th scope="col">Blocks</th>
+                  <th scope="col">{t('routines.day')}</th>
+                  <th scope="col">{t('routines.matchday')}</th>
+                  <th scope="col">{t('routines.blocks')}</th>
                   <th
                     scope="col"
                     className="exercises-list-actions-header"
-                    aria-label="Actions"
+                    aria-label={t('common.actions')}
                   />
                 </tr>
               </thead>
@@ -636,7 +633,7 @@ export function RoutineForm() {
                 {daysPageItems.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="routine-form-days-empty">
-                      No days yet. Use Create to add a row.
+                      {t('routines.noDaysYet')}
                     </td>
                   </tr>
                 ) : (
@@ -671,7 +668,7 @@ export function RoutineForm() {
                                   matchday: matchdayForDay(parsed),
                                 });
                               }}
-                              aria-label="Day number"
+                              aria-label={t('routines.dayNumber')}
                               aria-required="true"
                               aria-invalid={
                                 dayNumberErrors[row.id]
@@ -711,7 +708,7 @@ export function RoutineForm() {
                                 matchday: e.target.value,
                               })
                             }
-                            aria-label="Matchday"
+                            aria-label={t('routines.matchday')}
                           >
                             {MATCHDAY_OPTIONS.map((opt) => (
                               <option key={opt} value={opt}>
@@ -727,7 +724,9 @@ export function RoutineForm() {
                           className="routine-form-days-blocks-btn"
                           onClick={() => openBlocksModal(row.id)}
                         >
-                          {`${blocksByDayRowId[row.id]?.length ?? 0} Blocks`}
+                          {t('routines.blocksCount', {
+                            count: blocksByDayRowId[row.id]?.length ?? 0,
+                          })}
                         </button>
                       </td>
                       <td className="exercises-list-actions-cell">
@@ -739,13 +738,13 @@ export function RoutineForm() {
                                 className="routine-form-day-save"
                                 onClick={() => saveDayRow(row.id)}
                               >
-                                Save
+                                {t('common.save')}
                               </button>
                               <button
                                 type="button"
                                 className="routine-form-day-remove"
-                                aria-label="Remove draft day row"
-                                title="Remove row"
+                                aria-label={t('routines.saveDraftDayAria')}
+                                title={t('routines.removeRow')}
                                 onClick={() => removeDayRow(row.id)}
                               >
                                 <svg
@@ -765,11 +764,11 @@ export function RoutineForm() {
                               <button
                                 type="button"
                                 className="exercises-list-icon-btn exercises-list-icon-btn--edit routine-form-days-icon-btn"
-                                aria-label="Edit day row"
+                                aria-label={t('routines.editDayAria')}
                                 title={
                                   hasDraftDayRow
-                                    ? 'Finish editing the day row in progress first'
-                                    : 'Edit'
+                                    ? t('routines.finishEditingDay')
+                                    : t('common.edit')
                                 }
                                 disabled={hasDraftDayRow}
                                 onClick={() => editSavedDayRow(row.id)}
@@ -788,8 +787,8 @@ export function RoutineForm() {
                               <button
                                 type="button"
                                 className="exercises-list-icon-btn exercises-list-icon-btn--remove routine-form-days-icon-btn"
-                                aria-label="Remove day row"
-                                title="Remove"
+                                aria-label={t('routines.removeDayAria')}
+                                title={t('common.remove')}
                                 onClick={() => removeDayRow(row.id)}
                               >
                                 <svg
@@ -817,8 +816,12 @@ export function RoutineForm() {
           <div className="exercises-list-pagination">
             <span className="exercises-list-range">
               {trainingDays.length === 0
-                ? 'No days'
-                : `Showing ${daysRangeStart}–${daysRangeEnd} of ${trainingDays.length}`}
+                ? t('routines.noDays')
+                : t('common.showingRange', {
+                    start: daysRangeStart,
+                    end: daysRangeEnd,
+                    total: trainingDays.length,
+                  })}
             </span>
             <div className="exercises-list-page-actions">
               {showDaysPrev ? (
@@ -826,13 +829,16 @@ export function RoutineForm() {
                   type="button"
                   className="exercises-list-page-btn"
                   onClick={() => setDaysPage((p) => Math.max(1, p - 1))}
-                  aria-label="Previous page"
+                  aria-label={t('common.previousPage')}
                 >
-                  Previous
+                  {t('common.previous')}
                 </button>
               ) : null}
               <span className="exercises-list-page-indicator">
-                Page {daysSafePage} of {daysTotalPages}
+                {t('common.pageOf', {
+                  current: daysSafePage,
+                  total: daysTotalPages,
+                })}
               </span>
               {showDaysNext ? (
                 <button
@@ -841,9 +847,9 @@ export function RoutineForm() {
                   onClick={() =>
                     setDaysPage((p) => Math.min(daysTotalPages, p + 1))
                   }
-                  aria-label="Next page"
+                  aria-label={t('common.nextPage')}
                 >
-                  Next
+                  {t('common.next')}
                 </button>
               ) : null}
             </div>
@@ -852,8 +858,11 @@ export function RoutineForm() {
 
         {hasDraftDayRow ? (
           <p className="routine-form-submit-hint" role="status">
-            Save each day row or remove draft rows you do not need before{' '}
-            {isEdit ? 'saving' : 'creating'} the routine.
+            {t('routines.submitHint', {
+              action: isEdit
+                ? t('routines.submitHintActionEdit')
+                : t('routines.submitHintActionCreate'),
+            })}
           </p>
         ) : null}
 
@@ -869,7 +878,7 @@ export function RoutineForm() {
             className="exercise-form-cancel"
             onClick={() => navigate('..')}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -877,17 +886,17 @@ export function RoutineForm() {
             disabled={hasDraftDayRow || routineSaveInProgress}
             title={
               hasDraftDayRow
-                ? 'Save all day rows before submitting'
+                ? t('routines.saveAllDaysTitle')
                 : routineSaveInProgress
-                  ? 'Saving…'
+                  ? t('common.saving')
                   : undefined
             }
           >
             {routineSaveInProgress
-              ? 'Saving…'
+              ? t('common.saving')
               : isEdit
-                ? 'Save'
-                : 'Create'}
+                ? t('common.save')
+                : t('common.create')}
           </button>
         </div>
       </form>
