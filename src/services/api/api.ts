@@ -87,3 +87,56 @@ export async function remove(
     throw new Error(text || `Failed to remove ${segment} (${res.status})`);
   }
 }
+
+async function parseMutationResponse(
+  res: Response,
+  segment: string,
+  action: string
+): Promise<unknown> {
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(text || `Failed to ${action} ${segment} (${res.status})`);
+  }
+  if (!text) {
+    return undefined;
+  }
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function bulkSave(
+  resource: string,
+  items: unknown[],
+  auth: boolean = true
+): Promise<unknown> {
+  const segment = resource.replace(/^\/+/, "").replace(/\/+$/, "");
+  if (items.length === 0) {
+    return undefined;
+  }
+  const path = `/${segment}/bulk`;
+  const res = await apiFetch(path, auth, {
+    method: "PUT",
+    body: JSON.stringify(items),
+  });
+  return parseMutationResponse(res, segment, "bulk save");
+}
+
+export async function bulkRemove(
+  resource: string,
+  items: unknown[],
+  auth: boolean = true
+): Promise<void> {
+  const segment = resource.replace(/^\/+/, "").replace(/\/+$/, "");
+  if (items.length === 0) {
+    return;
+  }
+  const path = `/${segment}/bulk`;
+  const res = await apiFetch(path, auth, {
+    method: "DELETE",
+    body: JSON.stringify(items),
+  });
+  await parseMutationResponse(res, segment, "bulk remove");
+}

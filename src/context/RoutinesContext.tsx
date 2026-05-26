@@ -8,7 +8,7 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
-import { getAll, remove, save } from '../services/api/api';
+import { bulkRemove, bulkSave, getAll, remove, save } from '../services/api/api';
 import {
   normalizeRoutine,
   normalizeRoutineMapping,
@@ -24,23 +24,8 @@ import {
 import { Routine, RoutineMapping, TrainingBlock, TrainingDay } from '../types';
 import { translate } from '../i18n/translate';
 
-async function saveAll(
-  resource: string,
-  items: { id: string; payload: unknown }[]
-): Promise<void> {
-  if (items.length === 0) {
-    return;
-  }
-  await Promise.all(
-    items.map(({ id, payload }) => save(resource, id, payload))
-  );
-}
-
-async function removeAll(resource: string, ids: string[]): Promise<void> {
-  if (ids.length === 0) {
-    return;
-  }
-  await Promise.all(ids.map((id) => remove(resource, id)));
+function idsToBulkDeleteItems(ids: string[]): { id: string }[] {
+  return ids.map((id) => ({ id }));
 }
 
 export type RoutinesContextValue = {
@@ -172,19 +157,13 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
     async (routine: Routine, days: TrainingDay[], blocks: TrainingBlock[]) => {
       try {
         await save('routines', routine.id, routineToDynamoItem(routine));
-        await saveAll(
+        await bulkSave(
           'training-days',
-          days.map((day) => ({
-            id: day.id,
-            payload: trainingDayToDynamoItem(day),
-          }))
+          days.map((day) => trainingDayToDynamoItem(day))
         );
-        await saveAll(
+        await bulkSave(
           'training-blocks',
-          blocks.map((block) => ({
-            id: block.id,
-            payload: trainingBlockToDynamoItem(block),
-          }))
+          blocks.map((block) => trainingBlockToDynamoItem(block))
         );
       } catch (e) {
         const msg =
@@ -212,22 +191,22 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         .map((tb) => tb.id);
 
       try {
-        await removeAll('training-blocks', oldBlockIds);
-        await removeAll('training-days', removedDayIds);
-        await save('routines', routine.id, routineToDynamoItem(routine));
-        await saveAll(
-          'training-days',
-          days.map((day) => ({
-            id: day.id,
-            payload: trainingDayToDynamoItem(day),
-          }))
-        );
-        await saveAll(
+        await bulkRemove(
           'training-blocks',
-          blocks.map((block) => ({
-            id: block.id,
-            payload: trainingBlockToDynamoItem(block),
-          }))
+          idsToBulkDeleteItems(oldBlockIds)
+        );
+        await bulkRemove(
+          'training-days',
+          idsToBulkDeleteItems(removedDayIds)
+        );
+        await save('routines', routine.id, routineToDynamoItem(routine));
+        await bulkSave(
+          'training-days',
+          days.map((day) => trainingDayToDynamoItem(day))
+        );
+        await bulkSave(
+          'training-blocks',
+          blocks.map((block) => trainingBlockToDynamoItem(block))
         );
       } catch (e) {
         const msg =
@@ -268,9 +247,14 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         .map((m) => m.id);
 
       try {
-        await removeAll('training-blocks', blockIds);
-        await removeAll('training-days', dayIds);
-        await removeAll('routine-mappings', mappingIds);
+        await bulkRemove(
+          'training-blocks',
+          idsToBulkDeleteItems(blockIds)
+        );
+        await bulkRemove('training-days', idsToBulkDeleteItems(dayIds));
+        await Promise.all(
+          mappingIds.map((id) => remove('routine-mappings', id))
+        );
         await remove('routines', routineId);
       } catch (e) {
         const msg =
