@@ -7,7 +7,10 @@ export const exchangeCode = async (code: string) => {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({
+      code,
+      redirectUri: ENV.AWS_COGNITO_REDIRECT_URI,
+    })
   });
 
   const data = await res.json();
