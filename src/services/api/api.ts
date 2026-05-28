@@ -129,17 +129,17 @@ export async function bulkSave(
 
 export async function bulkRemove(
   resource: string,
-  items: unknown[],
+  ids: string[],
   auth: boolean = true
 ): Promise<void> {
   const segment = resource.replace(/^\/+/, "").replace(/\/+$/, "");
-  if (items.length === 0) {
+  if (ids.length === 0) {
     return;
   }
   const path = `/${segment}/bulk`;
   const res = await apiFetch(path, auth, {
     method: "DELETE",
-    body: JSON.stringify(items),
+    body: JSON.stringify(ids),
   });
   await parseMutationResponse(res, segment, "bulk remove");
 }

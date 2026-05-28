@@ -24,10 +24,6 @@ import {
 import { Routine, RoutineMapping, TrainingBlock, TrainingDay } from '../types';
 import { translate } from '../i18n/translate';
 
-function idsToBulkDeleteItems(ids: string[]): { id: string }[] {
-  return ids.map((id) => ({ id }));
-}
-
 export type RoutinesContextValue = {
   routines: Routine[];
   routineMappings: RoutineMapping[];
@@ -191,14 +187,8 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         .map((tb) => tb.id);
 
       try {
-        await bulkRemove(
-          'training-blocks',
-          idsToBulkDeleteItems(oldBlockIds)
-        );
-        await bulkRemove(
-          'training-days',
-          idsToBulkDeleteItems(removedDayIds)
-        );
+        await bulkRemove('training-blocks', oldBlockIds);
+        await bulkRemove('training-days', removedDayIds);
         await save('routines', routine.id, routineToDynamoItem(routine));
         await bulkSave(
           'training-days',
@@ -247,11 +237,8 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         .map((m) => m.id);
 
       try {
-        await bulkRemove(
-          'training-blocks',
-          idsToBulkDeleteItems(blockIds)
-        );
-        await bulkRemove('training-days', idsToBulkDeleteItems(dayIds));
+        await bulkRemove('training-blocks', blockIds);
+        await bulkRemove('training-days', dayIds);
         await Promise.all(
           mappingIds.map((id) => remove('routine-mappings', id))
         );
