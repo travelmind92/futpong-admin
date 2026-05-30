@@ -64,8 +64,9 @@ export enum RepType {
 export type Exercise = {
   id: string
   name: string
+  description: string
   repType: RepType
+  equivalenceGroup?: string
   videoUrl?: string
   thumbnailUrl?: string
-  description: string
 }

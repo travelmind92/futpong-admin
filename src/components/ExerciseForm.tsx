@@ -2,6 +2,9 @@ import React, {
   FormEvent,
   useEffect,
   useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
   useState,
 } from 'react';
 import {
@@ -14,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Exercise, RepType } from '../types';
 import { ExercisesContextValue } from '../context/ExercisesContext';
 import { ExerciseMediaDropZone } from './ExerciseMediaDropZone';
+import { ComboSelectField } from './ComboSelectField';
 import { translateRepType } from '../i18n/enumLabels';
 
 const repTypeOptions = Object.values(RepType);
@@ -82,12 +86,14 @@ export function ExerciseForm() {
   const nameId = useId();
   const descId = useId();
   const repId = useId();
+  const equivalenceGroupId = useId();
   const videoId = useId();
   const imageId = useId();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [repType, setRepType] = useState<RepType>(RepType.REPETITIONS);
+  const [equivalenceGroup, setEquivalenceGroup] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [priorVideoUrl, setPriorVideoUrl] = useState('');
@@ -101,11 +107,43 @@ export function ExerciseForm() {
   const [validationError, setValidationError] = useState('');
   const [saveError, setSaveError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  const repTypeSelectRef = useRef<HTMLSelectElement>(null);
+  const [repTypeControlWidth, setRepTypeControlWidth] = useState<number>();
+
+  const equivalenceGroupOptions = useMemo(() => {
+    const values = new Set<string>();
+    for (const ex of exercises) {
+      const group = ex.equivalenceGroup?.trim();
+      if (group) {
+        values.add(group);
+      }
+    }
+    return Array.from(values).sort((a, b) => a.localeCompare(b));
+  }, [exercises]);
+
+  useLayoutEffect(() => {
+    const select = repTypeSelectRef.current;
+    if (!select) {
+      return;
+    }
+
+    const syncWidth = () => {
+      setRepTypeControlWidth(select.getBoundingClientRect().width);
+    };
+
+    syncWidth();
+    const observer = new ResizeObserver(syncWidth);
+    observer.observe(select);
+    return () => observer.disconnect();
+  }, [t, repType]);
+
   useEffect(() => {
     if (!isEdit) {
       setName('');
       setDescription('');
       setRepType(RepType.REPETITIONS);
+      setEquivalenceGroup('');
       setVideoFile(null);
       setImageFile(null);
       setPriorVideoUrl('');
@@ -133,6 +171,7 @@ export function ExerciseForm() {
     setName(existing.name);
     setDescription(existing.description);
     setRepType(existing.repType);
+    setEquivalenceGroup(existing.equivalenceGroup ?? '');
     setVideoFile(null);
     setImageFile(null);
     setPriorVideoUrl(existing.videoUrl ?? '');
@@ -185,11 +224,16 @@ export function ExerciseForm() {
 
     const exerciseId = isEdit && editId ? editId : uuidv4();
 
+    const trimmedEquivalenceGroup = equivalenceGroup.trim();
+
     const exercise: Exercise = {
       id: exerciseId,
       name: trimmedName,
       description: trimmedDescription,
       repType,
+      ...(trimmedEquivalenceGroup
+        ? { equivalenceGroup: trimmedEquivalenceGroup }
+        : {}),
     };
 
     if (isEdit) {
@@ -327,6 +371,7 @@ export function ExerciseForm() {
         <div className="exercise-form-field">
           <label htmlFor={repId}>{t('exercises.repType')}</label>
           <select
+            ref={repTypeSelectRef}
             id={repId}
             value={repType}
             onChange={(e) => setRepType(e.target.value as RepType)}
@@ -338,6 +383,15 @@ export function ExerciseForm() {
             ))}
           </select>
         </div>
+
+        <ComboSelectField
+          id={equivalenceGroupId}
+          label={t('exercises.equivalenceGroupOptional')}
+          value={equivalenceGroup}
+          options={equivalenceGroupOptions}
+          onChange={setEquivalenceGroup}
+          controlWidth={repTypeControlWidth}
+        />
 
         <ExerciseMediaDropZone
           id={videoId}

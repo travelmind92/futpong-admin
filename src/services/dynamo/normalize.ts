@@ -57,12 +57,20 @@ export function normalizeExercise(raw: Record<string, unknown>): Exercise | null
       ? thumbnailUrlRaw
       : undefined;
 
+  const equivalenceGroupRaw = raw.equivalenceGroup;
+  const equivalenceGroup =
+    typeof equivalenceGroupRaw === 'string' &&
+    equivalenceGroupRaw.trim() !== ''
+      ? equivalenceGroupRaw.trim()
+      : undefined;
+
   return {
     id,
     name: typeof raw.name === 'string' ? raw.name : '',
     repType: isRepType(raw.repType) ? raw.repType : RepType.REPETITIONS,
     ...(videoUrl !== undefined ? { videoUrl } : {}),
     ...(thumbnailUrl !== undefined ? { thumbnailUrl } : {}),
+    ...(equivalenceGroup !== undefined ? { equivalenceGroup } : {}),
     description: typeof raw.description === 'string' ? raw.description : '',
   };
 }

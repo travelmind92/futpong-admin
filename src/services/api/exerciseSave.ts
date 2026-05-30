@@ -21,6 +21,11 @@ export function buildExerciseFormData({
   formData.append('description', exercise.description);
   formData.append('repType', exercise.repType);
 
+  const equivalenceGroup = exercise.equivalenceGroup?.trim();
+  if (equivalenceGroup) {
+    formData.append('equivalenceGroup', equivalenceGroup);
+  }
+
   const videoUrl = exercise.videoUrl?.trim();
   if (videoUrl && !media?.video) {
     formData.append('videoUrl', videoUrl);

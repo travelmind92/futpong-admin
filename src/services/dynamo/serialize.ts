@@ -23,6 +23,10 @@ export function exerciseToDynamoItem(exercise: Exercise): DynamoItem {
   if (t) {
     item.thumbnailUrl = t;
   }
+  const g = exercise.equivalenceGroup?.trim();
+  if (g) {
+    item.equivalenceGroup = g;
+  }
   return item;
 }
 
