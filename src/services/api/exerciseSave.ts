@@ -3,7 +3,7 @@ import type { Exercise } from '../../types';
 
 export type ExerciseSaveMedia = {
   video?: File;
-  thumbnail?: File;
+  image?: File;
 };
 
 export type SaveExerciseInput = {
@@ -31,16 +31,16 @@ export function buildExerciseFormData({
     formData.append('videoUrl', videoUrl);
   }
 
-  const thumbnailUrl = exercise.thumbnailUrl?.trim();
-  if (thumbnailUrl && !media?.thumbnail) {
-    formData.append('thumbnailUrl', thumbnailUrl);
+  const imageUrl = exercise.imageUrl?.trim();
+  if (imageUrl && !media?.image) {
+    formData.append('imageUrl', imageUrl);
   }
 
   if (media?.video) {
     formData.append('video', media.video);
   }
-  if (media?.thumbnail) {
-    formData.append('thumbnail', media.thumbnail);
+  if (media?.image) {
+    formData.append('image', media.image);
   }
 
   return formData;

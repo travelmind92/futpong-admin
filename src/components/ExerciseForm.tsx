@@ -21,9 +21,9 @@ import { ComboSelectField } from './ComboSelectField';
 import { translateRepType } from '../i18n/enumLabels';
 
 const repTypeOptions = Object.values(RepType);
-const THUMBNAIL_ACCEPT =
+const IMAGE_ACCEPT =
   'image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/tiff,image/svg+xml';
-const ALLOWED_THUMBNAIL_MIME = new Set([
+const ALLOWED_IMAGE_MIME = new Set([
   'image/png',
   'image/jpeg',
   'image/jpg',
@@ -33,7 +33,7 @@ const ALLOWED_THUMBNAIL_MIME = new Set([
   'image/tiff',
   'image/svg+xml',
 ]);
-const ALLOWED_THUMBNAIL_EXT = new Set([
+const ALLOWED_IMAGE_EXT = new Set([
   '.png',
   '.jpg',
   '.jpeg',
@@ -62,9 +62,9 @@ function assetNameFromUrl(rawUrl: string): string {
   }
 }
 
-function isAllowedThumbnailFile(file: File): boolean {
+function isAllowedImageFile(file: File): boolean {
   const mime = file.type.trim().toLowerCase();
-  if (mime && ALLOWED_THUMBNAIL_MIME.has(mime)) {
+  if (mime && ALLOWED_IMAGE_MIME.has(mime)) {
     return true;
   }
   const dot = file.name.lastIndexOf('.');
@@ -72,7 +72,7 @@ function isAllowedThumbnailFile(file: File): boolean {
     return false;
   }
   const ext = file.name.slice(dot).toLowerCase();
-  return ALLOWED_THUMBNAIL_EXT.has(ext);
+  return ALLOWED_IMAGE_EXT.has(ext);
 }
 
 export function ExerciseForm() {
@@ -97,9 +97,9 @@ export function ExerciseForm() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [priorVideoUrl, setPriorVideoUrl] = useState('');
-  const [priorThumbnailUrl, setPriorThumbnailUrl] = useState('');
+  const [priorImageUrl, setPriorImageUrl] = useState('');
   const [removeVideoOnSave, setRemoveVideoOnSave] = useState(false);
-  const [removeThumbnailOnSave, setRemoveThumbnailOnSave] = useState(false);
+  const [removeImageOnSave, setRemoveImageOnSave] = useState(false);
   const [videoInputKey, setVideoInputKey] = useState(0);
   const [imageInputKey, setImageInputKey] = useState(0);
   const [nameDuplicateError, setNameDuplicateError] = useState('');
@@ -147,9 +147,9 @@ export function ExerciseForm() {
       setVideoFile(null);
       setImageFile(null);
       setPriorVideoUrl('');
-      setPriorThumbnailUrl('');
+      setPriorImageUrl('');
       setRemoveVideoOnSave(false);
-      setRemoveThumbnailOnSave(false);
+      setRemoveImageOnSave(false);
       setVideoInputKey(0);
       setImageInputKey(0);
       setNameDuplicateError('');
@@ -175,9 +175,9 @@ export function ExerciseForm() {
     setVideoFile(null);
     setImageFile(null);
     setPriorVideoUrl(existing.videoUrl ?? '');
-    setPriorThumbnailUrl(existing.thumbnailUrl ?? '');
+    setPriorImageUrl(existing.imageUrl ?? '');
     setRemoveVideoOnSave(false);
-    setRemoveThumbnailOnSave(false);
+    setRemoveImageOnSave(false);
     setNameDuplicateError('');
     setMediaError('');
     setValidationError('');
@@ -241,11 +241,11 @@ export function ExerciseForm() {
         exercise.videoUrl = priorVideoUrl.trim();
       }
       if (
-        !removeThumbnailOnSave &&
-        priorThumbnailUrl.trim() &&
+        !removeImageOnSave &&
+        priorImageUrl.trim() &&
         imageFile == null
       ) {
-        exercise.thumbnailUrl = priorThumbnailUrl.trim();
+        exercise.imageUrl = priorImageUrl.trim();
       }
     }
 
@@ -253,7 +253,7 @@ export function ExerciseForm() {
       videoFile != null ||
       imageFile != null ||
       (isEdit && removeVideoOnSave) ||
-      (isEdit && removeThumbnailOnSave);
+      (isEdit && removeImageOnSave);
 
     const saveInput = {
       exercise,
@@ -261,7 +261,7 @@ export function ExerciseForm() {
         ? {
             media: {
               ...(videoFile != null ? { video: videoFile } : {}),
-              ...(imageFile != null ? { thumbnail: imageFile } : {}),
+              ...(imageFile != null ? { image: imageFile } : {}),
             },
           }
         : {}),
@@ -430,14 +430,14 @@ export function ExerciseForm() {
         <ExerciseMediaDropZone
           id={imageId}
           inputKey={imageInputKey}
-          accept={THUMBNAIL_ACCEPT}
-          fieldLabel={t('exercises.thumbnailOptional')}
-          clearLabel={t('exercises.clearThumbnail')}
-          hintLine={t('exercises.thumbnailHint')}
+          accept={IMAGE_ACCEPT}
+          fieldLabel={t('exercises.imageOptional')}
+          clearLabel={t('exercises.clearImage')}
+          hintLine={t('exercises.imageHint')}
           valueFile={imageFile}
           savedDisplayName={
-            !imageFile && priorThumbnailUrl.trim()
-              ? assetNameFromUrl(priorThumbnailUrl)
+            !imageFile && priorImageUrl.trim()
+              ? assetNameFromUrl(priorImageUrl)
               : ''
           }
           onPickFile={(file) => {
@@ -445,25 +445,25 @@ export function ExerciseForm() {
               setImageFile(null);
               return;
             }
-            if (!isAllowedThumbnailFile(file)) {
+            if (!isAllowedImageFile(file)) {
               setImageFile(null);
               setImageInputKey((k) => k + 1);
-              setMediaError(t('exercises.thumbnailInvalid'));
+              setMediaError(t('exercises.imageInvalid'));
               return;
             }
             setImageFile(file);
-            setRemoveThumbnailOnSave(false);
+            setRemoveImageOnSave(false);
             setMediaError('');
           }}
           onClear={() => {
             setImageFile(null);
-            setPriorThumbnailUrl('');
-            setRemoveThumbnailOnSave(true);
+            setPriorImageUrl('');
+            setRemoveImageOnSave(true);
             setImageInputKey((k) => k + 1);
           }}
-          showClear={imageFile != null || priorThumbnailUrl.trim() !== ''}
+          showClear={imageFile != null || priorImageUrl.trim() !== ''}
           replaceHint={
-            isEdit && priorThumbnailUrl.trim() !== '' && imageFile == null
+            isEdit && priorImageUrl.trim() !== '' && imageFile == null
               ? t('exercises.replaceFile')
               : undefined
           }

@@ -19,7 +19,7 @@ type SortColumn =
   | 'repType'
   | 'description'
   | 'video'
-  | 'thumbnail';
+  | 'image';
 
 type SortState =
   | { mode: 'none' }
@@ -36,7 +36,7 @@ function hasVideoUrl(url: string | undefined): boolean {
   return (url?.trim() ?? '').length > 0;
 }
 
-function hasThumbnailUrl(url: string | undefined): boolean {
+function hasImageUrl(url: string | undefined): boolean {
   return (url?.trim() ?? '').length > 0;
 }
 
@@ -69,8 +69,8 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
           return ex.description;
         case 'video':
           return hasVideoUrl(ex.videoUrl) ? '1' : '0';
-        case 'thumbnail':
-          return hasThumbnailUrl(ex.thumbnailUrl) ? '1' : '0';
+        case 'image':
+          return hasImageUrl(ex.imageUrl) ? '1' : '0';
         default:
           return '';
       }
@@ -179,13 +179,13 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
               </th>
               <th
                 scope="col"
-                aria-sort={listSortColumnAriaSort('thumbnail', sortState)}
+                aria-sort={listSortColumnAriaSort('image', sortState)}
               >
                 <SortColumnHeaderButton
-                  label={t('exercises.thumbnail')}
-                  column="thumbnail"
+                  label={t('exercises.image')}
+                  column="image"
                   sortState={sortState}
-                  onClick={() => toggleSort('thumbnail')}
+                  onClick={() => toggleSort('image')}
                 />
               </th>
               {!readOnly ? (
@@ -234,11 +234,11 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
                   )}
                 </td>
                 <td className="exercises-list-video-cell">
-                  {hasThumbnailUrl(exercise.thumbnailUrl) ? (
+                  {hasImageUrl(exercise.imageUrl) ? (
                     <span
                       className="exercises-list-thumb-yes"
-                      title={t('exercises.thumbnailAvailable')}
-                      aria-label={t('exercises.thumbnailAvailable')}
+                      title={t('exercises.imageAvailable')}
+                      aria-label={t('exercises.imageAvailable')}
                     >
                       <svg
                         className="exercises-list-thumb-icon"

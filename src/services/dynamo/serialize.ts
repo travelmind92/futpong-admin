@@ -19,9 +19,9 @@ export function exerciseToDynamoItem(exercise: Exercise): DynamoItem {
   if (v) {
     item.videoUrl = v;
   }
-  const t = exercise.thumbnailUrl?.trim();
-  if (t) {
-    item.thumbnailUrl = t;
+  const image = exercise.imageUrl?.trim();
+  if (image) {
+    item.imageUrl = image;
   }
   const g = exercise.equivalenceGroup?.trim();
   if (g) {

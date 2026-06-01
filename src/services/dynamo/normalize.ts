@@ -51,10 +51,10 @@ export function normalizeExercise(raw: Record<string, unknown>): Exercise | null
       ? videoUrlRaw
       : undefined;
 
-  const thumbnailUrlRaw = raw.thumbnailUrl;
-  const thumbnailUrl =
-    typeof thumbnailUrlRaw === 'string' && thumbnailUrlRaw.trim() !== ''
-      ? thumbnailUrlRaw
+  const imageUrlRaw = raw.imageUrl;
+  const imageUrl =
+    typeof imageUrlRaw === 'string' && imageUrlRaw.trim() !== ''
+      ? imageUrlRaw
       : undefined;
 
   const equivalenceGroupRaw = raw.equivalenceGroup;
@@ -69,7 +69,7 @@ export function normalizeExercise(raw: Record<string, unknown>): Exercise | null
     name: typeof raw.name === 'string' ? raw.name : '',
     repType: isRepType(raw.repType) ? raw.repType : RepType.REPETITIONS,
     ...(videoUrl !== undefined ? { videoUrl } : {}),
-    ...(thumbnailUrl !== undefined ? { thumbnailUrl } : {}),
+    ...(imageUrl !== undefined ? { imageUrl } : {}),
     ...(equivalenceGroup !== undefined ? { equivalenceGroup } : {}),
     description: typeof raw.description === 'string' ? raw.description : '',
   };

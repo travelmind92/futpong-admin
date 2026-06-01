@@ -68,5 +68,5 @@ export type Exercise = {
   repType: RepType
   equivalenceGroup?: string
   videoUrl?: string
-  thumbnailUrl?: string
+  imageUrl?: string
 }
