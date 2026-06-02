@@ -35,6 +35,7 @@ import {
   translatePlayerType,
   translateRoutineType,
 } from '../i18n/enumLabels';
+import { matchdayForDay } from '../utils/matchdayForDay';
 
 const playerTypeOptions = Object.values(PlayerType);
 const placeOptions = Object.values(Place);
@@ -53,14 +54,6 @@ type DraftTrainingDay = {
   day: number | '';
   matchday: string;
 };
-
-function matchdayForDay(day: number): string {
-  if (!Number.isFinite(day) || day < 1) {
-    return '+1';
-  }
-  const r = (day - 1) % 5;
-  return ['+1', '+2', '+3', '-2', '-1'][r];
-}
 
 function maxExistingDay(days: DraftTrainingDay[]): number {
   let max = 0;

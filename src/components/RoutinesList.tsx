@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { Routine } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useExercises } from '../context/ExercisesContext';
 import { RoutinesContextValue } from '../context/RoutinesContext';
+import { ImportRoutinesModal } from './ImportRoutinesModal';
 import {
   listSortColumnAriaSort,
   SortColumnHeaderButton,
@@ -31,8 +33,11 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { readOnly } = useAuth();
-  const { removeRoutine } = useOutletContext<RoutinesContextValue>();
+  const { exercises } = useExercises();
+  const { removeRoutine, addRoutine } =
+    useOutletContext<RoutinesContextValue>();
   const [page, setPage] = useState(1);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [sortState, setSortState] = useState<SortState>({ mode: 'none' });
 
   const sortedRoutines = useMemo(() => {
@@ -105,13 +110,22 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
       <div className="exercises-list-toolbar">
         <h2 className="exercises-list-title">{t('routines.title')}</h2>
         {!readOnly ? (
-          <button
-            type="button"
-            className="exercises-list-create"
-            onClick={() => navigate('new')}
-          >
-            {t('common.create')}
-          </button>
+          <div className="exercises-list-toolbar-actions">
+            {/* <button
+              type="button"
+              className="exercises-list-import"
+              onClick={() => setImportModalOpen(true)}
+            >
+              {t('routines.import')}
+            </button> */}
+            <button
+              type="button"
+              className="exercises-list-create"
+              onClick={() => navigate('new')}
+            >
+              {t('common.create')}
+            </button>
+          </div>
         ) : null}
       </div>
 
@@ -277,6 +291,14 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
           ) : null}
         </div>
       </div>
+
+      <ImportRoutinesModal
+        open={importModalOpen}
+        existingRoutines={routines}
+        existingExercises={exercises}
+        onImport={addRoutine}
+        onClose={() => setImportModalOpen(false)}
+      />
     </div>
   );
 }

@@ -1,13 +1,10 @@
 import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExerciseMediaDropZone } from './ExerciseMediaDropZone';
-import {
-  parsedRowsToExercises,
-  parseExercisesCsv,
-} from '../utils/parseExercisesCsv';
+import { parseRoutinesCsv } from '../utils/parseRoutinesCsv';
 import { downloadTextFile } from '../utils/downloadTextFile';
-import { EXERCISES_IMPORT_TEMPLATE } from '../templates/exercisesImportTemplate';
-import { Exercise } from '../types';
+import { ROUTINES_IMPORT_TEMPLATE } from '../templates/routinesImportTemplate';
+import { Exercise, Routine, TrainingBlock, TrainingDay } from '../types';
 
 const CSV_ACCEPT = '.csv,text/csv,application/vnd.ms-excel';
 
@@ -23,19 +20,25 @@ function isCsvFile(file: File): boolean {
   return file.name.slice(dot).toLowerCase() === '.csv';
 }
 
-type ImportExercisesModalProps = {
+type ImportRoutinesModalProps = {
   open: boolean;
+  existingRoutines: Routine[];
   existingExercises: Exercise[];
-  onImport: (exercises: Exercise[]) => Promise<void>;
+  onImport: (
+    routine: Routine,
+    days: TrainingDay[],
+    blocks: TrainingBlock[]
+  ) => Promise<void>;
   onClose: () => void;
 };
 
-export function ImportExercisesModal({
+export function ImportRoutinesModal({
   open,
+  existingRoutines,
   existingExercises,
   onImport,
   onClose,
-}: ImportExercisesModalProps) {
+}: ImportRoutinesModalProps) {
   const { t } = useTranslation();
   const fileInputId = useId();
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -58,7 +61,7 @@ export function ImportExercisesModal({
   };
 
   const handleDownloadTemplate = () => {
-    downloadTextFile(EXERCISES_IMPORT_TEMPLATE, 'ejercicios.csv');
+    downloadTextFile(ROUTINES_IMPORT_TEMPLATE, 'rutina.csv');
   };
 
   const handleImport = async () => {
@@ -73,25 +76,25 @@ export function ImportExercisesModal({
     try {
       text = await csvFile.text();
     } catch {
-      setImportError(t('exercises.importReadFailed'));
+      setImportError(t('routines.importReadFailed'));
       return;
     }
 
-    const parsed = parseExercisesCsv(text);
+    const parsed = parseRoutinesCsv(text, existingRoutines, existingExercises);
     if (!parsed.ok) {
-      setFileError(t(`exercises.importErrors.${parsed.error}`));
+      setFileError(t(`routines.importErrors.${parsed.error}`));
       return;
     }
 
-    const exercises = parsedRowsToExercises(parsed.rows, existingExercises);
+    const { routine, days, blocks } = parsed.payload;
 
     setIsImporting(true);
     try {
-      await onImport(exercises);
+      await onImport(routine, days, blocks);
       resetAndClose();
     } catch (err) {
       const msg =
-        err instanceof Error ? err.message : t('exercises.importFailed');
+        err instanceof Error ? err.message : t('routines.importFailed');
       setImportError(msg);
     } finally {
       setIsImporting(false);
@@ -112,12 +115,12 @@ export function ImportExercisesModal({
         className="blocks-modal import-exercises-modal"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="import-exercises-modal-title"
+        aria-labelledby="import-routines-modal-title"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="blocks-modal-header">
-          <h2 id="import-exercises-modal-title" className="blocks-modal-title">
-            {t('exercises.importModalTitle')}
+          <h2 id="import-routines-modal-title" className="blocks-modal-title">
+            {t('routines.importModalTitle')}
           </h2>
           <button
             type="button"
@@ -146,9 +149,9 @@ export function ImportExercisesModal({
             id={fileInputId}
             inputKey={fileInputKey}
             accept={CSV_ACCEPT}
-            fieldLabel={t('exercises.importCsvLabel')}
-            clearLabel={t('exercises.clearCsv')}
-            hintLine={t('exercises.importCsvHint')}
+            fieldLabel={t('routines.importCsvLabel')}
+            clearLabel={t('routines.clearCsv')}
+            hintLine={t('routines.importCsvHint')}
             valueFile={csvFile}
             savedDisplayName=""
             onPickFile={(file) => {
@@ -159,7 +162,7 @@ export function ImportExercisesModal({
               if (!isCsvFile(file)) {
                 setCsvFile(null);
                 setFileInputKey((k) => k + 1);
-                setFileError(t('exercises.importCsvInvalid'));
+                setFileError(t('routines.importCsvInvalid'));
                 return;
               }
               setCsvFile(file);
@@ -182,7 +185,7 @@ export function ImportExercisesModal({
             disabled={isImporting}
             onClick={handleDownloadTemplate}
           >
-            {t('exercises.downloadTemplate')}
+            {t('routines.downloadTemplate')}
           </button>
           <button
             type="button"
@@ -193,8 +196,8 @@ export function ImportExercisesModal({
             }}
           >
             {isImporting
-              ? t('exercises.importing')
-              : t('exercises.importExercises')}
+              ? t('routines.importing')
+              : t('routines.importRoutine')}
           </button>
         </div>
       </div>
