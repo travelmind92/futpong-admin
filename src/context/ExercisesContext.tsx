@@ -8,6 +8,7 @@ import React, {
   type ReactNode,
 } from 'react';
 import {
+  bulkSave,
   getAll,
   remove,
   save,
@@ -31,6 +32,7 @@ export type ExercisesContextValue = {
   exercises: Exercise[];
   addExercise: (input: SaveExerciseInput) => Promise<void>;
   updateExercise: (input: SaveExerciseInput) => Promise<void>;
+  importExercises: (items: Exercise[]) => Promise<void>;
   removeExercise: (id: string) => Promise<void>;
   dataLoading: boolean;
   dataError: string | null;
@@ -133,6 +135,35 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const importExercises = useCallback(async (items: Exercise[]) => {
+    if (items.length === 0) {
+      return;
+    }
+    try {
+      await bulkSave(
+        'exercises',
+        items.map((exercise) => exerciseToDynamoItem(exercise))
+      );
+    } catch (e) {
+      const msg =
+        e instanceof Error
+          ? e.message
+          : translate('errors.importExercises');
+      setDataError(msg);
+      throw e instanceof Error ? e : new Error(msg);
+    }
+    setDataError(null);
+    setExercises((prev) => {
+      const byId = new Map(prev.map((exercise) => [exercise.id, exercise]));
+      for (const item of items) {
+        byId.set(item.id, item);
+      }
+      const merged = Array.from(byId.values());
+      merged.sort((a, b) => a.name.localeCompare(b.name));
+      return merged;
+    });
+  }, []);
+
   const removeExercise = useCallback(
     async (id: string) => {
       if (isExerciseIdUsedInTrainingBlocks(id, trainingBlocks)) {
@@ -163,6 +194,7 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
       exercises,
       addExercise,
       updateExercise,
+      importExercises,
       removeExercise,
       dataLoading,
       dataError,
@@ -171,6 +203,7 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
       exercises,
       addExercise,
       updateExercise,
+      importExercises,
       removeExercise,
       dataLoading,
       dataError,

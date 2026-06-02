@@ -10,6 +10,8 @@ import {
 } from './SortColumnHeaderButton';
 import { translateRepType } from '../i18n/enumLabels';
 import { isExerciseInUseError } from '../i18n/errorCodes';
+import { textContainsSearch } from '../utils/textSearch';
+import { ImportExercisesModal } from './ImportExercisesModal';
 
 const PAGE_SIZE = 20;
 const DESCRIPTION_PREVIEW_CHARS = 80;
@@ -49,13 +51,42 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { readOnly } = useAuth();
-  const { removeExercise } = useOutletContext<ExercisesContextValue>();
+  const { removeExercise, importExercises } =
+    useOutletContext<ExercisesContextValue>();
   const [page, setPage] = useState(1);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [sortState, setSortState] = useState<SortState>({ mode: 'none' });
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredExercises = useMemo(() => {
+    const query = searchQuery.trim();
+    if (!query) {
+      return exercises;
+    }
+    const exerciseOrder = new Map(
+      exercises.map((exercise, index) => [exercise.id, index])
+    );
+    return exercises
+      .filter(
+        (ex) =>
+          textContainsSearch(ex.name, query) ||
+          textContainsSearch(ex.description, query)
+      )
+      .sort((a, b) => {
+        const aNameMatch = textContainsSearch(a.name, query);
+        const bNameMatch = textContainsSearch(b.name, query);
+        if (aNameMatch !== bNameMatch) {
+          return aNameMatch ? -1 : 1;
+        }
+        return (
+          (exerciseOrder.get(a.id) ?? 0) - (exerciseOrder.get(b.id) ?? 0)
+        );
+      });
+  }, [exercises, searchQuery]);
 
   const sortedExercises = useMemo(() => {
     if (sortState.mode === 'none') {
-      return exercises;
+      return filteredExercises;
     }
     const { column, mode } = sortState;
     const orderFactor = mode === 'asc' ? 1 : -1;
@@ -75,7 +106,7 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
           return '';
       }
     };
-    return [...exercises].sort((a, b) => {
+    return [...filteredExercises].sort((a, b) => {
       const aLabel = labelFor(a);
       const bLabel = labelFor(b);
       const byLabel = aLabel.localeCompare(bLabel);
@@ -84,7 +115,7 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
       }
       return a.id.localeCompare(b.id);
     });
-  }, [exercises, sortState]);
+  }, [filteredExercises, sortState]);
 
   const totalPages = Math.max(1, Math.ceil(sortedExercises.length / PAGE_SIZE));
 
@@ -123,15 +154,49 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
   return (
     <div className="exercises-list">
       <div className="exercises-list-toolbar">
-        <h2 className="exercises-list-title">{t('exercises.title')}</h2>
+        <div className="exercises-list-toolbar-start">
+          <h2 className="exercises-list-title">{t('exercises.title')}</h2>
+          <label className="exercises-list-search-wrap">
+            <svg
+              className="exercises-list-search-icon"
+              viewBox="0 0 24 24"
+              aria-hidden
+            >
+              <path
+                fill="currentColor"
+                d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+              />
+            </svg>
+            <input
+              type="search"
+              className="exercises-list-search-input"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+              placeholder={t('exercises.searchPlaceholder')}
+              aria-label={t('exercises.searchLabel')}
+            />
+          </label>
+        </div>
         {!readOnly ? (
-          <button
-            type="button"
-            className="exercises-list-create"
-            onClick={() => navigate('new')}
-          >
-            {t('common.create')}
-          </button>
+          <div className="exercises-list-toolbar-actions">
+            <button
+              type="button"
+              className="exercises-list-import"
+              onClick={() => setImportModalOpen(true)}
+            >
+              {t('exercises.import')}
+            </button>
+            <button
+              type="button"
+              className="exercises-list-create"
+              onClick={() => navigate('new')}
+            >
+              {t('common.create')}
+            </button>
+          </div>
         ) : null}
       </div>
 
@@ -201,6 +266,15 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
             {dataLoading ? (
               <tr>
                 <td colSpan={columnCount}>{t('exercises.loadingList')}</td>
+              </tr>
+            ) : null}
+            {!dataLoading && pageItems.length === 0 ? (
+              <tr>
+                <td colSpan={columnCount}>
+                  {searchQuery.trim() && exercises.length > 0
+                    ? t('exercises.noSearchResults')
+                    : t('exercises.noExercises')}
+                </td>
               </tr>
             ) : null}
             {!dataLoading &&
@@ -328,7 +402,9 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
           {dataLoading
             ? t('common.loading')
             : sortedExercises.length === 0
-              ? t('exercises.noExercises')
+              ? searchQuery.trim() && exercises.length > 0
+                ? t('exercises.noSearchResults')
+                : t('exercises.noExercises')
               : t('common.showingRange', {
                   start: rangeStart,
                   end: rangeEnd,
@@ -361,6 +437,13 @@ export function ExercisesList({ exercises, dataLoading }: ExercisesListProps) {
           ) : null}
         </div>
       </div>
+
+      <ImportExercisesModal
+        open={importModalOpen}
+        existingExercises={exercises}
+        onImport={importExercises}
+        onClose={() => setImportModalOpen(false)}
+      />
     </div>
   );
 }

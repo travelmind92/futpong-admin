@@ -349,12 +349,21 @@
 
 .exercises-list-toolbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   padding: 1.15rem 1.35rem;
   border-bottom: 1px solid var(--border-faint);
   background: var(--color-surface);
+}
+
+.exercises-list-toolbar-start {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .exercises-list-title {
@@ -365,7 +374,53 @@
   color: var(--text-primary);
 }
 
+.exercises-list-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 26rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.exercises-list-search-wrap:focus-within {
+  border-color: rgba(146, 192, 35, 0.65);
+  box-shadow: var(--focus-ring);
+}
+
+.exercises-list-search-icon {
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.exercises-list-search-input {
+  font: inherit;
+  font-size: 0.9375rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0;
+  border: none;
+  color: var(--text-primary);
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.exercises-list-search-input:focus {
+  outline: none;
+}
+
+.exercises-list-search-input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
 .exercises-list-create {
+  flex-shrink: 0;
   padding: 0.55rem 1.15rem;
   font: inherit;
   font-size: 1rem;
@@ -376,6 +431,44 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.exercises-list-toolbar-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.exercises-list-import {
+  flex-shrink: 0;
+  padding: 0.55rem 1.15rem;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--border-faint);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.exercises-list-import:hover {
+  background: var(--color-surface-muted);
+  border-color: var(--border);
+}
+
+.exercises-list-import:active {
+  opacity: 0.92;
+}
+
+.exercises-list-import:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .exercises-list-create:hover {
@@ -1636,4 +1729,33 @@ tbody.blocks-modal-block-group:last-of-type .blocks-modal-block-card {
 .blocks-modal-btn--primary:active:not(:disabled),
 .blocks-modal-btn--secondary:active {
   opacity: 0.92;
+}
+
+.import-exercises-modal {
+  max-width: 32rem;
+}
+
+.import-exercises-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.import-exercises-modal-body .app-data-banner {
+  align-self: stretch;
+}
+
+.import-exercises-modal-body .exercise-form-field--media {
+  align-items: center;
+  width: 100%;
+}
+
+.import-exercises-modal-body .exercise-form-field-label {
+  text-align: center;
+}
+
+.import-exercises-modal-body .exercise-form-media-row {
+  justify-content: center;
+  width: 100%;
 }
