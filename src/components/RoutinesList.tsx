@@ -111,13 +111,13 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
         <h2 className="exercises-list-title">{t('routines.title')}</h2>
         {!readOnly ? (
           <div className="exercises-list-toolbar-actions">
-            {/* <button
+            <button
               type="button"
               className="exercises-list-import"
               onClick={() => setImportModalOpen(true)}
             >
               {t('routines.import')}
-            </button> */}
+            </button>
             <button
               type="button"
               className="exercises-list-create"

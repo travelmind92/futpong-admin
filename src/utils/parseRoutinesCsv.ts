@@ -10,6 +10,7 @@ import {
   TrainingDay,
 } from '../types';
 import { matchdayForDay } from './matchdayForDay';
+import { normalizeForSearch } from './textSearch';
 
 const EXPECTED_HEADERS = [
   'NOMBRE',
@@ -54,7 +55,7 @@ export type RoutineImportPayload = {
 
 export type ParseRoutinesCsvResult =
   | { ok: true; payload: RoutineImportPayload }
-  | { ok: false; error: string };
+  | { ok: false; error: string; data?: string };
 
 type RoutineMeta = {
   name: string;
@@ -165,8 +166,13 @@ function findExerciseByName(
   name: string,
   exercises: Exercise[]
 ): Exercise | undefined {
-  const lower = name.trim().toLowerCase();
-  const matches = exercises.filter((e) => e.name.trim().toLowerCase() === lower);
+  const key = normalizeForSearch(name);
+  if (!key) {
+    return undefined;
+  }
+  const matches = exercises.filter(
+    (e) => normalizeForSearch(e.name) === key
+  );
   if (matches.length === 1) {
     return matches[0];
   }
@@ -300,7 +306,7 @@ export function parseRoutinesCsv(
 
     const foundExercise = findExerciseByName(exerciseName, existingExercises);
     if (!foundExercise) {
-      return { ok: false, error: 'exerciseNotFound' };
+      return { ok: false, error: 'exerciseNotFound', data: exerciseName };
     }
 
     if (

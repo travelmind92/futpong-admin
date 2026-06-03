@@ -82,7 +82,7 @@ export function ImportRoutinesModal({
 
     const parsed = parseRoutinesCsv(text, existingRoutines, existingExercises);
     if (!parsed.ok) {
-      setFileError(t(`routines.importErrors.${parsed.error}`));
+      setFileError(t(`routines.importErrors.${parsed.error}`) + (parsed.data ? `(${parsed.data})` : ''));
       return;
     }
 
