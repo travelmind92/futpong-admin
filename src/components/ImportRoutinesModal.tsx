@@ -145,6 +145,17 @@ export function ImportRoutinesModal({
             </p>
           ) : null}
 
+          <div className="import-routines-valid-values">
+            <p className="import-routines-valid-values__intro">
+              {t('routines.importValidValuesIntro')}
+            </p>
+            <ul className="import-routines-valid-values__list">
+              <li>{t('routines.importValidPlayerType')}</li>
+              <li>{t('routines.importValidPlace')}</li>
+              <li>{t('routines.importValidRoutineType')}</li>
+            </ul>
+          </div>
+
           <ExerciseMediaDropZone
             id={fileInputId}
             inputKey={fileInputKey}

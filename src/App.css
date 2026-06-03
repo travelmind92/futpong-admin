@@ -1746,6 +1746,27 @@ tbody.blocks-modal-block-group:last-of-type .blocks-modal-block-card {
   align-self: stretch;
 }
 
+.import-routines-valid-values {
+  align-self: stretch;
+  width: 100%;
+  text-align: left;
+}
+
+.import-routines-valid-values__intro {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.import-routines-valid-values__list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
 .import-exercises-modal-body .exercise-form-field--media {
   align-items: center;
   width: 100%;
