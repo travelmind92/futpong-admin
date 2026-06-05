@@ -207,7 +207,7 @@ export function parseRoutinesCsv(
   const headers = [...EXPECTED_HEADERS];
   let routineMeta: RoutineMeta | null = null;
   const daysByIndex = new Map<number, DayBuilder>();
-  const routineId = uuidv4();
+  let routineId = uuidv4();
 
   for (let lineIndex = 1; lineIndex < lines.length; lineIndex += 1) {
     const cells = splitCsvLine(lines[lineIndex], delimiter);
@@ -330,11 +330,11 @@ export function parseRoutinesCsv(
     return { ok: false, error: 'noRows' };
   }
 
-  const nameTaken = existingRoutines.some(
+  const existingRoutine = existingRoutines.find(
     (r) => r.name.trim().toLowerCase() === routineMeta!.name.trim().toLowerCase()
   );
-  if (nameTaken) {
-    return { ok: false, error: 'duplicateRoutineName' };
+  if (existingRoutine) {
+    routineId = existingRoutine.id;
   }
 
   for (const dayBuilder of Array.from(daysByIndex.values())) {

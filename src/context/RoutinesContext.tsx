@@ -210,16 +210,13 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         prev.map((r) => (r.id === routine.id ? routine : r))
       );
       setTrainingDays((prev) => {
-        const oldIds = prev
-          .filter((td) => td.routineId === routine.id)
-          .map((td) => td.id);
-        setTrainingBlocks((tbs) => [
-          ...blocks,
-          ...tbs.filter((tb) => !oldIds.includes(tb.trainingDayId)),
-        ]);
         const rest = prev.filter((td) => td.routineId !== routine.id);
         return [...days, ...rest];
       });
+      setTrainingBlocks((prev) => [
+        ...blocks,
+        ...prev.filter((tb) => !oldDayIds.includes(tb.trainingDayId)),
+      ]);
     },
     []
   );

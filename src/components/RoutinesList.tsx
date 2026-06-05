@@ -34,7 +34,7 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
   const navigate = useNavigate();
   const { readOnly } = useAuth();
   const { exercises } = useExercises();
-  const { removeRoutine, addRoutine } =
+  const { removeRoutine, addRoutine, updateRoutine } =
     useOutletContext<RoutinesContextValue>();
   const [page, setPage] = useState(1);
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -296,7 +296,14 @@ export function RoutinesList({ routines, dataLoading }: RoutinesListProps) {
         open={importModalOpen}
         existingRoutines={routines}
         existingExercises={exercises}
-        onImport={addRoutine}
+        onImport={async (routine, days, blocks) => {
+          const exists = routines.some((r) => r.id === routine.id);
+          if (exists) {
+            await updateRoutine(routine, days, blocks);
+          } else {
+            await addRoutine(routine, days, blocks);
+          }
+        }}
         onClose={() => setImportModalOpen(false)}
       />
     </div>
