@@ -1213,6 +1213,24 @@ form.routine-form {
   color: #b91c1c;
 }
 
+.routine-form-day-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.routine-form-day-clear:hover {
+  background: #f3f4f6;
+  color: var(--accent);
+}
+
 .routine-form-day-remove-icon {
   width: 20px;
   height: 20px;

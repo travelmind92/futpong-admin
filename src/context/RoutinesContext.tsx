@@ -269,8 +269,9 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
 
   const upsertRoutineMapping = useCallback(async (mapping: RoutineMapping) => {
     try {
+      console.log('upsertRoutineMapping', mapping);
       await save(
-        'routine-mappings',
+        'routines/mappings',
         mapping.id,
         routineMappingToDynamoItem(mapping)
       );

@@ -19,15 +19,19 @@ const playerTypeOptions = Object.values(PlayerType);
 const placeOptions = Object.values(Place);
 const routineTypeOptions = Object.values(RoutineType);
 
-type DraftRoutineMappingRow = {
-  id: string;
-  serverId?: string;
-  status: 'draft' | 'saved';
+type RoutineMappingRowValues = {
   playerType: PlayerType;
   routineType: RoutineType;
   place: Place;
   routineId: string;
 };
+
+type DraftRoutineMappingRow = {
+  id: string;
+  serverId?: string;
+  status: 'draft' | 'saved';
+  savedValues?: RoutineMappingRowValues;
+} & RoutineMappingRowValues;
 
 type MappingsListProps = {
   routineMappings: RoutineMapping[];
@@ -213,6 +217,7 @@ export function MappingsList({
               ...r,
               serverId: persisted.id,
               status: 'saved',
+              savedValues: undefined,
             }
           : r
       )
@@ -231,10 +236,42 @@ export function MappingsList({
     setRows((prev) =>
       prev.map((r) =>
         r.id === id && r.status === 'saved'
-          ? { ...r, status: 'draft' as const }
+          ? {
+              ...r,
+              status: 'draft' as const,
+              savedValues: {
+                playerType: r.playerType,
+                routineType: r.routineType,
+                place: r.place,
+                routineId: r.routineId,
+              },
+            }
           : r
       )
     );
+  };
+
+  const clearRowEdits = (id: string) => {
+    setRows((prev) =>
+      prev.map((r) =>
+        r.id === id && r.savedValues
+          ? {
+              ...r,
+              ...r.savedValues,
+              status: 'saved' as const,
+              savedValues: undefined,
+            }
+          : r
+      )
+    );
+    setRoutineErrorsByRowId((prev) => {
+      if (!prev[id]) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const removeRow = async (id: string) => {
@@ -483,11 +520,27 @@ export function MappingsList({
                           </button>
                           <button
                             type="button"
-                            className="routine-form-day-remove"
-                            aria-label={t('mappings.removeDraftAria')}
-                            title={t('routines.removeRow')}
+                            className={
+                              row.savedValues
+                                ? 'routine-form-day-clear'
+                                : 'routine-form-day-remove'
+                            }
+                            aria-label={
+                              row.savedValues
+                                ? t('mappings.clearEditAria')
+                                : t('mappings.removeDraftAria')
+                            }
+                            title={
+                              row.savedValues
+                                ? t('mappings.clearEdit')
+                                : t('routines.removeRow')
+                            }
                             disabled={removingRowId === row.id}
-                            onClick={() => void removeRow(row.id)}
+                            onClick={() =>
+                              row.savedValues
+                                ? clearRowEdits(row.id)
+                                : void removeRow(row.id)
+                            }
                           >
                             <svg
                               className="routine-form-day-remove-icon"
@@ -496,7 +549,11 @@ export function MappingsList({
                             >
                               <path
                                 fill="currentColor"
-                                d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                                d={
+                                  row.savedValues
+                                    ? 'M18.3 5.71 12 12l6.3 6.29-1.41 1.41L10.59 13.41 4.29 19.71 2.88 18.3 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3 1.42 1.42z'
+                                    : 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z'
+                                }
                               />
                             </svg>
                           </button>

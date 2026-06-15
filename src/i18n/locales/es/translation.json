@@ -214,6 +214,8 @@
     "createRoutineFirst": "Crea al menos una rutina antes de añadir asignaciones",
     "saveBeforeAdd": "Guarda o elimina la fila en edición antes de añadir otra",
     "removeDraftAria": "Eliminar fila de asignación en borrador",
+    "clearEdit": "Descartar cambios",
+    "clearEditAria": "Descartar cambios de la fila de asignación",
     "editAria": "Editar fila de asignación",
     "finishEditing": "Termina de editar la fila en curso primero",
     "removeAria": "Eliminar fila de asignación"

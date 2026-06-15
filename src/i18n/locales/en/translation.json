@@ -214,6 +214,8 @@
     "createRoutineFirst": "Create at least one routine before adding mappings",
     "saveBeforeAdd": "Save or remove the row being edited before adding another",
     "removeDraftAria": "Remove draft mapping row",
+    "clearEdit": "Clear changes",
+    "clearEditAria": "Clear mapping row changes",
     "editAria": "Edit mapping row",
     "finishEditing": "Finish editing the row in progress first",
     "removeAria": "Remove mapping row"
