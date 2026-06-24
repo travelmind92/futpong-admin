@@ -4,6 +4,7 @@ import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
 import { ExerciseForm } from './components/ExerciseForm';
 import { ExercisesLayout } from './panels/ExercisesLayout';
 import { ExercisesListPage } from './panels/ExercisesListPage';
+import { Exercises2Panel } from './panels/Exercises2Panel';
 import { MappingsPanel } from './panels/MappingsPanel';
 import { RoutineForm } from './components/RoutineForm';
 import { RoutinesLayout } from './panels/RoutinesLayout';
@@ -38,6 +39,24 @@ const menuItems: { to: string; labelKey: string; icon: React.ReactNode }[] = [
   {
     to: '/exercises',
     labelKey: 'nav.exercises',
+    icon: (
+      <svg
+        className="nav-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M6 7v10M3.5 8.5v7M8.5 8.5v7M18 7v10M15.5 8.5v7M20.5 8.5v7M8.5 12h7" />
+      </svg>
+    ),
+  },
+  {
+    to: '/exercises2',
+    labelKey: 'nav.exercises2',
     icon: (
       <svg
         className="nav-icon"
@@ -138,6 +157,7 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
               <Route path="new" element={<ExerciseForm />} />
               <Route path=":id/edit" element={<ExerciseForm />} />
             </Route>
+            <Route path="/exercises2" element={<Exercises2Panel />} />
             <Route path="/mappings" element={<MappingsPanel />} />
             <Route path="*" element={<Navigate to="/routines" replace />} />
           </Routes>

@@ -5,8 +5,12 @@ import type {
   TrainingBlock,
   TrainingDay,
 } from '../../types';
+import type { Exercise_2 } from '../../types/types';
 
 type DynamoItem = Record<string, unknown>;
+
+export const EXERCISE_2_VERSION = 'v3';
+export const EXERCISE_2_RESOURCE = 'exercises';
 
 export function exerciseToDynamoItem(exercise: Exercise): DynamoItem {
   const item: DynamoItem = {
@@ -26,6 +30,59 @@ export function exerciseToDynamoItem(exercise: Exercise): DynamoItem {
   const g = exercise.equivalenceGroup?.trim();
   if (g) {
     item.equivalenceGroup = g;
+  }
+  return item;
+}
+
+export function exercise2ToDynamoItem(exercise: Exercise_2): DynamoItem {
+  const item: DynamoItem = {
+    id: exercise.id,
+    version: EXERCISE_2_VERSION,
+    name: exercise.name,
+    description: exercise.description,
+    repType: exercise.repType,
+    ages: exercise.ages,
+    level: exercise.level,
+    places: exercise.places,
+    blockType: exercise.blockType,
+    category: exercise.category,
+  };
+  if (exercise.period !== undefined) {
+    item.period = exercise.period;
+  }
+  if (exercise.skill !== undefined) {
+    item.skill = exercise.skill;
+  }
+  if (exercise.challengeLevel !== undefined) {
+    item.challengeLevel = exercise.challengeLevel;
+  }
+  const mainMuscle = exercise.mainMuscle?.trim();
+  if (mainMuscle) {
+    item.mainMuscle = mainMuscle;
+  }
+  if (exercise.elements !== undefined && exercise.elements.length > 0) {
+    item.elements = exercise.elements;
+  }
+  if (exercise.weightType !== undefined) {
+    item.weightType = exercise.weightType;
+  }
+  if (exercise.impact !== undefined) {
+    item.impact = exercise.impact;
+  }
+  if (exercise.difficulty !== undefined) {
+    item.difficulty = exercise.difficulty;
+  }
+  const sistituteGroup = exercise.sistituteGroup?.trim();
+  if (sistituteGroup) {
+    item.sistituteGroup = sistituteGroup;
+  }
+  const videoUrl = exercise.videoUrl?.trim();
+  if (videoUrl) {
+    item.videoUrl = videoUrl;
+  }
+  const imageUrl = exercise.imageUrl?.trim();
+  if (imageUrl) {
+    item.imageUrl = imageUrl;
   }
   return item;
 }

@@ -29,6 +29,7 @@
     "main": "Navegación principal",
     "routines": "Rutinas",
     "exercises": "Ejercicios",
+    "exercises2": "Ejercicios 2",
     "mappings": "Asignaciones"
   },
   "auth": {
@@ -53,7 +54,7 @@
       "Home": "Casa"
     },
     "routineType": {
-      "Competition": "Competición",
+      "Competition": "Competencia",
       "Preseason": "Pretemporada"
     }
   },
@@ -121,6 +122,55 @@
       "missingName": "Cada fila debe tener un nombre (NOMBRE).",
       "missingDescription": "Cada fila debe tener una descripción (DESCRIPCION).",
       "invalidRepType": "Tipo de repetición no válido (TIPO_REPETICION). Usa Repeticiones o Segundos.",
+      "noRows": "El archivo CSV no tiene filas de ejercicios.",
+      "duplicateNameInFile": "El CSV contiene nombres de ejercicio duplicados."
+    }
+  },
+  "exercises2": {
+    "title": "Ejercicios 2",
+    "loadingList": "Cargando ejercicios…",
+    "noExercises": "No hay ejercicios",
+    "category": "Categoría",
+    "level": "Nivel",
+    "blockType": "Tipo de bloque",
+    "expandRow": "Expandir fila",
+    "toggleDetails": "Mostrar u ocultar detalles de {{name}}",
+    "values": "Valores",
+    "valuesModalTitle": "Valores válidos",
+    "multipleExampleLabel": "EJEMPLO MÚLTIPLE",
+    "copyCellValue": "Copiar al portapapeles",
+    "copyTooltip": "Copiar",
+    "import": "Importar",
+    "importModalTitle": "Importar ejercicios 2",
+    "importValidValuesIntro": "Valores válidos para columnas con opciones (etiquetas en español):",
+    "importCsvLabel": "Archivo CSV",
+    "importCsvHint": "CSV separado por punto y coma — usa \"/\" para separar varios valores en Edades, Lugares y Elementos (se ignoran espacios alrededor de \"/\")",
+    "clearCsv": "Quitar archivo CSV",
+    "importCsvInvalid": "Elige un archivo .csv.",
+    "downloadTemplate": "Descargar plantilla",
+    "importExercises": "Importar ejercicios",
+    "importing": "Importando…",
+    "importFailed": "La importación falló. Revisa la consola para más detalles.",
+    "importReadFailed": "No se pudo leer el archivo seleccionado.",
+    "importErrors": {
+      "emptyFile": "El archivo CSV está vacío.",
+      "invalidHeaders": "Encabezados inválidos. Se esperaba: NOMBRE;DESCRIPCION;TIPO_REPETICION;EDADES;NIVEL;LUGARES;PERIODO;TIPO_BLOQUE;CATEGORIA;HABILIDAD;NIVEL_DESAFIO;MUSCULO_PRINCIPAL;ELEMENTOS;TIPO_PESO;IMPACTO;DIFICULTAD;GRUPO_SUSTITUCION",
+      "invalidRow": "Una o más filas tienen un número incorrecto de columnas.",
+      "missingName": "Cada fila debe tener un nombre (NOMBRE).",
+      "missingDescription": "Cada fila debe tener una descripción (DESCRIPCION).",
+      "invalidRepType": "Tipo de repetición inválido (TIPO_REPETICION).",
+      "invalidAges": "Edades inválidas (EDADES). Indica al menos un valor válido, separado por \"/\".",
+      "invalidLevel": "Nivel inválido (NIVEL).",
+      "invalidPlaces": "Lugares inválidos (LUGARES). Indica al menos un valor válido, separado por \"/\".",
+      "invalidPeriod": "Periodo inválido (PERIODO).",
+      "invalidBlockType": "Tipo de bloque inválido (TIPO_BLOQUE).",
+      "invalidCategory": "Categoría inválida (CATEGORIA).",
+      "invalidSkill": "Habilidad inválida (HABILIDAD).",
+      "invalidChallengeLevel": "Nivel de desafío inválido (NIVEL_DESAFIO).",
+      "invalidElements": "Elementos inválidos (ELEMENTOS). Usa valores válidos separados por \"/\".",
+      "invalidWeightType": "Tipo de peso inválido (TIPO_PESO).",
+      "invalidImpact": "Impacto inválido (IMPACTO).",
+      "invalidDifficulty": "Dificultad inválida (DIFICULTAD).",
       "noRows": "El archivo CSV no tiene filas de ejercicios.",
       "duplicateNameInFile": "El CSV contiene nombres de ejercicio duplicados."
     }

@@ -10,6 +10,22 @@ import {
   TrainingBlock,
   TrainingDay,
 } from '../../types';
+import {
+  Age,
+  BlockType,
+  ChallengeLevel,
+  Difficulty,
+  Element,
+  ExerciseCategory,
+  Impact,
+  Level,
+  Period_2,
+  Place_2,
+  RepType_2,
+  Skill,
+  WeightType,
+} from '../../types/enums';
+import { Exercise_2 } from '../../types/types';
 
 function num(v: unknown, fallback: number): number {
   if (typeof v === 'number' && Number.isFinite(v)) {
@@ -135,6 +151,83 @@ export function normalizeTrainingDay(raw: Record<string, unknown>): TrainingDay 
     day: day >= 1 ? day : 1,
     name: typeof raw.name === 'string' ? raw.name : '',
     matchday: typeof raw.matchday === 'string' ? raw.matchday : '+1',
+  };
+}
+
+function isEnumValue<T extends Record<string, string>>(
+  e: T,
+  v: unknown
+): v is T[keyof T] {
+  return typeof v === 'string' && Object.values(e).includes(v as T[keyof T]);
+}
+
+function enumArray<T extends Record<string, string>>(
+  e: T,
+  v: unknown
+): T[keyof T][] {
+  if (!Array.isArray(v)) {
+    return [];
+  }
+  return v.filter((x): x is T[keyof T] => isEnumValue(e, x));
+}
+
+function optionalString(v: unknown): string | undefined {
+  return typeof v === 'string' && v.trim() !== '' ? v : undefined;
+}
+
+export function normalizeExercise2(
+  raw: Record<string, unknown>
+): Exercise_2 | null {
+  const id = raw.id;
+  if (typeof id !== 'string' || !id) {
+    return null;
+  }
+
+  const period = isEnumValue(Period_2, raw.period) ? raw.period : undefined;
+  const skill = isEnumValue(Skill, raw.skill) ? raw.skill : undefined;
+  const challengeLevel = isEnumValue(ChallengeLevel, raw.challengeLevel)
+    ? raw.challengeLevel
+    : undefined;
+  const weightType = isEnumValue(WeightType, raw.weightType)
+    ? raw.weightType
+    : undefined;
+  const impact = isEnumValue(Impact, raw.impact) ? raw.impact : undefined;
+  const difficulty = isEnumValue(Difficulty, raw.difficulty)
+    ? raw.difficulty
+    : undefined;
+  const mainMuscle = optionalString(raw.mainMuscle);
+  const sistituteGroup = optionalString(raw.sistituteGroup);
+  const videoUrl = optionalString(raw.videoUrl);
+  const imageUrl = optionalString(raw.imageUrl);
+  const elements = enumArray(Element, raw.elements);
+
+  return {
+    id,
+    name: typeof raw.name === 'string' ? raw.name : '',
+    description: typeof raw.description === 'string' ? raw.description : '',
+    repType: isEnumValue(RepType_2, raw.repType)
+      ? raw.repType
+      : RepType_2.REPETITIONS,
+    ages: enumArray(Age, raw.ages),
+    level: isEnumValue(Level, raw.level) ? raw.level : Level.RECREATIONAL,
+    places: enumArray(Place_2, raw.places),
+    blockType: isEnumValue(BlockType, raw.blockType)
+      ? raw.blockType
+      : BlockType.GENERAL_ACTIVATION,
+    category: isEnumValue(ExerciseCategory, raw.category)
+      ? raw.category
+      : ExerciseCategory.WARM_UP,
+    ...(period !== undefined ? { period } : {}),
+    ...(skill !== undefined ? { skill } : {}),
+    ...(challengeLevel !== undefined ? { challengeLevel } : {}),
+    ...(mainMuscle !== undefined ? { mainMuscle } : {}),
+    ...(elements.length > 0 ? { elements } : {}),
+    ...(weightType !== undefined ? { weightType } : {}),
+    ...(impact !== undefined ? { impact } : {}),
+    ...(difficulty !== undefined ? { difficulty } : {}),
+    ...(sistituteGroup !== undefined ? { sistituteGroup } : {}),
+    ...(videoUrl !== undefined ? { videoUrl } : {}),
+    ...(imageUrl !== undefined ? { imageUrl } : {}),
   };
 }
 
