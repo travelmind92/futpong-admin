@@ -1,7 +1,7 @@
-import { Age, BlockType, ChallengeLevel, Difficulty, Element, ExerciseCategory, Impact, Level, Period_2, Place_2, RepType_2, Skill, WeightType } from "./enums";
-import { Exercise_2 } from "./types";
+import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Impact_V3, Level_V3, Period_V3, Place_V3, RepType_V3, Skill_V3, WeightType_V3 } from "./enums";
+import { Exercise_V3 } from "./types";
 
-const ExercisePropLabels: Record<keyof Exercise_2, string> = {
+const ExercisePropLabels: Record<keyof Exercise_V3, string> = {
   id: 'ID',
   name: 'Nombre',
   description: 'Descripción',
@@ -25,24 +25,24 @@ const ExercisePropLabels: Record<keyof Exercise_2, string> = {
   version: 'Versión'
 };
 
-const RepTypeLabel: Record<RepType_2, string> = {
+const RepTypeLabel: Record<RepType_V3, string> = {
   Repetitions: 'Repeticiones',
   Seconds: 'Segundos',
 };
 
-const AgeLabel: Record<Age, string> = {
+const AgeLabel: Record<Age_V3, string> = {
   Children: 'Niños',
   Juveniles: 'Juveniles',
   Adult: 'Adulto',
   SeniorAdult: 'Adulto mayor',
 };
 
-const LevelLabel: Record<Level, string> = {
+const LevelLabel: Record<Level_V3, string> = {
   Recreational: 'Recreativo',
   Competitive: 'Competitivo',
 };
 
-const PlaceLabel: Record<Place_2, string> = {
+const PlaceLabel: Record<Place_V3, string> = {
   Gym: 'Gimnasio',
   Field: 'Cancha',
   Park: 'Plaza',
@@ -50,12 +50,12 @@ const PlaceLabel: Record<Place_2, string> = {
 };
 
 
-const PeriodLabel: Record<Period_2, string> = {
+const PeriodLabel: Record<Period_V3, string> = {
   Competition: 'Competencia',
   Preseason: 'Pretemporada',
 };
 
-const BlockTypeLabel: Record<BlockType, string> = {
+const BlockTypeLabel: Record<BlockType_V3, string> = {
   GeneralActivation: 'Activación general',
   Core: 'Core',
   PhysicalActivation: 'Activación física',
@@ -66,7 +66,7 @@ const BlockTypeLabel: Record<BlockType, string> = {
   InjuryPrevention: 'Prevención de lesiones',
 };
 
-const ExerciseCategoryLabel: Record<ExerciseCategory, string> = {
+const ExerciseCategoryLabel: Record<ExerciseCategory_V3, string> = {
   WarmUp: 'Calentamiento',
   UpperBodyStrength: 'Fuerza superior',
   LowerBodyStrength: 'Fuerza inferior',
@@ -79,7 +79,7 @@ const ExerciseCategoryLabel: Record<ExerciseCategory, string> = {
   TechnicalChallenge: 'Desafío técnico',
 };
 
-const SkillLabel: Record<Skill, string> = {
+const SkillLabel: Record<Skill_V3, string> = {
   Control: 'Control',
   Pass: 'Pase',
   Dribbling: 'Regate',
@@ -87,13 +87,13 @@ const SkillLabel: Record<Skill, string> = {
   HeadShot: 'Cabezazo',
 };
 
-const ChallengeLevelLabel: Record<ChallengeLevel, string> = {
+const ChallengeLevelLabel: Record<ChallengeLevel_V3, string> = {
   Bronze: 'Bronce',
   Silver: 'Plata',
   Gold: 'Oro',
 };
 
-const ElementLabel: Record<Element, string> = {
+const ElementLabel: Record<Element_V3, string> = {
   Ball: 'Pelota',
   Dumbbells: 'Mancuernas',
   Bar: 'Barra',
@@ -108,19 +108,19 @@ const ElementLabel: Record<Element, string> = {
   NoEquipment: 'Sin equipamiento',
 };
 
-const WeightTypeLabel: Record<WeightType, string> = {
+const WeightTypeLabel: Record<WeightType_V3, string> = {
   BodyWeight: 'Peso corporal',
   ExternalWeight: 'Peso externo',
   NoWeight: 'Sin peso',
 };
 
-const ImpactLabel: Record<Impact, string> = {
+const ImpactLabel: Record<Impact_V3, string> = {
   Low: 'Bajo',
   Medium: 'Medio',
   High: 'Alto',
 };
 
-const DifficultyLabel: Record<Difficulty, string> = {
+const DifficultyLabel: Record<Difficulty_V3, string> = {
   Low: 'Baja',
   Medium: 'Media',
   High: 'Alta',

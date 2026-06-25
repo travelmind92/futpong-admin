@@ -1,34 +1,34 @@
-enum Age {
+enum Age_V3 {
   CHILDREN = 'Children',
   JUVENILES = 'Juveniles',
   ADULT = 'Adult',
   SENIOR_ADULT = 'SeniorAdult'
 }
 
-enum Place_2 {
+enum Place_V3 {
   GYM = 'Gym',
   FIELD = 'Field',
   PARK = 'Park',
   HOME = 'Home'
 }
 
-enum Period_2 {
+enum Period_V3 {
   COMPETITION = 'Competition',
   PRESEASON = 'Preseason'
 }
 
-enum Level {
+enum Level_V3 {
   RECREATIONAL = 'Recreational',
   COMPETITIVE = 'Competitive'
 }
 
-enum Gender_2 {
+enum Gender_V3 {
   MALE = 'Male',
   FEMALE = 'Female',
   OTHER = 'Other'
 }
 
-enum BlockType {
+enum BlockType_V3 {
   GENERAL_ACTIVATION = 'GeneralActivation',
   CORE = 'Core',
   PHYSICAL_ACTIVATION = 'PhysicalActivation',
@@ -39,12 +39,12 @@ enum BlockType {
   INJURY_PREVENTION = 'InjuryPrevention'
 }
 
-enum RepType_2 {
+enum RepType_V3 {
   REPETITIONS = 'Repetitions',
   SECONDS = 'Seconds'
 }
 
-enum ExerciseCategory {
+enum ExerciseCategory_V3 {
   WARM_UP = 'WarmUp',
   UPPER_BODY_STRENGTH = 'UpperBodyStrength',
   LOWER_BODY_STRENGTH = 'LowerBodyStrength',
@@ -57,7 +57,7 @@ enum ExerciseCategory {
   TECHNICAL_CHALLENGE = 'TechnicalChallenge'
 }
 
-enum Skill {
+enum Skill_V3 {
   CONTROL = 'Control',
   PASS = 'Pass',
   DRIBBLING = 'Dribbling',
@@ -65,13 +65,13 @@ enum Skill {
   HEAD_SHOT = 'HeadShot'
 }
 
-enum ChallengeLevel {
+enum ChallengeLevel_V3 {
   BRONZE = 'Bronze',
   SILVER = 'Silver',
   GOLD = 'Gold'
 }
 
-enum Element {
+enum Element_V3 {
   BALL = 'Ball',
   DUMBBELLS = 'Dumbbells', // Mancuernas
   BAR = 'Bar',
@@ -86,30 +86,29 @@ enum Element {
   NO_EQUIPMENT = 'NoEquipment'
 }
 
-enum WeightType {
+enum WeightType_V3 {
   BODY_WEIGHT = 'BodyWeight',
   EXTERNAL_WEIGHT = 'ExternalWeight',
   NO_WEIGHT = 'NoWeight'
 }
 
-enum Impact {
+enum Impact_V3 {
   LOW = 'Low',
   MEDIUM = 'Medium',
   HIGH = 'High'
 }
 
-enum Difficulty {
+enum Difficulty_V3 {
   LOW = 'Low',
   MEDIUM = 'Medium',
   HIGH = 'High'
 }
 
 export {
-  Age, BlockType, ChallengeLevel, Difficulty, Element, ExerciseCategory, Gender_2, Impact, Level,
-  Period_2,
-  Place_2,
-  RepType_2,
-  Skill,
-  WeightType
+  Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Gender_V3, Impact_V3, Level_V3,
+  Period_V3,
+  Place_V3,
+  RepType_V3,
+  Skill_V3,
+  WeightType_V3
 };
-

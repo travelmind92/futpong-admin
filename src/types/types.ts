@@ -1,47 +1,24 @@
-import { Age, BlockType, ChallengeLevel, Difficulty, Element, ExerciseCategory, Gender_2, Impact, Level, Period_2, Place_2, RepType_2, Skill, WeightType } from "./enums"
+import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Gender_V3, Impact_V3, Level_V3, Period_V3, Place_V3, RepType_V3, Skill_V3, WeightType_V3 } from "./enums"
 
-export type User_2 = {
-  id: string
-  fullName: string
-  pictureUrl?: string
-  gender?: Gender_2
-  birthday?: string
-  email: string
-  age: Age
-  level: Level
-  period?: Period_2
-  height?: number
-  weight?: number
-  completedItems?: CompletedItem_2[]
-  pro?: boolean
-  appwrite?: boolean
-  auth?: boolean
-}
-
-export type CompletedItem_2 = {
-  routineId: string
-  trainingSessions: number[]
-}
-
-type Routine_2 = {
+type Routine_V3 = {
   id: string
   name: string
-  age: Age
-  level: Level
-  place: Place_2
-  period: Period_2
+  age: Age_V3
+  level: Level_V3
+  place: Place_V3
+  period: Period_V3
 }
 
-type RoutineMapping_2 = {
+type RoutineMapping_V3 = {
   id: string
-  age: Age
-  level: Level
-  place: Place_2
-  period: Period_2
+  age: Age_V3
+  level: Level_V3
+  place: Place_V3
+  period: Period_V3
   routineId: string
 }
 
-type TrainingDay_2 = {
+type TrainingDay_V3 = {
   id: string
   routineId: string
   session: number
@@ -51,48 +28,48 @@ type TrainingDay_2 = {
   tips?: string[]
 }
 
-type TrainingBlock_2 = {
+type TrainingBlock_V3 = {
   id: string
   trainingDayId: string
   index: number
   name: string
-  blockType: BlockType
+  blockType: BlockType_V3
   series: number
-  exercises: ExerciseItem_2[]
+  exercises: ExerciseItem_V3[]
 }
 
-type ExerciseItem_2 = {
+type ExerciseItem_V3 = {
   index: number
   exerciseId: string
   reps: string
   restSeconds?: number
 }
 
-type Exercise_2 = {
+type Exercise_V3 = {
   id: string
   name: string
   description: string
-  repType: RepType_2
-  ages: Age[]
-  level: Level
-  places: Place_2[]
-  period?: Period_2
-  blockType: BlockType
-  category: ExerciseCategory
-  skill?: Skill
-  challengeLevel?: ChallengeLevel
+  repType: RepType_V3
+  ages: Age_V3[]
+  level: Level_V3
+  places: Place_V3[]
+  period?: Period_V3
+  blockType: BlockType_V3
+  category: ExerciseCategory_V3
+  skill?: Skill_V3
+  challengeLevel?: ChallengeLevel_V3
   mainMuscle?: string
-  elements?: Element[]
-  weightType?: WeightType
-  impact?: Impact
-  difficulty?: Difficulty
+  elements?: Element_V3[]
+  weightType?: WeightType_V3  
+  impact?: Impact_V3
+  difficulty?: Difficulty_V3
   sistituteGroup?: string
   videoUrl?: string
   imageUrl?: string
   version?: string
 }
 
-type Question_2 = {
+type Question_V3 = {
   id: string
   index: number
   title: string
@@ -100,6 +77,6 @@ type Question_2 = {
 }
 
 export type {
-  Exercise_2, ExerciseItem_2, Question_2, Routine_2,
-  RoutineMapping_2, TrainingBlock_2, TrainingDay_2
+  Exercise_V3, ExerciseItem_V3, Question_V3, Routine_V3,
+  RoutineMapping_V3, TrainingBlock_V3, TrainingDay_V3
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
+import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { ExerciseForm } from './components/ExerciseForm';
 import { ExercisesLayout } from './panels/ExercisesLayout';
 import { ExercisesListPage } from './panels/ExercisesListPage';
@@ -13,14 +13,28 @@ import './App.css';
 import { buildCognitoLoginUrl, buildCognitoLogoutUrl } from './services/api/cognito';
 import { clearSession, getEmailFromIdToken, isAuthenticated } from './auth/auth';
 import { AuthProvider } from './context/AuthContext';
+import {
+  AppVersionProvider,
+  defaultPathForVersion,
+  isV2Path,
+  isV3Path,
+  useAppVersion,
+  type AppVersion,
+} from './context/AppVersionContext';
 import { ExercisesProvider } from './context/ExercisesContext';
 import { RoutinesProvider } from './context/RoutinesContext';
 import { exchangeCode } from './services/api/api';
 
-const menuItems: { to: string; labelKey: string; icon: React.ReactNode }[] = [
+const menuItems: {
+  to: string;
+  labelKey: string;
+  version: AppVersion;
+  icon: React.ReactNode;
+}[] = [
   {
     to: '/routines',
     labelKey: 'nav.routines',
+    version: 'v2',
     icon: (
       <svg
         className="nav-icon"
@@ -39,6 +53,7 @@ const menuItems: { to: string; labelKey: string; icon: React.ReactNode }[] = [
   {
     to: '/exercises',
     labelKey: 'nav.exercises',
+    version: 'v2',
     icon: (
       <svg
         className="nav-icon"
@@ -57,6 +72,7 @@ const menuItems: { to: string; labelKey: string; icon: React.ReactNode }[] = [
   {
     to: '/exercises2',
     labelKey: 'nav.exercises2',
+    version: 'v3',
     icon: (
       <svg
         className="nav-icon"
@@ -75,6 +91,7 @@ const menuItems: { to: string; labelKey: string; icon: React.ReactNode }[] = [
   {
     to: '/mappings',
     labelKey: 'nav.mappings',
+    version: 'v2',
     icon: (
       <svg
         className="nav-icon"
@@ -95,17 +112,47 @@ const menuItems: { to: string; labelKey: string; icon: React.ReactNode }[] = [
 function AppShell({ onLogout }: { onLogout: () => void }) {
   const { t } = useTranslation();
   const userEmail = getEmailFromIdToken();
+  const { appVersion, setAppVersion } = useAppVersion();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const visibleMenuItems = menuItems.filter((item) => item.version === appVersion);
+  const defaultPath = defaultPathForVersion(appVersion);
+
+  useEffect(() => {
+    if (appVersion === 'v3' && isV2Path(location.pathname)) {
+      navigate('/exercises2', { replace: true });
+      return;
+    }
+    if (appVersion === 'v2' && isV3Path(location.pathname)) {
+      navigate('/routines', { replace: true });
+    }
+  }, [appVersion, location.pathname, navigate]);
 
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1 className="app-title">
-          <span className="app-title-brand">
-            <span className="app-title-brand-fut">FUT</span>
-            <span className="app-title-brand-rest">PONG APP</span>
-          </span>
-          <span className="app-title-admin">{t('common.admin')}</span>
-        </h1>
+        <div className="app-header-start">
+          <h1 className="app-title">
+            <span className="app-title-brand">
+              <span className="app-title-brand-fut">FUT</span>
+              <span className="app-title-brand-rest">PONG APP</span>
+            </span>
+            <span className="app-title-admin">{t('common.admin')}</span>
+          </h1>
+
+          <label className="app-version-select-wrap">
+            <select
+              className="app-version-select"
+              value={appVersion}
+              onChange={(e) => setAppVersion(e.target.value as AppVersion)}
+              aria-label={t('common.version')}
+            >
+              <option value="v3">v3</option>
+              <option value="v2">v2</option>
+            </select>
+          </label>
+        </div>
 
         <div className="app-header-actions">
           {userEmail ? (
@@ -127,7 +174,7 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
         <aside className="app-sidebar" aria-label={t('nav.main')}>
           <nav className="app-nav">
             <ul className="app-nav-list">
-              {menuItems.map(({ to, labelKey, icon }) => (
+              {visibleMenuItems.map(({ to, labelKey, icon }) => (
                 <li key={to}>
                   <NavLink
                     to={to}
@@ -146,7 +193,7 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
 
         <main className="app-main">
           <Routes>
-            <Route path="/" element={<Navigate to="/routines" replace />} />
+            <Route path="/" element={<Navigate to={defaultPath} replace />} />
             <Route path="/routines" element={<RoutinesLayout />}>
               <Route index element={<RoutinesListPage />} />
               <Route path="new" element={<RoutineForm />} />
@@ -159,7 +206,7 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
             </Route>
             <Route path="/exercises2" element={<Exercises2Panel />} />
             <Route path="/mappings" element={<MappingsPanel />} />
-            <Route path="*" element={<Navigate to="/routines" replace />} />
+            <Route path="*" element={<Navigate to={defaultPath} replace />} />
           </Routes>
         </main>
       </div>
@@ -235,11 +282,13 @@ function App() {
 
   return (
     <AuthProvider isAuthenticated>
-      <RoutinesProvider>
-        <ExercisesProvider>
-          <AppShell onLogout={handleLogout} />
-        </ExercisesProvider>
-      </RoutinesProvider>
+      <AppVersionProvider>
+        <RoutinesProvider>
+          <ExercisesProvider>
+            <AppShell onLogout={handleLogout} />
+          </ExercisesProvider>
+        </RoutinesProvider>
+      </AppVersionProvider>
     </AuthProvider>
   );
 }

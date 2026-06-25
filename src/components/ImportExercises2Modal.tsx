@@ -7,7 +7,7 @@ import {
 } from '../utils/parseExercises2Csv';
 import { downloadTextFile } from '../utils/downloadTextFile';
 import { EXERCISES_2_IMPORT_TEMPLATE } from '../templates/exercises2ImportTemplate';
-import { Exercise_2 } from '../types/types';
+import { Exercise_V3 } from '../types/types';
 
 const CSV_ACCEPT = '.csv,text/csv,application/vnd.ms-excel';
 
@@ -25,8 +25,8 @@ function isCsvFile(file: File): boolean {
 
 type ImportExercises2ModalProps = {
   open: boolean;
-  existingExercises: Exercise_2[];
-  onImport: (exercises: Exercise_2[]) => Promise<void>;
+  existingExercises: Exercise_V3[];
+  onImport: (exercises: Exercise_V3[]) => Promise<void>;
   onClose: () => void;
 };
 

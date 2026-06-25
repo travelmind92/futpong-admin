@@ -1,18 +1,18 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
-  Age,
-  BlockType,
-  ChallengeLevel,
-  Difficulty,
-  Element,
-  ExerciseCategory,
-  Impact,
-  Level,
-  Period_2,
-  Place_2,
-  RepType_2,
-  Skill,
-  WeightType,
+  Age_V3,
+  BlockType_V3,
+  ChallengeLevel_V3,
+  Difficulty_V3,
+  Element_V3,
+  ExerciseCategory_V3,
+  Impact_V3,
+  Level_V3,
+  Period_V3,
+  Place_V3,
+  RepType_V3,
+  Skill_V3,
+  WeightType_V3,
 } from '../types/enums';
 import {
   AgeLabel,
@@ -30,14 +30,14 @@ import {
   SkillLabel,
   WeightTypeLabel,
 } from '../types/labels';
-import { Exercise_2 } from '../types/types';
+import { Exercise_V3 } from '../types/types';
 import { EXERCISE_2_VERSION } from '../services/dynamo/serialize';
 import { stripAccents, normalizeImportValue } from './stripAccents';
 
 const EXCLUDED_PROPS = ['id', 'videoUrl', 'imageUrl'] as const;
 
 type ExcludedProp = (typeof EXCLUDED_PROPS)[number];
-type ImportProp = Exclude<keyof Exercise_2, ExcludedProp>;
+type ImportProp = Exclude<keyof Exercise_V3, ExcludedProp>;
 
 export const EXERCISE_2_IMPORT_COLUMNS: ImportProp[] = [
   'name',
@@ -71,7 +71,7 @@ export const EXERCISE_2_IMPORT_HEADERS: string[] = EXERCISE_2_IMPORT_COLUMNS.map
   (prop) => labelToHeader(ExercisePropLabels[prop])
 );
 
-export type ParsedExercise2Row = Omit<Exercise_2, 'id' | 'videoUrl' | 'imageUrl'>;
+export type ParsedExercise2Row = Omit<Exercise_V3, 'id' | 'videoUrl' | 'imageUrl'>;
 
 export type ParseExercises2CsvResult =
   | { ok: true; rows: ParsedExercise2Row[] }
@@ -92,22 +92,22 @@ function buildEnumLookup<T extends Record<string, string>>(
   return lookup;
 }
 
-const REP_TYPE_LOOKUP = buildEnumLookup(RepType_2, RepTypeLabel);
-const AGE_LOOKUP = buildEnumLookup(Age, AgeLabel);
-const LEVEL_LOOKUP = buildEnumLookup(Level, LevelLabel);
-const PLACE_LOOKUP = buildEnumLookup(Place_2, PlaceLabel);
-const PERIOD_LOOKUP = buildEnumLookup(Period_2, PeriodLabel);
-const BLOCK_TYPE_LOOKUP = buildEnumLookup(BlockType, BlockTypeLabel);
-const CATEGORY_LOOKUP = buildEnumLookup(ExerciseCategory, ExerciseCategoryLabel);
-const SKILL_LOOKUP = buildEnumLookup(Skill, SkillLabel);
+const REP_TYPE_LOOKUP = buildEnumLookup(RepType_V3, RepTypeLabel);
+const AGE_LOOKUP = buildEnumLookup(Age_V3, AgeLabel);
+const LEVEL_LOOKUP = buildEnumLookup(Level_V3, LevelLabel);
+const PLACE_LOOKUP = buildEnumLookup(Place_V3, PlaceLabel);
+const PERIOD_LOOKUP = buildEnumLookup(Period_V3, PeriodLabel);
+const BLOCK_TYPE_LOOKUP = buildEnumLookup(BlockType_V3, BlockTypeLabel);
+const CATEGORY_LOOKUP = buildEnumLookup(ExerciseCategory_V3, ExerciseCategoryLabel);
+const SKILL_LOOKUP = buildEnumLookup(Skill_V3, SkillLabel);
 const CHALLENGE_LEVEL_LOOKUP = buildEnumLookup(
-  ChallengeLevel,
+  ChallengeLevel_V3,
   ChallengeLevelLabel
 );
-const ELEMENT_LOOKUP = buildEnumLookup(Element, ElementLabel);
-const WEIGHT_TYPE_LOOKUP = buildEnumLookup(WeightType, WeightTypeLabel);
-const IMPACT_LOOKUP = buildEnumLookup(Impact, ImpactLabel);
-const DIFFICULTY_LOOKUP = buildEnumLookup(Difficulty, DifficultyLabel);
+const ELEMENT_LOOKUP = buildEnumLookup(Element_V3, ElementLabel);
+const WEIGHT_TYPE_LOOKUP = buildEnumLookup(WeightType_V3, WeightTypeLabel);
+const IMPACT_LOOKUP = buildEnumLookup(Impact_V3, ImpactLabel);
+const DIFFICULTY_LOOKUP = buildEnumLookup(Difficulty_V3, DifficultyLabel);
 
 function parseEnum<V>(lookup: Map<string, V>, raw: string): V | null {
   const trimmed = raw.trim();
@@ -359,9 +359,9 @@ export function parseExercises2Csv(text: string): ParseExercises2CsvResult {
 
 function exercise2FromImportRow(
   row: ParsedExercise2Row,
-  existing?: Exercise_2
-): Exercise_2 {
-  const exercise: Exercise_2 = {
+  existing?: Exercise_V3
+): Exercise_V3 {
+  const exercise: Exercise_V3 = {
     id: existing?.id ?? uuidv4(),
     ...row,
     version: EXERCISE_2_VERSION,
@@ -381,8 +381,8 @@ function exercise2FromImportRow(
 
 export function parsedRowsToExercises2(
   rows: ParsedExercise2Row[],
-  existingExercises: Exercise_2[] = []
-): Exercise_2[] {
+  existingExercises: Exercise_V3[] = []
+): Exercise_V3[] {
   const existingByName = new Map(
     existingExercises.map((ex) => [ex.name.trim().toLowerCase(), ex])
   );

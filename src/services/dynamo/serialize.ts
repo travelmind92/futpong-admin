@@ -5,7 +5,7 @@ import type {
   TrainingBlock,
   TrainingDay,
 } from '../../types';
-import type { Exercise_2 } from '../../types/types';
+import type { Exercise_V3 } from '../../types/types';
 
 type DynamoItem = Record<string, unknown>;
 
@@ -34,7 +34,7 @@ export function exerciseToDynamoItem(exercise: Exercise): DynamoItem {
   return item;
 }
 
-export function exercise2ToDynamoItem(exercise: Exercise_2): DynamoItem {
+export function exercise2ToDynamoItem(exercise: Exercise_V3): DynamoItem {
   const item: DynamoItem = {
     id: exercise.id,
     version: EXERCISE_2_VERSION,

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Exercise_2 } from '../types/types';
+import { Exercise_V3 } from '../types/types';
 import {
   AgeLabel,
   BlockTypeLabel,
@@ -20,7 +20,7 @@ import {
 
 const DESCRIPTION_PREVIEW_CHARS = 25;
 
-const EXERCISE_2_DETAIL_PROPS = [
+const EXERCISE_V3_DETAIL_PROPS = [
   'name',
   'description',
   'repType',
@@ -40,12 +40,12 @@ const EXERCISE_2_DETAIL_PROPS = [
   'sistituteGroup',
   'videoUrl',
   'imageUrl',
-] as const satisfies readonly (keyof Exercise_2)[];
+] as const satisfies readonly (keyof Exercise_V3)[];
 
-type Exercise2DetailProp = (typeof EXERCISE_2_DETAIL_PROPS)[number];
+type ExerciseV3DetailProp = (typeof EXERCISE_V3_DETAIL_PROPS)[number];
 
-type Exercises2ListProps = {
-  exercises: Exercise_2[];
+type ExercisesV3ListProps = {
+  exercises: Exercise_V3[];
   dataLoading?: boolean;
 };
 
@@ -119,8 +119,8 @@ function Exercise2MediaIcon({
 }
 
 function formatExercise2DetailValue(
-  prop: Exercise2DetailProp,
-  exercise: Exercise_2,
+  prop: ExerciseV3DetailProp,
+  exercise: Exercise_V3,
   t: (key: string) => string
 ): React.ReactNode {
   switch (prop) {
@@ -185,7 +185,7 @@ function formatExercise2DetailValue(
   }
 }
 
-export function Exercises2List({ exercises, dataLoading }: Exercises2ListProps) {
+export function ExercisesV3List({ exercises, dataLoading }: ExercisesV3ListProps) {
   const { t } = useTranslation();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const columnCount = 6;
@@ -266,7 +266,7 @@ export function Exercises2List({ exercises, dataLoading }: Exercises2ListProps) 
                     <tr className="exercises2-list-detail-row">
                       <td colSpan={columnCount}>
                         <dl className="exercises2-list-detail">
-                          {EXERCISE_2_DETAIL_PROPS.map((prop) => (
+                          {EXERCISE_V3_DETAIL_PROPS.map((prop) => (
                             <div key={prop} className="exercises2-list-detail-item">
                               <dt>{ExercisePropLabels[prop]}</dt>
                               <dd>{formatExercise2DetailValue(prop, exercise, t)}</dd>

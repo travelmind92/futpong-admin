@@ -18,6 +18,7 @@
     "showingRange": "Showing {{start}}–{{end}} of {{total}}",
     "close": "Close",
     "admin": "Admin",
+    "version": "Version",
     "language": "Language",
     "languageEs": "Español",
     "languageEn": "English"
@@ -140,6 +141,7 @@
     "multipleExampleLabel": "EJEMPLO MÚLTIPLE",
     "copyCellValue": "Copy to clipboard",
     "copyTooltip": "Copy",
+    "scrollTableRight": "Scroll table to the right",
     "import": "Import",
     "importModalTitle": "Import exercises 2",
     "importValidValuesIntro": "Valid values for enum columns (Spanish labels):",

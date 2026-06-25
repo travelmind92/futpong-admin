@@ -109,6 +109,39 @@
   flex-shrink: 0;
 }
 
+.app-header-start {
+  display: flex;
+  align-items: center;
+  gap: 1.7rem;
+  min-width: 0;
+}
+
+.app-version-select-wrap {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.app-version-select {
+  padding: 0.4rem 2rem 0.4rem 0.65rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--color-surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")
+    no-repeat right 0.45rem center / 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  appearance: none;
+}
+
+.app-version-select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--accent);
+}
+
 .app-header-user-email {
   font-size: 0.875rem;
   font-weight: 500;
@@ -1940,13 +1973,57 @@ tbody.blocks-modal-block-group:last-of-type .blocks-modal-block-card {
 }
 
 .exercises2-values-modal-body {
-  padding: 0;
+  padding: 1.25rem;
   overflow: auto;
+}
+
+.exercises2-values-table-scroll-area {
+  position: relative;
 }
 
 .exercises2-values-table-wrap {
   overflow: auto;
   max-height: min(78vh, 680px);
+}
+
+.exercises2-values-scroll-right-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--text-muted);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.exercises2-values-scroll-right-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.exercises2-values-scroll-right-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.exercises2-values-scroll-right-icon {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .exercises2-values-table {

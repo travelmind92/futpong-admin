@@ -18,6 +18,7 @@
     "showingRange": "Mostrando {{start}}–{{end}} de {{total}}",
     "close": "Cerrar",
     "admin": "Admin",
+    "version": "Versión",
     "language": "Idioma",
     "languageEs": "Español",
     "languageEn": "English"
@@ -140,6 +141,7 @@
     "multipleExampleLabel": "EJEMPLO MÚLTIPLE",
     "copyCellValue": "Copiar al portapapeles",
     "copyTooltip": "Copiar",
+    "scrollTableRight": "Desplazar tabla a la derecha",
     "import": "Importar",
     "importModalTitle": "Importar ejercicios 2",
     "importValidValuesIntro": "Valores válidos para columnas con opciones (etiquetas en español):",

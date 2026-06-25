@@ -7,17 +7,17 @@ import {
   EXERCISE_2_VERSION,
   exercise2ToDynamoItem,
 } from '../services/dynamo/serialize';
-import { Exercise_2 } from '../types/types';
+import { Exercise_V3 } from '../types/types';
 import { translate } from '../i18n/translate';
 import { useAuth } from '../context/AuthContext';
 import { ImportExercises2Modal } from '../components/ImportExercises2Modal';
 import { Exercises2ValuesModal } from '../components/Exercises2ValuesModal';
-import { Exercises2List } from '../components/Exercises2List';
+import { ExercisesV3List } from '../components/Exercises2List';
 
 export function Exercises2Panel() {
   const { t } = useTranslation();
   const { readOnly } = useAuth();
-  const [exercises, setExercises] = useState<Exercise_2[]>([]);
+  const [exercises, setExercises] = useState<Exercise_V3[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -37,7 +37,7 @@ export function Exercises2Panel() {
         const ex = raw
           .filter((item) => item.version === EXERCISE_2_VERSION)
           .map((item) => normalizeExercise2(item))
-          .filter((x): x is Exercise_2 => x !== null);
+          .filter((x): x is Exercise_V3 => x !== null);
         ex.sort((a, b) => a.name.localeCompare(b.name));
         setExercises(ex);
       } catch (e) {
@@ -57,7 +57,7 @@ export function Exercises2Panel() {
     };
   }, []);
 
-  const importExercises = useCallback(async (items: Exercise_2[]) => {
+  const importExercises = useCallback(async (items: Exercise_V3[]) => {
     if (items.length === 0) {
       return;
     }
@@ -117,7 +117,7 @@ export function Exercises2Panel() {
           </div>
         </div>
 
-        <Exercises2List exercises={exercises} dataLoading={dataLoading} />
+        <ExercisesV3List exercises={exercises} dataLoading={dataLoading} />
       </div>
 
       <ImportExercises2Modal
