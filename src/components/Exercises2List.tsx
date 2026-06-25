@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Exercise_V3 } from '../types/types';
 import {
@@ -47,6 +48,7 @@ type ExerciseV3DetailProp = (typeof EXERCISE_V3_DETAIL_PROPS)[number];
 type ExercisesV3ListProps = {
   exercises: Exercise_V3[];
   dataLoading?: boolean;
+  readOnly?: boolean;
 };
 
 function hasMediaUrl(url: string | undefined): boolean {
@@ -185,10 +187,15 @@ function formatExercise2DetailValue(
   }
 }
 
-export function ExercisesV3List({ exercises, dataLoading }: ExercisesV3ListProps) {
+export function ExercisesV3List({
+  exercises,
+  dataLoading,
+  readOnly = false,
+}: ExercisesV3ListProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
-  const columnCount = 6;
+  const columnCount = readOnly ? 6 : 7;
 
   const toggleExpanded = (id: string) => {
     setExpandedIds((prev) => {
@@ -213,6 +220,13 @@ export function ExercisesV3List({ exercises, dataLoading }: ExercisesV3ListProps
             <th scope="col">{t('exercises2.level')}</th>
             <th scope="col">{t('exercises2.blockType')}</th>
             <th scope="col">{t('exercises.repType')}</th>
+            {!readOnly ? (
+              <th
+                scope="col"
+                className="exercises-list-actions-header"
+                aria-label={t('common.actions')}
+              />
+            ) : null}
           </tr>
         </thead>
         <tbody>
@@ -261,6 +275,30 @@ export function ExercisesV3List({ exercises, dataLoading }: ExercisesV3ListProps
                     <td>{LevelLabel[exercise.level]}</td>
                     <td>{BlockTypeLabel[exercise.blockType]}</td>
                     <td>{RepTypeLabel[exercise.repType]}</td>
+                    {!readOnly ? (
+                      <td className="exercises-list-actions-cell">
+                        <button
+                          type="button"
+                          className="exercises-list-icon-btn exercises-list-icon-btn--edit"
+                          aria-label={t('exercises2.editAria', {
+                            name: exercise.name,
+                          })}
+                          title={t('common.edit')}
+                          onClick={() => navigate(`${exercise.id}/edit`)}
+                        >
+                          <svg
+                            className="exercises-list-row-icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
+                            />
+                          </svg>
+                        </button>
+                      </td>
+                    ) : null}
                   </tr>
                   {isExpanded ? (
                     <tr className="exercises2-list-detail-row">

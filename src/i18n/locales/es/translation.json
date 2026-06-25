@@ -30,7 +30,7 @@
     "main": "Navegación principal",
     "routines": "Rutinas",
     "exercises": "Ejercicios",
-    "exercises2": "Ejercicios 2",
+    "exercises2": "Ejercicios",
     "mappings": "Asignaciones"
   },
   "auth": {
@@ -128,7 +128,7 @@
     }
   },
   "exercises2": {
-    "title": "Ejercicios 2",
+    "title": "Ejercicios",
     "loadingList": "Cargando ejercicios…",
     "noExercises": "No hay ejercicios",
     "category": "Categoría",
@@ -142,8 +142,13 @@
     "copyCellValue": "Copiar al portapapeles",
     "copyTooltip": "Copiar",
     "scrollTableRight": "Desplazar tabla a la derecha",
+    "editExercise": "Editar ejercicio",
+    "editAria": "Editar {{name}}",
+    "optionalEmpty": "—",
+    "validationAges": "Seleccioná al menos una edad.",
+    "validationPlaces": "Seleccioná al menos un lugar.",
     "import": "Importar",
-    "importModalTitle": "Importar ejercicios 2",
+    "importModalTitle": "Importar ejercicios",
     "importValidValuesIntro": "Valores válidos para columnas con opciones (etiquetas en español):",
     "importCsvLabel": "Archivo CSV",
     "importCsvHint": "CSV separado por punto y coma — usa \"/\" para separar varios valores en Edades, Lugares y Elementos (se ignoran espacios alrededor de \"/\")",
@@ -154,6 +159,7 @@
     "importing": "Importando…",
     "importFailed": "La importación falló. Revisa la consola para más detalles.",
     "importReadFailed": "No se pudo leer el archivo seleccionado.",
+    "templateDownloadFailed": "No se pudo descargar el archivo de plantilla.",
     "importErrors": {
       "emptyFile": "El archivo CSV está vacío.",
       "invalidHeaders": "Encabezados inválidos. Se esperaba: NOMBRE;DESCRIPCION;TIPO_REPETICION;EDADES;NIVEL;LUGARES;PERIODO;TIPO_BLOQUE;CATEGORIA;HABILIDAD;NIVEL_DESAFIO;MUSCULO_PRINCIPAL;ELEMENTOS;TIPO_PESO;IMPACTO;DIFICULTAD;GRUPO_SUSTITUCION",

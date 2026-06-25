@@ -4,7 +4,9 @@ import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'reac
 import { ExerciseForm } from './components/ExerciseForm';
 import { ExercisesLayout } from './panels/ExercisesLayout';
 import { ExercisesListPage } from './panels/ExercisesListPage';
-import { Exercises2Panel } from './panels/Exercises2Panel';
+import { ExerciseV3Form } from './components/ExerciseV3Form';
+import { Exercises2Layout } from './panels/Exercises2Layout';
+import { Exercises2ListPage } from './panels/Exercises2ListPage';
 import { MappingsPanel } from './panels/MappingsPanel';
 import { RoutineForm } from './components/RoutineForm';
 import { RoutinesLayout } from './panels/RoutinesLayout';
@@ -204,7 +206,10 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
               <Route path="new" element={<ExerciseForm />} />
               <Route path=":id/edit" element={<ExerciseForm />} />
             </Route>
-            <Route path="/exercises2" element={<Exercises2Panel />} />
+            <Route path="/exercises2" element={<Exercises2Layout />}>
+              <Route index element={<Exercises2ListPage />} />
+              <Route path=":id/edit" element={<ExerciseV3Form />} />
+            </Route>
             <Route path="/mappings" element={<MappingsPanel />} />
             <Route path="*" element={<Navigate to={defaultPath} replace />} />
           </Routes>

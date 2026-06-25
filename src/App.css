@@ -749,6 +749,46 @@
   max-width: 36rem;
 }
 
+.exercise-v3-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.1rem 1.25rem;
+  max-width: none;
+  width: 100%;
+}
+
+.exercise-v3-form > .exercise-form-field,
+.exercise-v3-form > .exercise-form-field--media {
+  min-width: 0;
+}
+
+.exercise-v3-form > .exercise-form-field--full-row,
+.exercise-v3-form > .exercise-form-actions {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
+.exercise-v3-form .exercise-form-field input[type='text'],
+.exercise-v3-form .exercise-form-field select,
+.exercise-v3-form .exercise-form-textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.exercise-v3-form .exercise-form-checkbox-group {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.exercise-v3-form .exercise-form-media-row {
+  flex-wrap: wrap;
+}
+
+.exercise-v3-form .exercise-form-drop-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .exercise-form-field {
   display: flex;
   flex-direction: column;
@@ -759,6 +799,32 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.exercise-form-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.exercise-form-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.exercise-form-checkbox-label input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--accent);
 }
 
 .exercise-form-field input[type='text'],

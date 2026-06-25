@@ -6,10 +6,11 @@ import {
   parseExercises2Csv,
 } from '../utils/parseExercises2Csv';
 import { downloadTextFile } from '../utils/downloadTextFile';
-import { EXERCISES_2_IMPORT_TEMPLATE } from '../templates/exercises2ImportTemplate';
 import { Exercise_V3 } from '../types/types';
 
 const CSV_ACCEPT = '.csv,text/csv,application/vnd.ms-excel';
+const EXERCISES_V3_TEMPLATE_PATH = '/ejercicios_v3.csv';
+const EXERCISES_V3_TEMPLATE_FILENAME = 'ejercicios_v3.csv';
 
 function isCsvFile(file: File): boolean {
   const mime = file.type.trim().toLowerCase();
@@ -57,8 +58,18 @@ export function ImportExercises2Modal({
     onClose();
   };
 
-  const handleDownloadTemplate = () => {
-    downloadTextFile(EXERCISES_2_IMPORT_TEMPLATE, 'ejercicios2.csv');
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch(EXERCISES_V3_TEMPLATE_PATH);
+      if (!response.ok) {
+        throw new Error(`Failed to load template (${response.status})`);
+      }
+      const content = await response.text();
+      downloadTextFile(content, EXERCISES_V3_TEMPLATE_FILENAME);
+    } catch (err) {
+      console.error(err);
+      setImportError(t('exercises2.templateDownloadFailed'));
+    }
   };
 
   const handleImport = async () => {
@@ -180,7 +191,9 @@ export function ImportExercises2Modal({
             type="button"
             className="blocks-modal-btn blocks-modal-btn--secondary"
             disabled={isImporting}
-            onClick={handleDownloadTemplate}
+            onClick={() => {
+              void handleDownloadTemplate();
+            }}
           >
             {t('exercises2.downloadTemplate')}
           </button>

@@ -30,7 +30,7 @@
     "main": "Main navigation",
     "routines": "Routines",
     "exercises": "Exercises",
-    "exercises2": "Exercises 2",
+    "exercises2": "Exercises",
     "mappings": "Mappings"
   },
   "auth": {
@@ -128,7 +128,7 @@
     }
   },
   "exercises2": {
-    "title": "Exercises 2",
+    "title": "Exercises",
     "loadingList": "Loading exercises…",
     "noExercises": "No exercises",
     "category": "Category",
@@ -142,6 +142,11 @@
     "copyCellValue": "Copy to clipboard",
     "copyTooltip": "Copy",
     "scrollTableRight": "Scroll table to the right",
+    "editExercise": "Edit exercise",
+    "editAria": "Edit {{name}}",
+    "optionalEmpty": "—",
+    "validationAges": "Select at least one age.",
+    "validationPlaces": "Select at least one place.",
     "import": "Import",
     "importModalTitle": "Import exercises 2",
     "importValidValuesIntro": "Valid values for enum columns (Spanish labels):",
@@ -154,6 +159,7 @@
     "importing": "Importing…",
     "importFailed": "Import failed. Check the console for details.",
     "importReadFailed": "Could not read the selected file.",
+    "templateDownloadFailed": "Could not download the template file.",
     "importErrors": {
       "emptyFile": "The CSV file is empty.",
       "invalidHeaders": "Invalid headers. Expected: NOMBRE;DESCRIPCION;TIPO_REPETICION;EDADES;NIVEL;LUGARES;PERIODO;TIPO_BLOQUE;CATEGORIA;HABILIDAD;NIVEL_DESAFIO;MUSCULO_PRINCIPAL;ELEMENTOS;TIPO_PESO;IMPACTO;DIFICULTAD;GRUPO_SUSTITUCION",
