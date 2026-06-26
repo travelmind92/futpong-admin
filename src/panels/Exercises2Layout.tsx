@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { getAll } from '../services/api/api';
+import { getAll, remove } from '../services/api/api';
 import { normalizeExercise2 } from '../services/dynamo/normalize';
 import { EXERCISE_2_RESOURCE, EXERCISE_2_VERSION } from '../services/dynamo/serialize';
 import { Exercise_V3 } from '../types/types';
@@ -12,6 +12,7 @@ export type Exercises2ContextValue = {
   dataLoading: boolean;
   dataError: string | null;
   setDataError: React.Dispatch<React.SetStateAction<string | null>>;
+  removeExercise: (id: string) => Promise<void>;
 };
 
 export function Exercises2Layout() {
@@ -53,6 +54,19 @@ export function Exercises2Layout() {
     };
   }, []);
 
+  const removeExercise = useCallback(async (id: string) => {
+    try {
+      await remove(EXERCISE_2_RESOURCE, id);
+      setDataError(null);
+      setExercises((prev) => prev.filter((exercise) => exercise.id !== id));
+    } catch (e) {
+      const msg =
+        e instanceof Error ? e.message : translate('errors.removeExercise');
+      setDataError(msg);
+      throw e instanceof Error ? e : new Error(msg);
+    }
+  }, []);
+
   const outletContext = useMemo(
     (): Exercises2ContextValue => ({
       exercises,
@@ -60,8 +74,9 @@ export function Exercises2Layout() {
       dataLoading,
       dataError,
       setDataError,
+      removeExercise,
     }),
-    [exercises, dataLoading, dataError]
+    [exercises, dataLoading, dataError, removeExercise]
   );
 
   return <Outlet context={outletContext} />;

@@ -21,6 +21,7 @@ export function Exercises2ListPage() {
     dataLoading,
     dataError,
     setDataError,
+    removeExercise,
   } = useOutletContext<Exercises2ContextValue>();
   const [importModalOpen, setImportModalOpen] = React.useState(false);
   const [valuesModalOpen, setValuesModalOpen] = React.useState(false);
@@ -92,6 +93,7 @@ export function Exercises2ListPage() {
           exercises={exercises}
           dataLoading={dataLoading}
           readOnly={readOnly}
+          onRemoveExercise={removeExercise}
         />
       </div>
 

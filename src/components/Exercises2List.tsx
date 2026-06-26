@@ -49,6 +49,7 @@ type ExercisesV3ListProps = {
   exercises: Exercise_V3[];
   dataLoading?: boolean;
   readOnly?: boolean;
+  onRemoveExercise?: (id: string) => Promise<void>;
 };
 
 function hasMediaUrl(url: string | undefined): boolean {
@@ -191,6 +192,7 @@ export function ExercisesV3List({
   exercises,
   dataLoading,
   readOnly = false,
+  onRemoveExercise,
 }: ExercisesV3ListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -277,26 +279,75 @@ export function ExercisesV3List({
                     <td>{RepTypeLabel[exercise.repType]}</td>
                     {!readOnly ? (
                       <td className="exercises-list-actions-cell">
-                        <button
-                          type="button"
-                          className="exercises-list-icon-btn exercises-list-icon-btn--edit"
-                          aria-label={t('exercises2.editAria', {
-                            name: exercise.name,
-                          })}
-                          title={t('common.edit')}
-                          onClick={() => navigate(`${exercise.id}/edit`)}
-                        >
-                          <svg
-                            className="exercises-list-row-icon"
-                            viewBox="0 0 24 24"
-                            aria-hidden
+                        <div className="exercises-list-actions">
+                          <button
+                            type="button"
+                            className="exercises-list-icon-btn exercises-list-icon-btn--edit"
+                            aria-label={t('exercises2.editAria', {
+                              name: exercise.name,
+                            })}
+                            title={t('common.edit')}
+                            onClick={() => navigate(`${exercise.id}/edit`)}
                           >
-                            <path
-                              fill="currentColor"
-                              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
-                            />
-                          </svg>
-                        </button>
+                            <svg
+                              className="exercises-list-row-icon"
+                              viewBox="0 0 24 24"
+                              aria-hidden
+                            >
+                              <path
+                                fill="currentColor"
+                                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
+                              />
+                            </svg>
+                          </button>
+                          {onRemoveExercise ? (
+                            <button
+                              type="button"
+                              className="exercises-list-icon-btn exercises-list-icon-btn--remove"
+                              aria-label={t('exercises.removeAria', {
+                                name: exercise.name,
+                              })}
+                              title={t('common.remove')}
+                              onClick={() => {
+                                void (async () => {
+                                  if (
+                                    !window.confirm(
+                                      t('exercises.removeConfirm', {
+                                        name: exercise.name,
+                                      })
+                                    )
+                                  ) {
+                                    return;
+                                  }
+                                  try {
+                                    await onRemoveExercise(exercise.id);
+                                    setExpandedIds((prev) => {
+                                      if (!prev.has(exercise.id)) {
+                                        return prev;
+                                      }
+                                      const next = new Set(prev);
+                                      next.delete(exercise.id);
+                                      return next;
+                                    });
+                                  } catch {
+                                    // Error banner is set on the layout provider
+                                  }
+                                })();
+                              }}
+                            >
+                              <svg
+                                className="exercises-list-row-icon"
+                                viewBox="0 0 24 24"
+                                aria-hidden
+                              >
+                                <path
+                                  fill="currentColor"
+                                  d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                                />
+                              </svg>
+                            </button>
+                          ) : null}
+                        </div>
                       </td>
                     ) : null}
                   </tr>

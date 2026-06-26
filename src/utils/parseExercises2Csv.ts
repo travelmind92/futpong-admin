@@ -33,6 +33,10 @@ import {
 import { Exercise_V3 } from '../types/types';
 import { EXERCISE_2_VERSION } from '../services/dynamo/serialize';
 import { stripAccents, normalizeImportValue } from './stripAccents';
+import {
+  CsvDelimiter,
+  parseCsvRecords,
+} from './parseCsvRecords';
 
 const EXCLUDED_PROPS = ['id', 'videoUrl', 'imageUrl'] as const;
 
@@ -144,13 +148,7 @@ function normalizeHeader(value: string): string {
   return normalizeImportValue(value.replace(/^\uFEFF/, ''));
 }
 
-type CsvDelimiter = ';' | ',';
-
 const DELIMITERS: CsvDelimiter[] = [';', ','];
-
-function splitCsvLine(line: string, delimiter: CsvDelimiter): string[] {
-  return line.split(delimiter).map((cell) => cell.trim());
-}
 
 function headersMatchExpected(headerCells: string[]): boolean {
   if (headerCells.length !== EXERCISE_2_IMPORT_HEADERS.length) {
@@ -161,9 +159,13 @@ function headersMatchExpected(headerCells: string[]): boolean {
   );
 }
 
-function detectDelimiter(headerLine: string): CsvDelimiter | null {
+function detectDelimiter(text: string): CsvDelimiter | null {
   for (const delimiter of DELIMITERS) {
-    const headerCells = splitCsvLine(headerLine, delimiter).map(normalizeHeader);
+    const { records, malformed } = parseCsvRecords(text, delimiter);
+    if (malformed || records.length === 0) {
+      continue;
+    }
+    const headerCells = records[0].map((cell) => normalizeHeader(cell.trim()));
     if (headersMatchExpected(headerCells)) {
       return delimiter;
     }
@@ -313,24 +315,28 @@ export function parseExercises2Csv(text: string): ParseExercises2CsvResult {
     return { ok: false, error: 'emptyFile' };
   }
 
-  const lines = normalized
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-
-  if (lines.length === 0) {
-    return { ok: false, error: 'emptyFile' };
-  }
-
-  const delimiter = detectDelimiter(lines[0]);
+  const delimiter = detectDelimiter(normalized);
   if (!delimiter) {
     return { ok: false, error: 'invalidHeaders' };
   }
 
+  const { records, malformed } = parseCsvRecords(normalized, delimiter);
+  if (malformed || records.length === 0) {
+    return { ok: false, error: 'invalidRow' };
+  }
+
+  const dataRecords = records.slice(1).filter((record) =>
+    record.some((cell) => cell.trim().length > 0)
+  );
+
+  if (dataRecords.length === 0) {
+    return { ok: false, error: 'noRows' };
+  }
+
   const rows: ParsedExercise2Row[] = [];
 
-  for (let lineIndex = 1; lineIndex < lines.length; lineIndex += 1) {
-    const cells = splitCsvLine(lines[lineIndex], delimiter);
+  for (const record of dataRecords) {
+    const cells = record.map((cell) => cell.trim());
     if (cells.length !== EXERCISE_2_IMPORT_COLUMNS.length) {
       return { ok: false, error: 'invalidRow' };
     }
@@ -339,10 +345,6 @@ export function parseExercises2Csv(text: string): ParseExercises2CsvResult {
       return { ok: false, error: parsed.error };
     }
     rows.push(parsed.row);
-  }
-
-  if (rows.length === 0) {
-    return { ok: false, error: 'noRows' };
   }
 
   const seenNames = new Set<string>();
