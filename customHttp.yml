@@ -1,0 +1,8 @@
+# AWS Amplify: serve static assets before the SPA fallback.
+redirects:
+  - source: '/<*.csv>'
+    target: '/<*.csv>'
+    status: '200'
+  - source: '/<*>'
+    target: '/index.html'
+    status: '404-200'
