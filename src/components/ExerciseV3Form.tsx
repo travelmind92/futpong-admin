@@ -10,11 +10,8 @@ import {
   useParams,
 } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-// import { save } from '../services/api/api';
 import {
-  EXERCISE_2_RESOURCE,
   EXERCISE_2_VERSION,
-  exercise2ToDynamoItem,
 } from '../services/dynamo/serialize';
 import {
   Age_V3,
@@ -214,7 +211,6 @@ function applyExerciseToForm(
     setImpact: (v: Impact_V3 | undefined) => void;
     setDifficulty: (v: Difficulty_V3 | undefined) => void;
     setSistituteGroup: (v: string) => void;
-    setVersion: (v: string) => void;
     setPriorVideoUrl: (v: string) => void;
     setPriorImageUrl: (v: string) => void;
   }
@@ -236,7 +232,6 @@ function applyExerciseToForm(
   setters.setImpact(exercise.impact);
   setters.setDifficulty(exercise.difficulty);
   setters.setSistituteGroup(exercise.sistituteGroup ?? '');
-  setters.setVersion(exercise.version ?? EXERCISE_2_VERSION);
   setters.setPriorVideoUrl(exercise.videoUrl ?? '');
   setters.setPriorImageUrl(exercise.imageUrl ?? '');
 }
@@ -244,7 +239,8 @@ function applyExerciseToForm(
 export function ExerciseV3Form() {
   const { t } = useTranslation();
   const { id: editId } = useParams();
-  const { exercises, dataLoading, dataError } = useOutletContext<Exercises2ContextValue>();
+  const { exercises, dataLoading, dataError, updateExercise } =
+    useOutletContext<Exercises2ContextValue>();
   const navigate = useNavigate();
 
   const nameId = useId();
@@ -264,7 +260,6 @@ export function ExerciseV3Form() {
   const impactId = useId();
   const difficultyId = useId();
   const sistituteGroupId = useId();
-  const versionId = useId();
   const videoId = useId();
   const imageId = useId();
 
@@ -291,7 +286,6 @@ export function ExerciseV3Form() {
   const [impact, setImpact] = useState<Impact_V3 | undefined>();
   const [difficulty, setDifficulty] = useState<Difficulty_V3 | undefined>();
   const [sistituteGroup, setSistituteGroup] = useState('');
-  const [version, setVersion] = useState(EXERCISE_2_VERSION);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [priorVideoUrl, setPriorVideoUrl] = useState('');
@@ -302,6 +296,7 @@ export function ExerciseV3Form() {
   const [imageInputKey, setImageInputKey] = useState(0);
   const [validationError, setValidationError] = useState('');
   const [mediaError, setMediaError] = useState('');
+  const [saveError, setSaveError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -337,7 +332,6 @@ export function ExerciseV3Form() {
       setImpact,
       setDifficulty,
       setSistituteGroup,
-      setVersion,
       setPriorVideoUrl,
       setPriorImageUrl,
     });
@@ -347,6 +341,7 @@ export function ExerciseV3Form() {
     setRemoveImageOnSave(false);
     setValidationError('');
     setMediaError('');
+    setSaveError('');
   }, [editId, dataLoading, exercises, navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -374,10 +369,11 @@ export function ExerciseV3Form() {
       return;
     }
     setValidationError('');
+    setSaveError('');
 
     const trimmedMainMuscle = mainMuscle.trim();
     const trimmedSistituteGroup = sistituteGroup.trim();
-    const trimmedVersion = version.trim() || EXERCISE_2_VERSION;
+    const existingExercise = exercises.find((item) => item.id === editId);
 
     const exercise: Exercise_V3 = {
       id: editId,
@@ -389,7 +385,7 @@ export function ExerciseV3Form() {
       places,
       blockType,
       category,
-      version: trimmedVersion,
+      version: existingExercise?.version ?? EXERCISE_2_VERSION,
       ...(period !== undefined ? { period } : {}),
       ...(skill !== undefined ? { skill } : {}),
       ...(challengeLevel !== undefined ? { challengeLevel } : {}),
@@ -410,18 +406,31 @@ export function ExerciseV3Form() {
       exercise.imageUrl = priorImageUrl.trim();
     }
 
-    const payload = exercise2ToDynamoItem(exercise);
+    const hasMediaChanges =
+      videoFile != null ||
+      imageFile != null ||
+      removeVideoOnSave ||
+      removeImageOnSave;
 
     setIsSaving(true);
     try {
-      console.log('Exercise_V3 save', { exercise, payload, media: {
-          video: videoFile ?? undefined,
-          image: imageFile ?? undefined,
-          removeVideo: removeVideoOnSave,
-          removeImage: removeImageOnSave,
-        },
+      await updateExercise({
+        exercise,
+        ...(hasMediaChanges
+          ? {
+              media: {
+                ...(videoFile != null ? { video: videoFile } : {}),
+                ...(imageFile != null ? { image: imageFile } : {}),
+              },
+            }
+          : {}),
       });
-      // await save(EXERCISE_2_RESOURCE, exercise.id, payload);
+      navigate('..', { replace: false });
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : t('exercises.saveFailed');
+      setSaveError(msg);
+      console.error(err);
     } finally {
       setIsSaving(false);
     }
@@ -446,6 +455,11 @@ export function ExerciseV3Form() {
       {validationError ? (
         <p className="app-data-banner app-data-banner--error" role="alert">
           {validationError}
+        </p>
+      ) : null}
+      {saveError ? (
+        <p className="app-data-banner app-data-banner--error" role="alert">
+          {saveError}
         </p>
       ) : null}
       <form
@@ -627,17 +641,6 @@ export function ExerciseV3Form() {
             type="text"
             value={sistituteGroup}
             onChange={(e) => setSistituteGroup(e.target.value)}
-            autoComplete="off"
-          />
-        </div>
-
-        <div className="exercise-form-field">
-          <label htmlFor={versionId}>{ExercisePropLabels.version}</label>
-          <input
-            id={versionId}
-            type="text"
-            value={version}
-            onChange={(e) => setVersion(e.target.value)}
             autoComplete="off"
           />
         </div>

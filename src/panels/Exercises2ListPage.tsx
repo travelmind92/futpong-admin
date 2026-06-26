@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { bulkSave } from '../services/api/api';
@@ -11,6 +11,7 @@ import { ImportExercises2Modal } from '../components/ImportExercises2Modal';
 import { Exercises2ValuesModal } from '../components/Exercises2ValuesModal';
 import { ExercisesV3List } from '../components/Exercises2List';
 import { Exercises2ContextValue } from './Exercises2Layout';
+import { textContainsSearch } from '../utils/textSearch';
 
 export function Exercises2ListPage() {
   const { t } = useTranslation();
@@ -23,8 +24,35 @@ export function Exercises2ListPage() {
     setDataError,
     removeExercise,
   } = useOutletContext<Exercises2ContextValue>();
-  const [importModalOpen, setImportModalOpen] = React.useState(false);
-  const [valuesModalOpen, setValuesModalOpen] = React.useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [valuesModalOpen, setValuesModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredExercises = useMemo(() => {
+    const query = searchQuery.trim();
+    if (!query) {
+      return exercises;
+    }
+    const exerciseOrder = new Map(
+      exercises.map((exercise, index) => [exercise.id, index])
+    );
+    return exercises
+      .filter(
+        (exercise) =>
+          textContainsSearch(exercise.name, query) ||
+          textContainsSearch(exercise.description, query)
+      )
+      .sort((a, b) => {
+        const aNameMatch = textContainsSearch(a.name, query);
+        const bNameMatch = textContainsSearch(b.name, query);
+        if (aNameMatch !== bNameMatch) {
+          return aNameMatch ? -1 : 1;
+        }
+        return (
+          (exerciseOrder.get(a.id) ?? 0) - (exerciseOrder.get(b.id) ?? 0)
+        );
+      });
+  }, [exercises, searchQuery]);
 
   const importExercises = useCallback(
     async (items: Exercise_V3[]) => {
@@ -68,6 +96,26 @@ export function Exercises2ListPage() {
         <div className="exercises-list-toolbar">
           <div className="exercises-list-toolbar-start">
             <h2 className="exercises-list-title">{t('exercises2.title')}</h2>
+            <label className="exercises-list-search-wrap">
+              <svg
+                className="exercises-list-search-icon"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
+                <path
+                  fill="currentColor"
+                  d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                />
+              </svg>
+              <input
+                type="search"
+                className="exercises-list-search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('exercises.searchPlaceholder')}
+                aria-label={t('exercises.searchLabel')}
+              />
+            </label>
           </div>
           <div className="exercises-list-toolbar-actions">
             <button
@@ -90,10 +138,12 @@ export function Exercises2ListPage() {
         </div>
 
         <ExercisesV3List
-          exercises={exercises}
+          exercises={filteredExercises}
           dataLoading={dataLoading}
           readOnly={readOnly}
           onRemoveExercise={removeExercise}
+          searchQuery={searchQuery}
+          totalExerciseCount={exercises.length}
         />
       </div>
 

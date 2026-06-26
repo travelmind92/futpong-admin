@@ -1,10 +1,5 @@
 import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Impact_V3, Level_V3, Period_V3, Place_V3, RepType_V3, Skill_V3, WeightType_V3 } from "./enums"
 
-// TODO NEXT
-// - Implementar edit de 1 exercise
-// - Deployar
-// - Avisar a Gonza que puede importar ejercicios
-
 type Routine_V3 = {
   id: string
   name: string

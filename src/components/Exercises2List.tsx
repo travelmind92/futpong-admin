@@ -50,6 +50,8 @@ type ExercisesV3ListProps = {
   dataLoading?: boolean;
   readOnly?: boolean;
   onRemoveExercise?: (id: string) => Promise<void>;
+  searchQuery?: string;
+  totalExerciseCount?: number;
 };
 
 function hasMediaUrl(url: string | undefined): boolean {
@@ -193,6 +195,8 @@ export function ExercisesV3List({
   dataLoading,
   readOnly = false,
   onRemoveExercise,
+  searchQuery = '',
+  totalExerciseCount = 0,
 }: ExercisesV3ListProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -239,7 +243,11 @@ export function ExercisesV3List({
           ) : null}
           {!dataLoading && exercises.length === 0 ? (
             <tr>
-              <td colSpan={columnCount}>{t('exercises2.noExercises')}</td>
+              <td colSpan={columnCount}>
+                {searchQuery.trim() && totalExerciseCount > 0
+                  ? t('exercises.noSearchResults')
+                  : t('exercises2.noExercises')}
+              </td>
             </tr>
           ) : null}
           {!dataLoading &&
