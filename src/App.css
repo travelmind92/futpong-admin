@@ -658,12 +658,53 @@
   background: #f3f4f6;
 }
 
+.exercises-list-icon-btn--edit {
+  color: var(--accent);
+}
+
 .exercises-list-icon-btn--edit:hover:not(:disabled) {
+  color: var(--accent-hover);
+}
+
+.exercises-list-icon-btn--save:hover:not(:disabled) {
+  color: #059669;
+}
+
+.mappings2-routine-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.mappings2-routine-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mappings2-routine-select {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+}
+
+.mappings2-routine-cell .exercises-list-icon-btn--edit {
+  padding: 0.2rem;
+}
+
+.mappings2-routine-cell .exercises-list-icon-btn--edit .exercises-list-row-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.exercises-list-icon-btn--view {
   color: var(--accent);
 }
 
 .exercises-list-icon-btn--view:hover:not(:disabled) {
-  color: #2563eb;
+  color: var(--accent-hover);
 }
 
 .exercises-list-icon-btn--remove:hover:not(:disabled) {

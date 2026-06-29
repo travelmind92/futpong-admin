@@ -32,6 +32,7 @@
     "exercises": "Ejercicios",
     "exercises2": "Ejercicios",
     "routines2": "Rutinas",
+    "mappings2": "Mapeo",
     "mappings": "Asignaciones"
   },
   "auth": {
@@ -338,6 +339,19 @@
       "blockWithoutExercises": "Un bloque no tiene ejercicios.",
       "noRows": "El archivo CSV no tiene filas de datos."
     }
+  },
+  "mappings2": {
+    "title": "Mapeo",
+    "routine": "Rutina",
+    "add": "Agregar",
+    "loadingList": "Cargando mapeos…",
+    "noMappings": "No hay mapeos",
+    "draftOnly": "Nuevo mapeo (sin guardar)",
+    "duplicateMapping": "Ya existe un mapeo con esta edad, nivel, lugar y periodo.",
+    "editRoutineAria": "Editar rutina del mapeo",
+    "saveRoutineAria": "Guardar rutina del mapeo",
+    "cancelDraftAria": "Cancelar fila de mapeo nueva",
+    "removeAria": "Eliminar fila de mapeo"
   },
   "mappings": {
     "title": "Asignaciones",

@@ -13,6 +13,7 @@ import { RoutinesLayout } from './panels/RoutinesLayout';
 import { RoutinesListPage } from './panels/RoutinesListPage';
 import { RoutinesV3Layout } from './panels/RoutinesV3Layout';
 import { RoutinesV3ListPage } from './panels/RoutinesV3ListPage';
+import { MappingsV3ListPage } from './panels/MappingsV3ListPage';
 import { RoutineV3DetailPanel } from './components/RoutineV3DetailPanel';
 import './App.css';
 import { buildCognitoLoginUrl, buildCognitoLogoutUrl } from './services/api/cognito';
@@ -113,6 +114,29 @@ const menuItems: {
     ),
   },
   {
+    to: '/mappings2',
+    labelKey: 'nav.mappings2',
+    version: 'v3',
+    icon: (
+      <svg
+        className="nav-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M16 3h5v5" />
+        <path d="M4 20 21 3" />
+        <path d="M21 16v5h-5" />
+        <path d="M15 15l6 6" />
+        <path d="M4 4l5 5" />
+      </svg>
+    ),
+  },
+  {
     to: '/mappings',
     labelKey: 'nav.mappings',
     version: 'v2',
@@ -145,7 +169,7 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
 
   useEffect(() => {
     if (appVersion === 'v3' && isV2Path(location.pathname)) {
-      navigate('/exercises2', { replace: true });
+      navigate(defaultPath, { replace: true });
       return;
     }
     if (appVersion === 'v2' && isV3Path(location.pathname)) {
@@ -235,6 +259,9 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
             <Route path="/exercises2" element={<ExercisesV3Layout />}>
               <Route index element={<ExercisesV3ListPage />} />
               <Route path=":id/edit" element={<ExerciseV3Form />} />
+            </Route>
+            <Route path="/mappings2" element={<RoutinesV3Layout />}>
+              <Route index element={<MappingsV3ListPage />} />
             </Route>
             <Route path="/mappings" element={<MappingsPanel />} />
             <Route path="*" element={<Navigate to={defaultPath} replace />} />

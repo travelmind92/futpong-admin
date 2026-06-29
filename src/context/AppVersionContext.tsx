@@ -40,7 +40,7 @@ export function useAppVersion(): AppVersionContextValue {
 }
 
 export function defaultPathForVersion(version: AppVersion): string {
-  return version === 'v3' ? '/exercises2' : '/routines';
+  return version === 'v3' ? '/routines2' : '/routines';
 }
 
 export function isV2Path(pathname: string): boolean {
@@ -59,6 +59,8 @@ export function isV3Path(pathname: string): boolean {
     pathname === '/exercises2' ||
     pathname.startsWith('/exercises2/') ||
     pathname === '/routines2' ||
-    pathname.startsWith('/routines2/')
+    pathname.startsWith('/routines2/') ||
+    pathname === '/mappings2' ||
+    pathname.startsWith('/mappings2/')
   );
 }

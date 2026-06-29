@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { bulkRemove, getAll, remove } from '../services/api/api';
+import { bulkRemove, getAll, remove, save } from '../services/api/api';
 import { persistRoutineV3Import } from '../services/api/routineV3Import';
 import {
   normalizeExercise2,
@@ -17,6 +17,7 @@ import {
   ROUTINE_V3_RESOURCE,
   TRAINING_BLOCK_V3_RESOURCE,
   TRAINING_DAY_V3_RESOURCE,
+  routineMappingV3ToDynamoItem,
 } from '../services/dynamo/serialize';
 import {
   Exercise_V3,
@@ -33,6 +34,7 @@ import { translate } from '../i18n/translate';
 
 export type RoutinesV3ContextValue = {
   routines: Routine_V3[];
+  routineMappings: RoutineMapping_V3[];
   exercises: Exercise_V3[];
   trainingDays: TrainingDay_V3[];
   trainingBlocks: TrainingBlock_V3[];
@@ -41,6 +43,9 @@ export type RoutinesV3ContextValue = {
   setDataError: React.Dispatch<React.SetStateAction<string | null>>;
   removeRoutine: (id: string) => Promise<void>;
   importRoutine: (payload: RoutineV3ImportPayload) => Promise<void>;
+  updateRoutineMapping: (mapping: RoutineMapping_V3) => Promise<void>;
+  createRoutineMapping: (mapping: RoutineMapping_V3) => Promise<void>;
+  removeRoutineMapping: (mappingId: string) => Promise<void>;
 };
 
 function isV3Item(item: Record<string, unknown>): boolean {
@@ -110,6 +115,17 @@ export function RoutinesV3Layout() {
           .filter(isV3Item)
           .map((item) => normalizeRoutineMappingV3(item))
           .filter((x): x is RoutineMapping_V3 => x !== null);
+        rm.sort((a, b) => {
+          const byAge = a.age.localeCompare(b.age);
+          if (byAge !== 0) return byAge;
+          const byLevel = a.level.localeCompare(b.level);
+          if (byLevel !== 0) return byLevel;
+          const byPlace = a.place.localeCompare(b.place);
+          if (byPlace !== 0) return byPlace;
+          const byPeriod = a.period.localeCompare(b.period);
+          if (byPeriod !== 0) return byPeriod;
+          return a.routineId.localeCompare(b.routineId);
+        });
         setRoutineMappings(rm);
 
         const td = rawDays
@@ -291,9 +307,88 @@ export function RoutinesV3Layout() {
     []
   );
 
+  const updateRoutineMapping = useCallback(async (mapping: RoutineMapping_V3) => {
+    try {
+      await save(
+        ROUTINE_MAPPING_V3_WRITE_RESOURCE,
+        mapping.id,
+        routineMappingV3ToDynamoItem(mapping)
+      );
+    } catch (e) {
+      const msg =
+        e instanceof Error ? e.message : translate('errors.saveMapping');
+      setDataError(msg);
+      throw e instanceof Error ? e : new Error(msg);
+    }
+    setDataError(null);
+    setRoutineMappings((prev) =>
+      prev.map((item) => (item.id === mapping.id ? mapping : item))
+    );
+  }, []);
+
+  const sortRoutineMappings = useCallback((items: RoutineMapping_V3[]) => {
+    return [...items].sort((a, b) => {
+      const byAge = a.age.localeCompare(b.age);
+      if (byAge !== 0) return byAge;
+      const byLevel = a.level.localeCompare(b.level);
+      if (byLevel !== 0) return byLevel;
+      const byPlace = a.place.localeCompare(b.place);
+      if (byPlace !== 0) return byPlace;
+      const byPeriod = a.period.localeCompare(b.period);
+      if (byPeriod !== 0) return byPeriod;
+      return a.routineId.localeCompare(b.routineId);
+    });
+  }, []);
+
+  const createRoutineMapping = useCallback(
+    async (mapping: RoutineMapping_V3) => {
+      const duplicate = routineMappingsRef.current.find(
+        (item) =>
+          item.age === mapping.age &&
+          item.level === mapping.level &&
+          item.place === mapping.place &&
+          item.period === mapping.period
+      );
+      if (duplicate) {
+        const msg = translate('mappings2.duplicateMapping');
+        setDataError(msg);
+        throw new Error(msg);
+      }
+      try {
+        await save(
+          ROUTINE_MAPPING_V3_WRITE_RESOURCE,
+          mapping.id,
+          routineMappingV3ToDynamoItem(mapping)
+        );
+      } catch (e) {
+        const msg =
+          e instanceof Error ? e.message : translate('errors.saveMapping');
+        setDataError(msg);
+        throw e instanceof Error ? e : new Error(msg);
+      }
+      setDataError(null);
+      setRoutineMappings((prev) => sortRoutineMappings([...prev, mapping]));
+    },
+    [sortRoutineMappings]
+  );
+
+  const removeRoutineMapping = useCallback(async (mappingId: string) => {
+    try {
+      await remove(ROUTINE_MAPPING_V3_WRITE_RESOURCE, mappingId);
+    } catch (e) {
+      const msg =
+        e instanceof Error ? e.message : translate('errors.removeMapping');
+      setDataError(msg);
+      throw e instanceof Error ? e : new Error(msg);
+    }
+    setDataError(null);
+    setRoutineMappings((prev) => prev.filter((item) => item.id !== mappingId));
+  }, []);
+
   const outletContext = useMemo(
     (): RoutinesV3ContextValue => ({
       routines,
+      routineMappings,
       exercises,
       trainingDays,
       trainingBlocks,
@@ -302,9 +397,13 @@ export function RoutinesV3Layout() {
       setDataError,
       removeRoutine,
       importRoutine,
+      updateRoutineMapping,
+      createRoutineMapping,
+      removeRoutineMapping,
     }),
     [
       routines,
+      routineMappings,
       exercises,
       trainingDays,
       trainingBlocks,
@@ -312,6 +411,9 @@ export function RoutinesV3Layout() {
       dataError,
       removeRoutine,
       importRoutine,
+      updateRoutineMapping,
+      createRoutineMapping,
+      removeRoutineMapping,
     ]
   );
 

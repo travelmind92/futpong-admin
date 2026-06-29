@@ -32,6 +32,7 @@
     "exercises": "Exercises",
     "exercises2": "Exercises",
     "routines2": "Routines",
+    "mappings2": "Mapping",
     "mappings": "Mappings"
   },
   "auth": {
@@ -338,6 +339,19 @@
       "blockWithoutExercises": "A block has no exercises.",
       "noRows": "The CSV file has no data rows."
     }
+  },
+  "mappings2": {
+    "title": "Mapping",
+    "routine": "Routine",
+    "add": "Add",
+    "loadingList": "Loading mappings…",
+    "noMappings": "No mappings",
+    "draftOnly": "New mapping (unsaved)",
+    "duplicateMapping": "A mapping with this age, level, place, and period already exists.",
+    "editRoutineAria": "Edit routine mapping",
+    "saveRoutineAria": "Save routine mapping",
+    "cancelDraftAria": "Cancel new mapping row",
+    "removeAria": "Remove mapping row"
   },
   "mappings": {
     "title": "Mappings",
