@@ -31,7 +31,7 @@ const RepTypeLabel: Record<RepType_V3, string> = {
 };
 
 const AgeLabel: Record<Age_V3, string> = {
-  Children: 'Niños',
+  Children: 'Infantiles',
   Juveniles: 'Juveniles',
   Adult: 'Adulto',
   SeniorAdult: 'Adulto mayor',

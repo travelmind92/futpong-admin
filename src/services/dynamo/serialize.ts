@@ -5,12 +5,17 @@ import type {
   TrainingBlock,
   TrainingDay,
 } from '../../types';
-import type { Exercise_V3 } from '../../types/types';
+import type { Exercise_V3, Routine_V3, RoutineMapping_V3, TrainingBlock_V3, TrainingDay_V3 } from '../../types/types';
 
 type DynamoItem = Record<string, unknown>;
 
 export const EXERCISE_2_VERSION = 'v3';
 export const EXERCISE_2_RESOURCE = 'exercises';
+export const ROUTINE_V3_RESOURCE = 'routines';
+export const ROUTINE_MAPPING_V3_FETCH_RESOURCE = 'routine-mappings';
+export const ROUTINE_MAPPING_V3_WRITE_RESOURCE = 'routines/mappings';
+export const TRAINING_DAY_V3_RESOURCE = 'training-days';
+export const TRAINING_BLOCK_V3_RESOURCE = 'training-blocks';
 
 export function exerciseToDynamoItem(exercise: Exercise): DynamoItem {
   const item: DynamoItem = {
@@ -85,6 +90,61 @@ export function exercise2ToDynamoItem(exercise: Exercise_V3): DynamoItem {
     item.imageUrl = imageUrl;
   }
   return item;
+}
+
+export function routineV3ToDynamoItem(routine: Routine_V3): DynamoItem {
+  return {
+    id: routine.id,
+    version: EXERCISE_2_VERSION,
+    name: routine.name,
+    age: routine.age,
+    level: routine.level,
+    place: routine.place,
+    period: routine.period,
+  };
+}
+
+export function routineMappingV3ToDynamoItem(mapping: RoutineMapping_V3): DynamoItem {
+  return {
+    id: mapping.id,
+    version: EXERCISE_2_VERSION,
+    age: mapping.age,
+    level: mapping.level,
+    place: mapping.place,
+    period: mapping.period,
+    routineId: mapping.routineId,
+  };
+}
+
+export function trainingDayV3ToDynamoItem(day: TrainingDay_V3): DynamoItem {
+  const item: DynamoItem = {
+    id: day.id,
+    version: EXERCISE_2_VERSION,
+    routineId: day.routineId,
+    session: day.session,
+    name: day.name,
+    minutes: day.minutes,
+  };
+  if (day.matchday !== undefined) {
+    item.matchday = day.matchday;
+  }
+  if (day.tips !== undefined && day.tips.length > 0) {
+    item.tips = day.tips;
+  }
+  return item;
+}
+
+export function trainingBlockV3ToDynamoItem(block: TrainingBlock_V3): DynamoItem {
+  return {
+    id: block.id,
+    version: EXERCISE_2_VERSION,
+    trainingDayId: block.trainingDayId,
+    index: block.index,
+    name: block.name,
+    blockType: block.blockType,
+    series: block.series,
+    exercises: block.exercises,
+  };
 }
 
 export function routineToDynamoItem(routine: Routine): DynamoItem {

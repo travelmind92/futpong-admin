@@ -1,9 +1,12 @@
 import type { TrainingBlock } from '../types';
+import type { TrainingBlock_V3 } from '../types/types';
+
+type BlockWithExerciseRefs = Pick<TrainingBlock, 'exercises'> | Pick<TrainingBlock_V3, 'exercises'>;
 
 /** True if any exercise row in any block references this exercise id. */
 export function isExerciseIdUsedInTrainingBlocks(
   exerciseId: string,
-  blocks: TrainingBlock[]
+  blocks: BlockWithExerciseRefs[]
 ): boolean {
   const target = exerciseId.trim();
   if (!target) {

@@ -10,10 +10,11 @@ import { useAuth } from '../context/AuthContext';
 import { ImportExercises2Modal } from '../components/ImportExercises2Modal';
 import { Exercises2ValuesModal } from '../components/Exercises2ValuesModal';
 import { ExercisesV3List } from '../components/Exercises2List';
-import { Exercises2ContextValue } from './Exercises2Layout';
+import { Exercises2ContextValue } from './ExercisesV3Layout';
+import { resolveImportedExercises2 } from '../utils/parseExercises2Csv';
 import { textContainsSearch } from '../utils/textSearch';
 
-export function Exercises2ListPage() {
+export function ExercisesV3ListPage() {
   const { t } = useTranslation();
   const { readOnly } = useAuth();
   const {
@@ -59,10 +60,11 @@ export function Exercises2ListPage() {
       if (items.length === 0) {
         return;
       }
+      const resolvedItems = resolveImportedExercises2(items, exercises);
       try {
         await bulkSave(
           EXERCISE_2_RESOURCE,
-          items.map((exercise) => exercise2ToDynamoItem(exercise))
+          resolvedItems.map((exercise) => exercise2ToDynamoItem(exercise))
         );
       } catch (e) {
         const msg =
@@ -73,7 +75,7 @@ export function Exercises2ListPage() {
       setDataError(null);
       setExercises((prev) => {
         const byId = new Map(prev.map((exercise) => [exercise.id, exercise]));
-        for (const item of items) {
+        for (const item of resolvedItems) {
           byId.set(item.id, item);
         }
         const merged = Array.from(byId.values());
@@ -81,7 +83,7 @@ export function Exercises2ListPage() {
         return merged;
       });
     },
-    [setDataError, setExercises]
+    [exercises, setDataError, setExercises]
   );
 
   return (

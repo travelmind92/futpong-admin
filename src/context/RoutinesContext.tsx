@@ -237,7 +237,7 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         await bulkRemove('training-blocks', blockIds);
         await bulkRemove('training-days', dayIds);
         await Promise.all(
-          mappingIds.map((id) => remove('routine-mappings', id))
+          mappingIds.map((id) => remove('routines/mappings', id))
         );
         await remove('routines', routineId);
       } catch (e) {
@@ -295,7 +295,7 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
 
   const removeRoutineMapping = useCallback(async (mappingId: string) => {
     try {
-      await remove('routine-mappings', mappingId);
+      await remove('routines/mappings', mappingId);
     } catch (e) {
       const msg =
         e instanceof Error

@@ -5,12 +5,15 @@ import { ExerciseForm } from './components/ExerciseForm';
 import { ExercisesLayout } from './panels/ExercisesLayout';
 import { ExercisesListPage } from './panels/ExercisesListPage';
 import { ExerciseV3Form } from './components/ExerciseV3Form';
-import { Exercises2Layout } from './panels/Exercises2Layout';
-import { Exercises2ListPage } from './panels/Exercises2ListPage';
+import { ExercisesV3Layout } from './panels/ExercisesV3Layout';
+import { ExercisesV3ListPage } from './panels/ExercisesV3ListPage';
 import { MappingsPanel } from './panels/MappingsPanel';
 import { RoutineForm } from './components/RoutineForm';
 import { RoutinesLayout } from './panels/RoutinesLayout';
 import { RoutinesListPage } from './panels/RoutinesListPage';
+import { RoutinesV3Layout } from './panels/RoutinesV3Layout';
+import { RoutinesV3ListPage } from './panels/RoutinesV3ListPage';
+import { RoutineV3DetailPanel } from './components/RoutineV3DetailPanel';
 import './App.css';
 import { buildCognitoLoginUrl, buildCognitoLogoutUrl } from './services/api/cognito';
 import { clearSession, getEmailFromIdToken, isAuthenticated } from './auth/auth';
@@ -68,6 +71,25 @@ const menuItems: {
         aria-hidden
       >
         <path d="M6 7v10M3.5 8.5v7M8.5 8.5v7M18 7v10M15.5 8.5v7M20.5 8.5v7M8.5 12h7" />
+      </svg>
+    ),
+  },
+  {
+    to: '/routines2',
+    labelKey: 'nav.routines2',
+    version: 'v3',
+    icon: (
+      <svg
+        className="nav-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
       </svg>
     ),
   },
@@ -206,8 +228,12 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
               <Route path="new" element={<ExerciseForm />} />
               <Route path=":id/edit" element={<ExerciseForm />} />
             </Route>
-            <Route path="/exercises2" element={<Exercises2Layout />}>
-              <Route index element={<Exercises2ListPage />} />
+            <Route path="/routines2" element={<RoutinesV3Layout />}>
+              <Route index element={<RoutinesV3ListPage />} />
+              <Route path=":id" element={<RoutineV3DetailPanel />} />
+            </Route>
+            <Route path="/exercises2" element={<ExercisesV3Layout />}>
+              <Route index element={<ExercisesV3ListPage />} />
               <Route path=":id/edit" element={<ExerciseV3Form />} />
             </Route>
             <Route path="/mappings" element={<MappingsPanel />} />

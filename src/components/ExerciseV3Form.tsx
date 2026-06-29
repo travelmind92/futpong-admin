@@ -2,6 +2,7 @@ import React, {
   FormEvent,
   useEffect,
   useId,
+  useRef,
   useState,
 } from 'react';
 import {
@@ -46,7 +47,8 @@ import {
 } from '../types/labels';
 import { Exercise_V3 } from '../types/types';
 import { ExerciseMediaDropZone } from './ExerciseMediaDropZone';
-import { Exercises2ContextValue } from '../panels/Exercises2Layout';
+import { Exercises2ContextValue } from '../panels/ExercisesV3Layout';
+import { normalizeForSearch } from '../utils/textSearch';
 
 const IMAGE_ACCEPT =
   'image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/tiff,image/svg+xml';
@@ -244,6 +246,7 @@ export function ExerciseV3Form() {
   const navigate = useNavigate();
 
   const nameId = useId();
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const descId = useId();
   const repTypeId = useId();
   const agesId = useId();
@@ -295,6 +298,7 @@ export function ExerciseV3Form() {
   const [videoInputKey, setVideoInputKey] = useState(0);
   const [imageInputKey, setImageInputKey] = useState(0);
   const [validationError, setValidationError] = useState('');
+  const [nameDuplicateError, setNameDuplicateError] = useState('');
   const [mediaError, setMediaError] = useState('');
   const [saveError, setSaveError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -340,6 +344,7 @@ export function ExerciseV3Form() {
     setRemoveVideoOnSave(false);
     setRemoveImageOnSave(false);
     setValidationError('');
+    setNameDuplicateError('');
     setMediaError('');
     setSaveError('');
   }, [editId, dataLoading, exercises, navigate]);
@@ -368,7 +373,22 @@ export function ExerciseV3Form() {
       setValidationError(t('exercises2.validationPlaces'));
       return;
     }
+
+    const normalizedName = normalizeForSearch(trimmedName);
+    const nameTaken = exercises.some(
+      (exercise) =>
+        exercise.id !== editId &&
+        normalizeForSearch(exercise.name) === normalizedName
+    );
+    if (nameTaken) {
+      setNameDuplicateError(t('exercises.duplicateName'));
+      nameInputRef.current?.focus();
+      nameInputRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      return;
+    }
+
     setValidationError('');
+    setNameDuplicateError('');
     setSaveError('');
 
     const trimmedMainMuscle = mainMuscle.trim();
@@ -472,16 +492,31 @@ export function ExerciseV3Form() {
         <div className="exercise-form-field">
           <label htmlFor={nameId}>{ExercisePropLabels.name}</label>
           <input
+            ref={nameInputRef}
             id={nameId}
             type="text"
             value={name}
             onChange={(e) => {
               setName(e.target.value);
+              setNameDuplicateError('');
               setValidationError('');
             }}
             required
             autoComplete="off"
+            aria-invalid={nameDuplicateError ? true : undefined}
+            aria-describedby={
+              nameDuplicateError ? `${nameId}-error` : undefined
+            }
           />
+          {nameDuplicateError ? (
+            <p
+              id={`${nameId}-error`}
+              className="exercise-form-error"
+              role="alert"
+            >
+              {nameDuplicateError}
+            </p>
+          ) : null}
         </div>
 
         <div className="exercise-form-field">

@@ -25,7 +25,14 @@ import {
   Skill_V3,
   WeightType_V3,
 } from '../../types/enums';
-import { Exercise_V3 } from '../../types/types';
+import {
+  ExerciseItem_V3,
+  Exercise_V3,
+  RoutineMapping_V3,
+  Routine_V3,
+  TrainingBlock_V3,
+  TrainingDay_V3,
+} from '../../types/types';
 
 function num(v: unknown, fallback: number): number {
   if (typeof v === 'number' && Number.isFinite(v)) {
@@ -88,6 +95,123 @@ export function normalizeExercise(raw: Record<string, unknown>): Exercise | null
     ...(imageUrl !== undefined ? { imageUrl } : {}),
     ...(equivalenceGroup !== undefined ? { equivalenceGroup } : {}),
     description: typeof raw.description === 'string' ? raw.description : '',
+  };
+}
+
+export function normalizeRoutineV3(raw: Record<string, unknown>): Routine_V3 | null {
+  const id = raw.id;
+  if (typeof id !== 'string' || !id) {
+    return null;
+  }
+  return {
+    id,
+    name: typeof raw.name === 'string' ? raw.name : '',
+    age: isEnumValue(Age_V3, raw.age) ? raw.age : Age_V3.ADULT,
+    level: isEnumValue(Level_V3, raw.level) ? raw.level : Level_V3.RECREATIONAL,
+    place: isEnumValue(Place_V3, raw.place) ? raw.place : Place_V3.GYM,
+    period: isEnumValue(Period_V3, raw.period)
+      ? raw.period
+      : Period_V3.COMPETITION,
+  };
+}
+
+export function normalizeRoutineMappingV3(
+  raw: Record<string, unknown>
+): RoutineMapping_V3 | null {
+  const id = raw.id;
+  const routineId = raw.routineId;
+  if (typeof id !== 'string' || !id || typeof routineId !== 'string' || !routineId) {
+    return null;
+  }
+  return {
+    id,
+    age: isEnumValue(Age_V3, raw.age) ? raw.age : Age_V3.ADULT,
+    level: isEnumValue(Level_V3, raw.level) ? raw.level : Level_V3.RECREATIONAL,
+    place: isEnumValue(Place_V3, raw.place) ? raw.place : Place_V3.GYM,
+    period: isEnumValue(Period_V3, raw.period)
+      ? raw.period
+      : Period_V3.COMPETITION,
+    routineId,
+  };
+}
+
+export function normalizeTrainingDayV3(
+  raw: Record<string, unknown>
+): TrainingDay_V3 | null {
+  const id = raw.id;
+  const routineId = raw.routineId;
+  if (typeof id !== 'string' || !id || typeof routineId !== 'string' || !routineId) {
+    return null;
+  }
+  const session = num(raw.session, 1);
+  const minutes = num(raw.minutes, 0);
+  const matchdayRaw = raw.matchday;
+  const matchday =
+    typeof matchdayRaw === 'string' && matchdayRaw.trim() !== ''
+      ? matchdayRaw
+      : undefined;
+  const tipsRaw = raw.tips;
+  const tips = Array.isArray(tipsRaw)
+    ? tipsRaw.filter((tip): tip is string => typeof tip === 'string')
+    : undefined;
+
+  return {
+    id,
+    routineId,
+    session: session >= 1 ? session : 1,
+    name: typeof raw.name === 'string' ? raw.name : '',
+    ...(matchday !== undefined ? { matchday } : {}),
+    minutes: minutes >= 0 ? minutes : 0,
+    ...(tips !== undefined && tips.length > 0 ? { tips } : {}),
+  };
+}
+
+function normalizeExerciseItemV3(raw: unknown): ExerciseItem_V3 | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+  const o = raw as Record<string, unknown>;
+  const exerciseId = o.exerciseId;
+  const reps = o.reps;
+  const restSecondsRaw = o.restSeconds;
+  const restSeconds =
+    typeof restSecondsRaw === 'number' && Number.isFinite(restSecondsRaw)
+      ? restSecondsRaw
+      : undefined;
+
+  return {
+    index: num(o.index, 0),
+    exerciseId: typeof exerciseId === 'string' ? exerciseId : '',
+    reps: typeof reps === 'string' ? reps : reps != null ? String(reps) : '',
+    ...(restSeconds !== undefined ? { restSeconds } : {}),
+  };
+}
+
+export function normalizeTrainingBlockV3(
+  raw: Record<string, unknown>
+): TrainingBlock_V3 | null {
+  const id = raw.id;
+  const trainingDayId = raw.trainingDayId;
+  if (typeof id !== 'string' || !id || typeof trainingDayId !== 'string' || !trainingDayId) {
+    return null;
+  }
+  const exercisesRaw = raw.exercises;
+  const exercises: ExerciseItem_V3[] = Array.isArray(exercisesRaw)
+    ? exercisesRaw
+        .map(normalizeExerciseItemV3)
+        .filter((x): x is ExerciseItem_V3 => x !== null)
+    : [];
+
+  return {
+    id,
+    trainingDayId,
+    index: num(raw.index, 0),
+    name: typeof raw.name === 'string' ? raw.name : '',
+    blockType: isEnumValue(BlockType_V3, raw.blockType)
+      ? raw.blockType
+      : BlockType_V3.GENERAL_ACTIVATION,
+    series: num(raw.series, 1),
+    exercises,
   };
 }
 

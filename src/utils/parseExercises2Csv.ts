@@ -37,6 +37,7 @@ import {
   CsvDelimiter,
   parseCsvRecords,
 } from './parseCsvRecords';
+import { normalizeForSearch } from './textSearch';
 
 const EXCLUDED_PROPS = ['id', 'videoUrl', 'imageUrl'] as const;
 
@@ -349,7 +350,7 @@ export function parseExercises2Csv(text: string): ParseExercises2CsvResult {
 
   const seenNames = new Set<string>();
   for (const row of rows) {
-    const key = row.name.toLowerCase();
+    const key = normalizeForSearch(row.name);
     if (seenNames.has(key)) {
       return { ok: false, error: 'duplicateNameInFile' };
     }
@@ -381,18 +382,56 @@ function exercise2FromImportRow(
   return exercise;
 }
 
+function findExistingExerciseByName(
+  name: string,
+  exercises: Exercise_V3[]
+): Exercise_V3 | undefined {
+  const key = normalizeForSearch(name);
+  if (!key) {
+    return undefined;
+  }
+  return exercises.find(
+    (exercise) => normalizeForSearch(exercise.name) === key
+  );
+}
+
+function mergeImportedExerciseWithExisting(
+  item: Exercise_V3,
+  existing?: Exercise_V3
+): Exercise_V3 {
+  if (!existing) {
+    return item;
+  }
+  const videoUrl = existing.videoUrl?.trim();
+  const imageUrl = existing.imageUrl?.trim();
+  return {
+    ...item,
+    id: existing.id,
+    ...(videoUrl ? { videoUrl } : {}),
+    ...(imageUrl ? { imageUrl } : {}),
+  };
+}
+
 export function parsedRowsToExercises2(
   rows: ParsedExercise2Row[],
   existingExercises: Exercise_V3[] = []
 ): Exercise_V3[] {
-  const existingByName = new Map(
-    existingExercises.map((ex) => [ex.name.trim().toLowerCase(), ex])
-  );
-
   return rows.map((row) =>
     exercise2FromImportRow(
       row,
-      existingByName.get(row.name.trim().toLowerCase())
+      findExistingExerciseByName(row.name, existingExercises)
+    )
+  );
+}
+
+export function resolveImportedExercises2(
+  items: Exercise_V3[],
+  existingExercises: Exercise_V3[] = []
+): Exercise_V3[] {
+  return items.map((item) =>
+    mergeImportedExerciseWithExisting(
+      item,
+      findExistingExerciseByName(item.name, existingExercises)
     )
   );
 }

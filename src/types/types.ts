@@ -2,11 +2,12 @@ import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, Exe
 
 type Routine_V3 = {
   id: string
-  name: string
+  name: string 
   age: Age_V3
   level: Level_V3
   place: Place_V3
   period: Period_V3
+  version?: string
 }
 
 type RoutineMapping_V3 = {

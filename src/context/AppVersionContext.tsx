@@ -55,5 +55,10 @@ export function isV2Path(pathname: string): boolean {
 }
 
 export function isV3Path(pathname: string): boolean {
-  return pathname === '/exercises2' || pathname.startsWith('/exercises2/');
+  return (
+    pathname === '/exercises2' ||
+    pathname.startsWith('/exercises2/') ||
+    pathname === '/routines2' ||
+    pathname.startsWith('/routines2/')
+  );
 }

@@ -662,6 +662,10 @@
   color: var(--accent);
 }
 
+.exercises-list-icon-btn--view:hover:not(:disabled) {
+  color: #2563eb;
+}
+
 .exercises-list-icon-btn--remove:hover:not(:disabled) {
   color: #b91c1c;
 }
@@ -2212,4 +2216,293 @@ tbody.blocks-modal-block-group:last-of-type .blocks-modal-block-card {
 .exercises2-values-copy-icon {
   width: 0.875rem;
   height: 0.875rem;
+}
+
+/* Routine V3 detail panel */
+.routine-v3-detail-panel {
+  max-width: none;
+}
+
+.routine-v3-detail-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.routine-v3-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+  margin: 0 0 0 -0.25rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.routine-v3-detail-back svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.routine-v3-detail-back:hover {
+  background: #f3f4f6;
+  color: var(--text-primary);
+}
+
+.routine-v3-detail-meta {
+  margin: 0;
+  padding: 1rem 1.125rem;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+}
+
+.routine-v3-detail-summary {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.routine-v3-detail-days {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.routine-v3-detail-days-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.routine-v3-detail-days-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.routine-v3-detail-days-filter {
+  flex: 1 1 14rem;
+  max-width: 22rem;
+}
+
+.routine-v3-detail-days-filter-input {
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.routine-v3-detail-days-filter-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.routine-v3-detail-days-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.routine-v3-detail-day {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.routine-v3-detail-day.is-expanded {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border-subtle));
+}
+
+.routine-v3-detail-day-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.routine-v3-detail-day-header:hover {
+  background: #f9fafb;
+}
+
+.routine-v3-detail-day-chevron {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+}
+
+.routine-v3-detail-day-chevron.is-expanded {
+  transform: rotate(90deg);
+}
+
+.routine-v3-detail-day-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.routine-v3-detail-day-session {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--accent);
+}
+
+.routine-v3-detail-day-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.routine-v3-detail-day-meta {
+  flex: 1 1 100%;
+  padding-left: 1.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+@media (min-width: 640px) {
+  .routine-v3-detail-day-meta {
+    flex: 0 1 auto;
+    padding-left: 0;
+    margin-left: auto;
+    text-align: right;
+  }
+}
+
+.routine-v3-detail-day-body {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--border-subtle);
+  background: #fafafa;
+}
+
+.routine-v3-detail-tips {
+  padding: 0.75rem 0 0.25rem;
+}
+
+.routine-v3-detail-tips-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.routine-v3-detail-tips-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.routine-v3-detail-block {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.routine-v3-detail-block-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.routine-v3-detail-block-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.routine-v3-detail-block-meta {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.routine-v3-detail-exercises-wrap {
+  overflow-x: auto;
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+}
+
+.routine-v3-detail-exercises-table {
+  width: 100%;
+  font-size: 0.875rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #ffffff;
+  border: 1px solid #9ca3af;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.routine-v3-detail-exercises-table thead th {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid #eef0f2;
+}
+
+.routine-v3-detail-exercises-table tbody tr:nth-child(even) td {
+  background: #fafbfc;
+}
+
+.routine-v3-detail-exercises-table th,
+.routine-v3-detail-exercises-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.routine-v3-detail-exercises-table th:first-child,
+.routine-v3-detail-exercises-table td:first-child {
+  width: 3rem;
+}
+
+.routine-v3-detail-exercises-table th:last-child,
+.routine-v3-detail-exercises-table td:last-child {
+  min-width: 6.5rem;
+  white-space: nowrap;
+}
+
+.routine-v3-detail-unknown-exercise {
+  color: #b45309;
+}
+
+.routine-v3-detail-empty {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-style: italic;
 }
