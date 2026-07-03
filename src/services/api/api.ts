@@ -49,6 +49,28 @@ export async function getAll<T>(
   return parseListBody<T>(await res.json(), segment);
 }
 
+export async function getTrainingBlocksByDayIds<T>(
+  dayIds: string[],
+  auth: boolean = true
+): Promise<T[]> {
+  const ids = dayIds.filter((id) => id);
+  if (ids.length === 0) {
+    return [];
+  }
+  const params = new URLSearchParams();
+  if (ids.length === 1) {
+    params.set("trainingDayId", ids[0]);
+  } else {
+    params.set("trainingDayIds", ids.join(","));
+  }
+  const path = `/public/training-days/training-blocks?${params.toString()}`;
+  const res = await apiFetch(path, auth, { method: "GET" });
+  if (!res.ok) {
+    throw new Error(`Failed to load training blocks (${res.status})`);
+  }
+  return parseListBody<T>(await res.json(), "training-blocks");
+}
+
 export async function save(
   resource: string,
   id: string,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Exercise_V3 } from '../types/types';
@@ -20,6 +20,8 @@ import {
 } from '../types/labels';
 
 const DESCRIPTION_PREVIEW_CHARS = 25;
+
+const PAGE_SIZE = 20;
 
 const EXERCISE_V3_DETAIL_PROPS = [
   'name',
@@ -201,7 +203,24 @@ export function ExercisesV3List({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+  const [page, setPage] = useState(1);
   const columnCount = readOnly ? 6 : 7;
+
+  const totalPages = Math.max(1, Math.ceil(exercises.length / PAGE_SIZE));
+
+  const pageItems = useMemo(() => {
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * PAGE_SIZE;
+    return exercises.slice(start, start + PAGE_SIZE);
+  }, [exercises, page, totalPages]);
+
+  const safePage = Math.min(page, totalPages);
+  const rangeStart = exercises.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(safePage * PAGE_SIZE, exercises.length);
+
+  const showPaginationNav = !dataLoading && exercises.length > 0;
+  const showPrevPage = showPaginationNav && safePage > 1;
+  const showNextPage = showPaginationNav && safePage < totalPages;
 
   const toggleExpanded = (id: string) => {
     setExpandedIds((prev) => {
@@ -216,7 +235,8 @@ export function ExercisesV3List({
   };
 
   return (
-    <div className="exercises-list-table-wrap">
+    <>
+      <div className="exercises-list-table-wrap">
       <table className="exercises-list-table list-data-table exercises2-list-table">
         <thead>
           <tr>
@@ -251,7 +271,7 @@ export function ExercisesV3List({
             </tr>
           ) : null}
           {!dataLoading &&
-            exercises.map((exercise) => {
+            pageItems.map((exercise) => {
               const isExpanded = expandedIds.has(exercise.id);
               return (
                 <React.Fragment key={exercise.id}>
@@ -378,6 +398,46 @@ export function ExercisesV3List({
             })}
         </tbody>
       </table>
-    </div>
+      </div>
+
+      <div className="exercises-list-pagination">
+        <span className="exercises-list-range">
+          {dataLoading
+            ? t('common.loading')
+            : exercises.length === 0
+              ? t('exercises2.noExercises')
+              : t('common.showingRange', {
+                  start: rangeStart,
+                  end: rangeEnd,
+                  total: exercises.length,
+                })}
+        </span>
+        <div className="exercises-list-page-actions">
+          {showPrevPage ? (
+            <button
+              type="button"
+              className="exercises-list-page-btn"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              aria-label={t('common.previousPage')}
+            >
+              {t('common.previous')}
+            </button>
+          ) : null}
+          <span className="exercises-list-page-indicator">
+            {t('common.pageOf', { current: safePage, total: totalPages })}
+          </span>
+          {showNextPage ? (
+            <button
+              type="button"
+              className="exercises-list-page-btn"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              aria-label={t('common.nextPage')}
+            >
+              {t('common.next')}
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </>
   );
 }

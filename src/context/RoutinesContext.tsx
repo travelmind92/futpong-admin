@@ -8,7 +8,14 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
-import { bulkRemove, bulkSave, getAll, remove, save } from '../services/api/api';
+import {
+  bulkRemove,
+  bulkSave,
+  getAll,
+  getTrainingBlocksByDayIds,
+  remove,
+  save,
+} from '../services/api/api';
 import {
   normalizeRoutine,
   normalizeRoutineMapping,
@@ -42,6 +49,8 @@ export type RoutinesContextValue = {
   removeRoutine: (routineId: string) => Promise<void>;
   upsertRoutineMapping: (mapping: RoutineMapping) => Promise<void>;
   removeRoutineMapping: (mappingId: string) => Promise<void>;
+  trainingBlocksLoading: boolean;
+  loadTrainingBlocksForDays: (dayIds: string[]) => Promise<TrainingBlock[]>;
   dataLoading: boolean;
   dataError: string | null;
 };
@@ -61,20 +70,16 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
   const [routineMappings, setRoutineMappings] = useState<RoutineMapping[]>([]);
   const [trainingDays, setTrainingDays] = useState<TrainingDay[]>([]);
   const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([]);
+  const [trainingBlocksLoading, setTrainingBlocksLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
 
   const trainingDaysRef = useRef(trainingDays);
-  const trainingBlocksRef = useRef(trainingBlocks);
   const routineMappingsRef = useRef(routineMappings);
 
   useEffect(() => {
     trainingDaysRef.current = trainingDays;
   }, [trainingDays]);
-
-  useEffect(() => {
-    trainingBlocksRef.current = trainingBlocks;
-  }, [trainingBlocks]);
 
   useEffect(() => {
     routineMappingsRef.current = routineMappings;
@@ -86,11 +91,10 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
       setDataLoading(true);
       setDataError(null);
       try {
-        const [rawRoutines, rawMappings, rawDays, rawBlocks] = await Promise.all([
+        const [rawRoutines, rawMappings, rawDays] = await Promise.all([
           getAll<Record<string, unknown>>('routines', true),
           getAll<Record<string, unknown>>('routine-mappings', true),
           getAll<Record<string, unknown>>('training-days', true),
-          getAll<Record<string, unknown>>('training-blocks', true),
         ]);
         if (cancelled) return;
         const rt = rawRoutines
@@ -122,16 +126,6 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
           return a.day - b.day;
         });
         setTrainingDays(td);
-
-        const tb = rawBlocks
-          .map((item) => normalizeTrainingBlock(item))
-          .filter((x): x is TrainingBlock => x !== null);
-        tb.sort((a, b) => {
-          const byDay = a.trainingDayId.localeCompare(b.trainingDayId);
-          if (byDay !== 0) return byDay;
-          return a.index - b.index;
-        });
-        setTrainingBlocks(tb);
       } catch (e) {
         if (!cancelled) {
           setDataError(
@@ -148,6 +142,51 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, []);
+
+  const fetchTrainingBlocksForDays = useCallback(
+    async (dayIds: string[]): Promise<TrainingBlock[]> => {
+      const raw = await getTrainingBlocksByDayIds<Record<string, unknown>>(
+        dayIds
+      );
+      const blocks = raw
+        .map((item) => normalizeTrainingBlock(item))
+        .filter((x): x is TrainingBlock => x !== null);
+      blocks.sort((a, b) => {
+        const byDay = a.trainingDayId.localeCompare(b.trainingDayId);
+        if (byDay !== 0) return byDay;
+        return a.index - b.index;
+      });
+      return blocks;
+    },
+    []
+  );
+
+  const loadTrainingBlocksForDays = useCallback(
+    async (dayIds: string[]): Promise<TrainingBlock[]> => {
+      const relevant = dayIds.filter((dayId) => dayId);
+      if (relevant.length === 0) {
+        return [];
+      }
+      setTrainingBlocksLoading(true);
+      try {
+        const blocks = await fetchTrainingBlocksForDays(relevant);
+        const dayIdSet = new Set(relevant);
+        setTrainingBlocks((prev) => [
+          ...prev.filter((block) => !dayIdSet.has(block.trainingDayId)),
+          ...blocks,
+        ]);
+        return blocks;
+      } catch (e) {
+        const msg =
+          e instanceof Error ? e.message : translate('errors.loadRoutines');
+        setDataError(msg);
+        throw e instanceof Error ? e : new Error(msg);
+      } finally {
+        setTrainingBlocksLoading(false);
+      }
+    },
+    [fetchTrainingBlocksForDays]
+  );
 
   const addRoutine = useCallback(
     async (routine: Routine, days: TrainingDay[], blocks: TrainingBlock[]) => {
@@ -182,9 +221,9 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         .map((td) => td.id);
       const newDayIdSet = new Set(days.map((d) => d.id));
       const removedDayIds = oldDayIds.filter((id) => !newDayIdSet.has(id));
-      const oldBlockIds = trainingBlocksRef.current
-        .filter((tb) => oldDayIds.includes(tb.trainingDayId))
-        .map((tb) => tb.id);
+      const oldBlockIds = (await fetchTrainingBlocksForDays(oldDayIds)).map(
+        (tb) => tb.id
+      );
 
       try {
         await bulkRemove('training-blocks', oldBlockIds);
@@ -218,7 +257,7 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         ...prev.filter((tb) => !oldDayIds.includes(tb.trainingDayId)),
       ]);
     },
-    []
+    [fetchTrainingBlocksForDays]
   );
 
   const removeRoutine = useCallback(
@@ -226,9 +265,9 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
       const dayIds = trainingDaysRef.current
         .filter((td) => td.routineId === routineId)
         .map((td) => td.id);
-      const blockIds = trainingBlocksRef.current
-        .filter((tb) => dayIds.includes(tb.trainingDayId))
-        .map((tb) => tb.id);
+      const blockIds = (await fetchTrainingBlocksForDays(dayIds)).map(
+        (tb) => tb.id
+      );
       const mappingIds = routineMappingsRef.current
         .filter((m) => m.routineId === routineId)
         .map((m) => m.id);
@@ -264,7 +303,7 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
         return prev.filter((td) => td.routineId !== routineId);
       });
     },
-    []
+    [fetchTrainingBlocksForDays]
   );
 
   const upsertRoutineMapping = useCallback(async (mapping: RoutineMapping) => {
@@ -319,6 +358,8 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
       removeRoutine,
       upsertRoutineMapping,
       removeRoutineMapping,
+      trainingBlocksLoading,
+      loadTrainingBlocksForDays,
       dataLoading,
       dataError,
     }),
@@ -332,6 +373,8 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
       removeRoutine,
       upsertRoutineMapping,
       removeRoutineMapping,
+      trainingBlocksLoading,
+      loadTrainingBlocksForDays,
       dataLoading,
       dataError,
     ]

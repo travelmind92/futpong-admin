@@ -127,7 +127,7 @@ export function RoutineForm() {
     updateRoutine,
     routines,
     trainingDays: allTrainingDays,
-    trainingBlocks: allTrainingBlocks,
+    loadTrainingBlocksForDays,
     dataLoading: routinesDataLoading,
   } = useOutletContext<RoutinesContextValue>();
   const { exercises: exerciseCatalog } = useExercises();
@@ -158,6 +158,7 @@ export function RoutineForm() {
   const [blocksByDayRowId, setBlocksByDayRowId] = useState<
     Record<string, LocalTrainingBlock[]>
   >({});
+  const [editBlocksLoading, setEditBlocksLoading] = useState(false);
   const [blocksModalDayRowId, setBlocksModalDayRowId] = useState<
     string | null
   >(null);
@@ -216,18 +217,42 @@ export function RoutineForm() {
     setRoutineNameDuplicateError('');
     setRoutineBlocksSubmitError('');
     setDayNumberErrors({});
-    const blocksByDay: Record<string, LocalTrainingBlock[]> = {};
-    for (const row of loaded) {
-      const forDay = allTrainingBlocks.filter(
-        (tb) => tb.trainingDayId === row.id
-      );
-      blocksByDay[row.id] = hydrateBlocksForModal(
-        trainingBlocksToLocal(forDay)
-      );
-    }
-    setBlocksByDayRowId(blocksByDay);
+    setBlocksByDayRowId({});
     setBlocksModalDayRowId(null);
     setBlocksModalDraft([]);
+
+    let cancelled = false;
+    const dayIds = loaded.map((row) => row.id);
+    if (dayIds.length === 0) {
+      setEditBlocksLoading(false);
+      return;
+    }
+    setEditBlocksLoading(true);
+    void (async () => {
+      try {
+        const blocks = await loadTrainingBlocksForDays(dayIds);
+        if (cancelled) {
+          return;
+        }
+        const blocksByDay: Record<string, LocalTrainingBlock[]> = {};
+        for (const row of loaded) {
+          const forDay = blocks.filter((tb) => tb.trainingDayId === row.id);
+          blocksByDay[row.id] = hydrateBlocksForModal(
+            trainingBlocksToLocal(forDay)
+          );
+        }
+        setBlocksByDayRowId(blocksByDay);
+      } catch {
+        // Error banner is set on the routines provider
+      } finally {
+        if (!cancelled) {
+          setEditBlocksLoading(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
     // Re-run when async routine-related data finishes loading; omit day/block arrays from deps to avoid resetting the form when other routines change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, editRoutineId, navigate, routinesDataLoading]);
@@ -716,10 +741,18 @@ export function RoutineForm() {
                           type="button"
                           className="routine-form-days-blocks-btn"
                           onClick={() => openBlocksModal(row.id)}
+                          disabled={editBlocksLoading}
+                          title={
+                            editBlocksLoading
+                              ? t('routines.loadingBlocks')
+                              : undefined
+                          }
                         >
-                          {t('routines.blocksCount', {
-                            count: blocksByDayRowId[row.id]?.length ?? 0,
-                          })}
+                          {editBlocksLoading
+                            ? t('routines.loadingBlocks')
+                            : t('routines.blocksCount', {
+                                count: blocksByDayRowId[row.id]?.length ?? 0,
+                              })}
                         </button>
                       </td>
                       <td className="exercises-list-actions-cell">
@@ -876,13 +909,17 @@ export function RoutineForm() {
           <button
             type="submit"
             className="exercise-form-submit"
-            disabled={hasDraftDayRow || routineSaveInProgress}
+            disabled={
+              hasDraftDayRow || routineSaveInProgress || editBlocksLoading
+            }
             title={
               hasDraftDayRow
                 ? t('routines.saveAllDaysTitle')
-                : routineSaveInProgress
-                  ? t('common.saving')
-                  : undefined
+                : editBlocksLoading
+                  ? t('routines.loadingBlocks')
+                  : routineSaveInProgress
+                    ? t('common.saving')
+                    : undefined
             }
           >
             {routineSaveInProgress

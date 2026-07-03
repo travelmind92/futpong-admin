@@ -14,6 +14,8 @@ export function RoutinesLayout() {
     removeRoutine,
     upsertRoutineMapping,
     removeRoutineMapping,
+    trainingBlocksLoading,
+    loadTrainingBlocksForDays,
     dataLoading,
     dataError,
   } = useRoutines();
@@ -29,6 +31,8 @@ export function RoutinesLayout() {
       removeRoutine,
       upsertRoutineMapping,
       removeRoutineMapping,
+      trainingBlocksLoading,
+      loadTrainingBlocksForDays,
       dataLoading,
       dataError,
     }),
@@ -42,6 +46,8 @@ export function RoutinesLayout() {
       removeRoutine,
       upsertRoutineMapping,
       removeRoutineMapping,
+      trainingBlocksLoading,
+      loadTrainingBlocksForDays,
       dataLoading,
       dataError,
     ]

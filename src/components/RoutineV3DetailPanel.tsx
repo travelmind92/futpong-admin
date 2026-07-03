@@ -32,6 +32,7 @@ type DayAccordionProps = {
   blocks: TrainingBlock_V3[];
   exerciseById: Map<string, Exercise_V3>;
   expanded: boolean;
+  loading?: boolean;
   onToggle: () => void;
 };
 
@@ -40,6 +41,7 @@ function DayAccordion({
   blocks,
   exerciseById,
   expanded,
+  loading = false,
   onToggle,
 }: DayAccordionProps) {
   const { t } = useTranslation();
@@ -47,22 +49,37 @@ function DayAccordion({
     (sum, block) => sum + block.exercises.length,
     0
   );
+  const isExpanded = expanded && !loading;
 
   return (
-    <div className={`routine-v3-detail-day${expanded ? ' is-expanded' : ''}`}>
+    <div
+      className={`routine-v3-detail-day${isExpanded ? ' is-expanded' : ''}${
+        loading ? ' is-loading' : ''
+      }`}
+    >
       <button
         type="button"
         className="routine-v3-detail-day-header"
-        aria-expanded={expanded}
+        aria-expanded={isExpanded}
+        aria-busy={loading}
+        disabled={loading}
         onClick={onToggle}
       >
-        <svg
-          className={`routine-v3-detail-day-chevron${expanded ? ' is-expanded' : ''}`}
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-        </svg>
+        {loading ? (
+          <span
+            className="routine-v3-detail-day-spinner"
+            role="status"
+            aria-hidden
+          />
+        ) : (
+          <svg
+            className={`routine-v3-detail-day-chevron${isExpanded ? ' is-expanded' : ''}`}
+            viewBox="0 0 24 24"
+            aria-hidden
+          >
+            <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+          </svg>
+        )}
         <span className="routine-v3-detail-day-title">
           <span className="routine-v3-detail-day-session">
             {t('routines2.sessionNumber', { session: day.session })}
@@ -78,13 +95,21 @@ function DayAccordion({
             </>
           ) : null}
           {' · '}
-          {t('routines.blocksCount', { count: blocks.length })}
-          {' · '}
-          {t('routines2.exercisesCount', { count: exerciseCount })}
+          {loading ? (
+            <span className="routine-v3-detail-day-loading-label">
+              {t('routines2.loadingBlocks')}
+            </span>
+          ) : (
+            <>
+              {t('routines.blocksCount', { count: blocks.length })}
+              {' · '}
+              {t('routines2.exercisesCount', { count: exerciseCount })}
+            </>
+          )}
         </span>
       </button>
 
-      {expanded ? (
+      {isExpanded ? (
         <div className="routine-v3-detail-day-body">
           {day.tips && day.tips.length > 0 ? (
             <div className="routine-v3-detail-tips">
@@ -187,6 +212,8 @@ export function RoutineV3DetailPanel() {
     exercises,
     trainingDays,
     trainingBlocks,
+    trainingBlocksLoading,
+    loadTrainingBlocksForDays,
     dataLoading,
     dataError,
   } = useOutletContext<RoutinesV3ContextValue>();
@@ -222,6 +249,22 @@ export function RoutineV3DetailPanel() {
         .sort((a, b) => a.session - b.session),
     [trainingDays, id]
   );
+
+  const dayIdsKey = useMemo(
+    () =>
+      daysForRoutine
+        .map((day) => day.id)
+        .sort()
+        .join(','),
+    [daysForRoutine]
+  );
+
+  useEffect(() => {
+    if (dataLoading || !dayIdsKey) {
+      return;
+    }
+    void loadTrainingBlocksForDays(dayIdsKey.split(','));
+  }, [dayIdsKey, dataLoading, loadTrainingBlocksForDays]);
 
   const blocksByDayId = useMemo(() => {
     const dayIds = new Set(daysForRoutine.map((day) => day.id));
@@ -389,6 +432,7 @@ export function RoutineV3DetailPanel() {
                     blocks={blocksByDayId.get(day.id) ?? []}
                     exerciseById={exerciseById}
                     expanded={expandedDayIds.has(day.id)}
+                    loading={trainingBlocksLoading}
                     onToggle={() => toggleDay(day.id)}
                   />
                 ))}
