@@ -65,13 +65,13 @@ const TipCategoryLabel: Record<TipCategory, string> = {
 };
 
 const BlockTypeLabel: Record<BlockType_V3, string> = {
-  GeneralActivation: 'Activación general',
+  GeneralActivation: 'Movilidad',
   Core: 'Core',
   PhysicalActivation: 'Activación física',
   MainBlock: 'Bloque principal',
   Technical: 'Técnico',
   Challenge: 'Desafío',
-  CoolDown: 'Enfriamiento',
+  CoolDown: 'Vuelta a la Calma',
   InjuryPrevention: 'Prevención de lesiones',
 };
 
@@ -84,7 +84,7 @@ const ExerciseCategoryLabel: Record<ExerciseCategory_V3, string> = {
   SpeedAgility: 'Velocidad y agilidad',
   TechnicalFootball: 'Técnico de fútbol',
   InjuryPrevention: 'Prevención de lesiones',
-  CoolDown: 'Enfriamiento',
+  CoolDown: 'Vuelta a la Calma',
   TechnicalChallenge: 'Desafío técnico',
 };
 
