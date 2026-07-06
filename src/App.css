@@ -2502,6 +2502,28 @@ tbody.blocks-modal-block-group:last-of-type .blocks-modal-block-card {
   color: var(--text-primary);
 }
 
+.routine-v3-detail-tip {
+  margin-bottom: 0.35rem;
+}
+
+.routine-v3-detail-tip-category {
+  display: inline-block;
+  margin-right: 0.5rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+}
+
+.routine-v3-detail-tip-text {
+  vertical-align: middle;
+}
+
 .routine-v3-detail-block {
   margin-top: 0.75rem;
   padding: 0.75rem;

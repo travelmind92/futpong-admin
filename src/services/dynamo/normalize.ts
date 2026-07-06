@@ -23,6 +23,7 @@ import {
   Place_V3,
   RepType_V3,
   Skill_V3,
+  TipCategory,
   WeightType_V3,
 } from '../../types/enums';
 import {
@@ -30,6 +31,7 @@ import {
   Exercise_V3,
   RoutineMapping_V3,
   Routine_V3,
+  Tip,
   TrainingBlock_V3,
   TrainingDay_V3,
 } from '../../types/types';
@@ -152,7 +154,9 @@ export function normalizeTrainingDayV3(
       : undefined;
   const tipsRaw = raw.tips;
   const tips = Array.isArray(tipsRaw)
-    ? tipsRaw.filter((tip): tip is string => typeof tip === 'string')
+    ? tipsRaw
+        .map(normalizeTipV3)
+        .filter((tip): tip is Tip => tip !== null)
     : undefined;
 
   return {
@@ -163,6 +167,21 @@ export function normalizeTrainingDayV3(
     ...(matchday !== undefined ? { matchday } : {}),
     minutes: minutes >= 0 ? minutes : 0,
     ...(tips !== undefined && tips.length > 0 ? { tips } : {}),
+  };
+}
+
+function normalizeTipV3(raw: unknown): Tip | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+  const o = raw as Record<string, unknown>;
+  const text = typeof o.text === 'string' ? o.text.trim() : '';
+  if (!text || !isEnumValue(TipCategory, o.category)) {
+    return null;
+  }
+  return {
+    category: o.category,
+    text,
   };
 }
 

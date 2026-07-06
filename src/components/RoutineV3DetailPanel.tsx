@@ -12,6 +12,7 @@ import {
   LevelLabel,
   PeriodLabel,
   PlaceLabel,
+  TipCategoryLabel,
 } from '../types/labels';
 import {
   Exercise_V3,
@@ -118,7 +119,17 @@ function DayAccordion({
               </span>
               <ul className="routine-v3-detail-tips-list">
                 {day.tips.map((tip, index) => (
-                  <li key={`${day.id}-tip-${index}`}>{tip}</li>
+                  <li
+                    key={`${day.id}-tip-${index}`}
+                    className="routine-v3-detail-tip"
+                  >
+                    <span className="routine-v3-detail-tip-category">
+                      {TipCategoryLabel[tip.category]}
+                    </span>
+                    <span className="routine-v3-detail-tip-text">
+                      {tip.text}
+                    </span>
+                  </li>
                 ))}
               </ul>
             </div>

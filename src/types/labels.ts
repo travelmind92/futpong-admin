@@ -1,4 +1,4 @@
-import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Impact_V3, Level_V3, Period_V3, Place_V3, RepType_V3, Skill_V3, WeightType_V3 } from "./enums";
+import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Impact_V3, Level_V3, Period_V3, Place_V3, RepType_V3, Skill_V3, TipCategory, WeightType_V3 } from "./enums";
 import { Exercise_V3 } from "./types";
 
 const ExercisePropLabels: Record<keyof Exercise_V3, string> = {
@@ -53,6 +53,15 @@ const PlaceLabel: Record<Place_V3, string> = {
 const PeriodLabel: Record<Period_V3, string> = {
   Competition: 'Competencia',
   Preseason: 'Pretemporada',
+};
+
+const TipCategoryLabel: Record<TipCategory, string> = {
+  Psychology: 'Psicología',
+  Nutrition: 'Nutrición',
+  Sleep: 'Sueño',
+  Injuries: 'Lesiones',
+  Planning: 'Planificación',
+  Tactics: 'Táctica',
 };
 
 const BlockTypeLabel: Record<BlockType_V3, string> = {
@@ -126,4 +135,4 @@ const DifficultyLabel: Record<Difficulty_V3, string> = {
   High: 'Alta',
 };
 
-export { RepTypeLabel, AgeLabel, LevelLabel, PlaceLabel, PeriodLabel, BlockTypeLabel, ExerciseCategoryLabel, SkillLabel, ChallengeLevelLabel, ElementLabel, WeightTypeLabel, ImpactLabel, DifficultyLabel, ExercisePropLabels };
+export { RepTypeLabel, AgeLabel, LevelLabel, PlaceLabel, PeriodLabel, BlockTypeLabel, TipCategoryLabel, ExerciseCategoryLabel, SkillLabel, ChallengeLevelLabel, ElementLabel, WeightTypeLabel, ImpactLabel, DifficultyLabel, ExercisePropLabels };
