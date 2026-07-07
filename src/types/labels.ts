@@ -106,6 +106,8 @@ const ElementLabel: Record<Element_V3, string> = {
   Ball: 'Pelota',
   Dumbbells: 'Mancuernas',
   Bar: 'Barra',
+  Plates: 'Discos',
+  Kettlebells: 'Pesas rusas',
   ElasticBand: 'Banda elástica',
   TRX: 'TRX',
   Fitball: 'Fitball',

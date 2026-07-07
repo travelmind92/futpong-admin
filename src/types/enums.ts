@@ -75,6 +75,8 @@ enum Element_V3 {
   BALL = 'Ball',
   DUMBBELLS = 'Dumbbells', // Mancuernas
   BAR = 'Bar',
+  PLATES = 'Plates', // Discos
+  KETTLEBELLS = 'Kettlebells', // Pesas rusas
   ELASTIC_BAND = 'ElasticBand',
   TRX = 'TRX',
   FITBALL = 'Fitball',
