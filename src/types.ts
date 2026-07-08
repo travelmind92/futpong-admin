@@ -52,7 +52,7 @@ export type TrainingBlock = {
   trainingDayId: string
   index: number
   name: string
-  series: string
+  series: number
   exercises: ExerciseItem[]
 }
 

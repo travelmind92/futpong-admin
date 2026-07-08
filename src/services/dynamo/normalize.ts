@@ -391,7 +391,7 @@ export function normalizeTrainingBlock(raw: Record<string, unknown>): TrainingBl
     trainingDayId,
     index: num(raw.index, 0),
     name: typeof raw.name === 'string' ? raw.name : '',
-    series: typeof raw.series === 'string' ? raw.series : '',
+    series: num(raw.series, 1),
     exercises,
   };
 }

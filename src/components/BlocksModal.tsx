@@ -27,9 +27,23 @@ export type LocalTrainingBlock = {
   /** 1-based order in the list (derived from row order). */
   index: number;
   name: string;
-  series: string;
+  /** Number of series; empty string while the field is cleared during editing. */
+  series: number | '';
   exercises: LocalExerciseItem[];
 };
+
+/** Parses the series input, keeping only positive integers (empty when cleared/invalid). */
+function parseSeriesInput(raw: string): number | '' {
+  const v = raw.trim();
+  if (v === '' || !/^\d+$/.test(v)) {
+    return '';
+  }
+  const n = parseInt(v, 10);
+  if (!Number.isFinite(n) || n < 1) {
+    return '';
+  }
+  return n;
+}
 
 function withBlockIndices(list: LocalTrainingBlock[]): LocalTrainingBlock[] {
   return list.map((b, i) => ({
@@ -295,7 +309,7 @@ export function BlocksModal({
   const cannotSaveBlocks = blocks.some(
     (b) =>
       !(b.name ?? '').trim() ||
-      !(b.series ?? '').trim() ||
+      typeof b.series !== 'number' ||
       (b.exercises ?? []).some(
         (ex) => !isLocalExerciseRowComplete(ex, exerciseOptions)
       )
@@ -315,7 +329,7 @@ export function BlocksModal({
     onChange(blocks.map((b, i) => (i === index ? { ...b, name } : b)));
   };
 
-  const updateSeries = (index: number, series: string) => {
+  const updateSeries = (index: number, series: number | '') => {
     onChange(blocks.map((b, i) => (i === index ? { ...b, series } : b)));
   };
 
@@ -550,10 +564,14 @@ export function BlocksModal({
                               <input
                                 id={`block-series-${block.id}`}
                                 type="text"
+                                inputMode="numeric"
                                 className="blocks-modal-field-input"
-                                value={block.series}
+                                value={block.series === '' ? '' : String(block.series)}
                                 onChange={(e) =>
-                                  updateSeries(index, e.target.value)
+                                  updateSeries(
+                                    index,
+                                    parseSeriesInput(e.target.value)
+                                  )
                                 }
                               />
                             </div>
@@ -768,7 +786,7 @@ export function hydrateBlocksForModal(
     ...b,
     index: i + 1,
     name: b.name ?? '',
-    series: b.series ?? '',
+    series: typeof b.series === 'number' ? b.series : '',
     exercises: withExerciseIndices(
       (b.exercises ?? []).map((ex) => ({
         ...ex,

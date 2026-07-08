@@ -1,10 +1,10 @@
 NOMBRE,PERFIL,LUGAR,PERIODO,DIA,BLOQUE_N,BLOQUE_NOMBRE,BLOQUE_SERIES,EJERCICIO_N,EJERCICIO_NOMBRE,EJERCICIO_REPETICIONES
-MiRutina,Elite,Gimnasio,Competencia,1,1,Movilidad,1 serie,1,Tobillo,8 c/lado
+MiRutina,Elite,Gimnasio,Competencia,1,1,Movilidad,1,1,Tobillo,8 c/lado
 ,,,,1,1,,,2,Cadera 6 Apoyos,8 c/lado
-,,,,1,2,Activación,2 series,1,Plancha Baja,30''
+,,,,1,2,Activación,2,1,Plancha Baja,30''
 ,,,,1,2,,,2,Remo Renegado,6 c/lado
 ,,,,1,2,,,3,Pistones,6 c/lado
-,,,,2,1,Movilidad,1 serie,1,Caidas,6
+,,,,2,1,Movilidad,1,1,Caidas,6
 ,,,,2,1,,,2,Tijera Corta,6 c/lado
-,,,,2,2,Activación,2 series,1,Sentadillas,5
+,,,,2,2,Activación,2,1,Sentadillas,5
 ,,,,2,2,,,2,Sentadillas + Salto,5

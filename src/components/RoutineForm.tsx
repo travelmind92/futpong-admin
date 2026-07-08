@@ -449,7 +449,11 @@ export function RoutineForm() {
     for (const row of savedRows) {
       const list = effectiveBlocksForDay(row.id);
       for (const b of list) {
-        if (isBlank(b.name) || isBlank(b.series)) {
+        const seriesInvalid =
+          typeof b.series !== 'number' ||
+          !Number.isFinite(b.series) ||
+          b.series < 1;
+        if (isBlank(b.name) || seriesInvalid) {
           const d = typeof row.day === 'number' ? row.day : '—';
           setRoutineBlocksSubmitError(
             t('routines.blocksIncomplete', { day: d })
@@ -501,7 +505,7 @@ export function RoutineForm() {
           trainingDayId: dayId,
           index: b.index,
           name: b.name.trim(),
-          series: b.series.trim(),
+          series: b.series === '' ? 1 : b.series,
           exercises: (b.exercises ?? []).map((ex) => ({
             index: ex.index,
             exerciseId: ex.exerciseId.trim(),

@@ -69,7 +69,7 @@ type BlockBuilder = {
   trainingDayId: string;
   index: number;
   name: string;
-  series: string;
+  series: number;
   exercises: ExerciseItem[];
 };
 
@@ -269,7 +269,8 @@ export function parseRoutinesCsv(
       if (!blockNameCell) {
         return { ok: false, error: 'missingBlockName' };
       }
-      if (!blockSeriesCell) {
+      const blockSeries = parsePositiveInt(blockSeriesCell);
+      if (blockSeries == null) {
         return { ok: false, error: 'missingBlockSeries' };
       }
       blockBuilder = {
@@ -277,7 +278,7 @@ export function parseRoutinesCsv(
         trainingDayId: dayBuilder.id,
         index: blockIndex,
         name: blockNameCell,
-        series: blockSeriesCell,
+        series: blockSeries,
         exercises: [],
       };
       dayBuilder.blocks.set(blockIndex, blockBuilder);
@@ -286,7 +287,11 @@ export function parseRoutinesCsv(
         blockBuilder.name = blockNameCell;
       }
       if (blockSeriesCell) {
-        blockBuilder.series = blockSeriesCell;
+        const blockSeries = parsePositiveInt(blockSeriesCell);
+        if (blockSeries == null) {
+          return { ok: false, error: 'missingBlockSeries' };
+        }
+        blockBuilder.series = blockSeries;
       }
     }
 
@@ -342,7 +347,7 @@ export function parseRoutinesCsv(
       if (!blockBuilder.name.trim()) {
         return { ok: false, error: 'missingBlockName' };
       }
-      if (!blockBuilder.series.trim()) {
+      if (blockBuilder.series < 1) {
         return { ok: false, error: 'missingBlockSeries' };
       }
       if (blockBuilder.exercises.length === 0) {
@@ -377,7 +382,7 @@ export function parseRoutinesCsv(
         trainingDayId: blockBuilder.trainingDayId,
         index: blockBuilder.index,
         name: blockBuilder.name.trim(),
-        series: blockBuilder.series.trim(),
+        series: blockBuilder.series,
         exercises: blockBuilder.exercises,
       });
     }
