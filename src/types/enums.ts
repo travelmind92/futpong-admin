@@ -115,6 +115,25 @@ enum TipCategory {
   TACTICS = 'Tactics'
 }
 
+enum Position {
+  GOALKEEPER = 'Goalkeeper',
+  CENTER_BACK = 'CenterBack',
+  FULL_BACK = 'FullBack',
+  DEFENSIVE_MIDFIELDER = 'DefensiveMidfielder',
+  ATTACKING_MIDFIELDER = 'AttackingMidfielder',
+  WINGER = 'Winger',
+  STRIKER = 'Striker'
+}
+
+enum Focus {
+  GENERAL = 'General',
+  STRENGTH = 'Strength',
+  EXPLOSIVENESS = 'Explosiveness',
+  ENDURANCE = 'Endurance',
+  SPEED_AGILITY = 'SpeedAgility',
+  STABILITY_PREVENTION = 'StabilityPrevention'
+}
+
 export {
   Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Gender_V3, Impact_V3, Level_V3,
   Period_V3,
@@ -122,5 +141,7 @@ export {
   RepType_V3,
   Skill_V3,
   WeightType_V3,
-  TipCategory
+  TipCategory,
+  Position,
+  Focus
 };

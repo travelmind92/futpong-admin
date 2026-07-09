@@ -1,4 +1,4 @@
-import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Impact_V3, Level_V3, Period_V3, Place_V3, RepType_V3, Skill_V3, TipCategory, WeightType_V3 } from "./enums";
+import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Focus, Impact_V3, Level_V3, Period_V3, Place_V3, Position, RepType_V3, Skill_V3, TipCategory, WeightType_V3 } from "./enums";
 import { Exercise_V3 } from "./types";
 
 const ExercisePropLabels: Record<keyof Exercise_V3, string> = {
@@ -137,4 +137,23 @@ const DifficultyLabel: Record<Difficulty_V3, string> = {
   High: 'Alta',
 };
 
-export { RepTypeLabel, AgeLabel, LevelLabel, PlaceLabel, PeriodLabel, BlockTypeLabel, TipCategoryLabel, ExerciseCategoryLabel, SkillLabel, ChallengeLevelLabel, ElementLabel, WeightTypeLabel, ImpactLabel, DifficultyLabel, ExercisePropLabels };
+const PositionLabel: Record<Position, string> = {
+  Goalkeeper: 'Arquero',
+  CenterBack: 'Defensor Central',
+  FullBack: 'Defensor Lateral',
+  DefensiveMidfielder: 'Mediocampista Defensivo',
+  AttackingMidfielder: 'Mediocampista Ofensivo',
+  Winger: 'Extremo',
+  Striker: 'Delantero',
+};
+
+const FocusLabel: Record<Focus, string> = {
+  General: 'General',
+  Strength: 'Fuerza',
+  Explosiveness: 'Explosividad',
+  Endurance: 'Resistencia',
+  SpeedAgility: 'Velocidad y agilidad',
+  StabilityPrevention: 'Estabilidad y Prevención',
+};
+
+export { RepTypeLabel, AgeLabel, LevelLabel, PlaceLabel, PeriodLabel, BlockTypeLabel, TipCategoryLabel, ExerciseCategoryLabel, SkillLabel, ChallengeLevelLabel, ElementLabel, WeightTypeLabel, ImpactLabel, DifficultyLabel, ExercisePropLabels, PositionLabel, FocusLabel };
