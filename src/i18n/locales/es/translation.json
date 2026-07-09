@@ -150,6 +150,8 @@
     "optionalEmpty": "—",
     "validationAges": "Seleccioná al menos una edad.",
     "validationPlaces": "Seleccioná al menos un lugar.",
+    "validationBlockTypes": "Seleccioná al menos un tipo de bloque.",
+    "validationCategories": "Seleccioná al menos una categoría.",
     "import": "Importar",
     "importModalTitle": "Importar ejercicios",
     "importValidValuesIntro": "Valores válidos para columnas con opciones (etiquetas en español):",
@@ -165,7 +167,7 @@
     "templateDownloadFailed": "No se pudo descargar el archivo de plantilla.",
     "importErrors": {
       "emptyFile": "El archivo CSV está vacío.",
-      "invalidHeaders": "Encabezados inválidos. Se esperaba: NOMBRE;DESCRIPCION;TIPO_REPETICION;EDADES;NIVEL;LUGARES;PERIODO;TIPO_BLOQUE;CATEGORIA;HABILIDAD;NIVEL_DESAFIO;MUSCULO_PRINCIPAL;ELEMENTOS;TIPO_PESO;IMPACTO;DIFICULTAD;GRUPO_SUSTITUCION",
+      "invalidHeaders": "Encabezados inválidos. Se esperaba: NOMBRE;DESCRIPCION;TIPO_REPETICION;EDADES;NIVEL;LUGARES;PERIODOS;TIPOS_BLOQUE;CATEGORIAS;HABILIDADES;NIVEL_DESAFIO;MUSCULO_PRINCIPAL;ELEMENTOS;TIPO_PESO;IMPACTO;DIFICULTAD;GRUPO_SUSTITUCION",
       "invalidRow": "Una o más filas tienen un número incorrecto de columnas.",
       "missingName": "Cada fila debe tener un nombre (NOMBRE).",
       "missingDescription": "Cada fila debe tener una descripción (DESCRIPCION).",

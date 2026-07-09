@@ -51,10 +51,10 @@ export const EXERCISE_2_IMPORT_COLUMNS: ImportProp[] = [
   'ages',
   'level',
   'places',
-  'period',
-  'blockType',
-  'category',
-  'skill',
+  'periods',
+  'blockTypes',
+  'categories',
+  'skills',
   'challengeLevel',
   'mainMuscle',
   'elements',
@@ -211,13 +211,13 @@ function parseRow(
     return { ok: false, error: 'invalidPlaces' };
   }
 
-  const blockType = parseEnum(BLOCK_TYPE_LOOKUP, cellFor('blockType'));
-  if (!blockType) {
+  const blockTypes = parseEnumArray(BLOCK_TYPE_LOOKUP, cellFor('blockTypes'));
+  if (!blockTypes.ok || blockTypes.values.length === 0) {
     return { ok: false, error: 'invalidBlockType' };
   }
 
-  const category = parseEnum(CATEGORY_LOOKUP, cellFor('category'));
-  if (!category) {
+  const categories = parseEnumArray(CATEGORY_LOOKUP, cellFor('categories'));
+  if (!categories.ok || categories.values.length === 0) {
     return { ok: false, error: 'invalidCategory' };
   }
 
@@ -228,26 +228,30 @@ function parseRow(
     ages: ages.values,
     level,
     places: places.values,
-    blockType,
-    category,
+    blockTypes: blockTypes.values,
+    categories: categories.values,
   };
 
-  const periodRaw = cellFor('period');
-  if (periodRaw) {
-    const period = parseEnum(PERIOD_LOOKUP, periodRaw);
-    if (!period) {
+  const periodsRaw = cellFor('periods');
+  if (periodsRaw) {
+    const periods = parseEnumArray(PERIOD_LOOKUP, periodsRaw);
+    if (!periods.ok) {
       return { ok: false, error: 'invalidPeriod' };
     }
-    row.period = period;
+    if (periods.values.length > 0) {
+      row.periods = periods.values;
+    }
   }
 
-  const skillRaw = cellFor('skill');
-  if (skillRaw) {
-    const skill = parseEnum(SKILL_LOOKUP, skillRaw);
-    if (!skill) {
+  const skillsRaw = cellFor('skills');
+  if (skillsRaw) {
+    const skills = parseEnumArray(SKILL_LOOKUP, skillsRaw);
+    if (!skills.ok) {
       return { ok: false, error: 'invalidSkill' };
     }
-    row.skill = skill;
+    if (skills.values.length > 0) {
+      row.skills = skills.values;
+    }
   }
 
   const challengeLevelRaw = cellFor('challengeLevel');

@@ -30,10 +30,10 @@ const EXERCISE_V3_DETAIL_PROPS = [
   'ages',
   'level',
   'places',
-  'period',
-  'blockType',
-  'category',
-  'skill',
+  'periods',
+  'blockTypes',
+  'categories',
+  'skills',
   'challengeLevel',
   'mainMuscle',
   'elements',
@@ -141,14 +141,14 @@ function formatExercise2DetailValue(
       return LevelLabel[exercise.level];
     case 'places':
       return formatEnumArray(exercise.places, PlaceLabel);
-    case 'period':
-      return exercise.period ? PeriodLabel[exercise.period] : '-';
-    case 'blockType':
-      return BlockTypeLabel[exercise.blockType];
-    case 'category':
-      return ExerciseCategoryLabel[exercise.category];
-    case 'skill':
-      return exercise.skill ? SkillLabel[exercise.skill] : '-';
+    case 'periods':
+      return formatEnumArray(exercise.periods, PeriodLabel);
+    case 'blockTypes':
+      return formatEnumArray(exercise.blockTypes, BlockTypeLabel);
+    case 'categories':
+      return formatEnumArray(exercise.categories, ExerciseCategoryLabel);
+    case 'skills':
+      return formatEnumArray(exercise.skills, SkillLabel);
     case 'challengeLevel':
       return exercise.challengeLevel
         ? ChallengeLevelLabel[exercise.challengeLevel]
@@ -301,9 +301,9 @@ export function ExercisesV3List({
                       </button>
                     </td>
                     <td>{exercise.name}</td>
-                    <td>{ExerciseCategoryLabel[exercise.category]}</td>
+                    <td>{formatEnumArray(exercise.categories, ExerciseCategoryLabel)}</td>
                     <td>{LevelLabel[exercise.level]}</td>
-                    <td>{BlockTypeLabel[exercise.blockType]}</td>
+                    <td>{formatEnumArray(exercise.blockTypes, BlockTypeLabel)}</td>
                     <td>{RepTypeLabel[exercise.repType]}</td>
                     {!readOnly ? (
                       <td className="exercises-list-actions-cell">

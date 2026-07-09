@@ -202,10 +202,10 @@ function applyExerciseToForm(
     setAges: (v: Age_V3[]) => void;
     setLevel: (v: Level_V3) => void;
     setPlaces: (v: Place_V3[]) => void;
-    setPeriod: (v: Period_V3 | undefined) => void;
-    setBlockType: (v: BlockType_V3) => void;
-    setCategory: (v: ExerciseCategory_V3) => void;
-    setSkill: (v: Skill_V3 | undefined) => void;
+    setPeriods: (v: Period_V3[]) => void;
+    setBlockTypes: (v: BlockType_V3[]) => void;
+    setCategories: (v: ExerciseCategory_V3[]) => void;
+    setSkills: (v: Skill_V3[]) => void;
     setChallengeLevel: (v: ChallengeLevel_V3 | undefined) => void;
     setMainMuscle: (v: string) => void;
     setElements: (v: Element_V3[]) => void;
@@ -223,10 +223,10 @@ function applyExerciseToForm(
   setters.setAges(exercise.ages);
   setters.setLevel(exercise.level);
   setters.setPlaces(exercise.places);
-  setters.setPeriod(exercise.period);
-  setters.setBlockType(exercise.blockType);
-  setters.setCategory(exercise.category);
-  setters.setSkill(exercise.skill);
+  setters.setPeriods(exercise.periods ?? []);
+  setters.setBlockTypes(exercise.blockTypes);
+  setters.setCategories(exercise.categories);
+  setters.setSkills(exercise.skills ?? []);
   setters.setChallengeLevel(exercise.challengeLevel);
   setters.setMainMuscle(exercise.mainMuscle ?? '');
   setters.setElements(exercise.elements ?? []);
@@ -272,14 +272,10 @@ export function ExerciseV3Form() {
   const [ages, setAges] = useState<Age_V3[]>([]);
   const [level, setLevel] = useState<Level_V3>(Level_V3.RECREATIONAL);
   const [places, setPlaces] = useState<Place_V3[]>([]);
-  const [period, setPeriod] = useState<Period_V3 | undefined>();
-  const [blockType, setBlockType] = useState<BlockType_V3>(
-    BlockType_V3.GENERAL_ACTIVATION
-  );
-  const [category, setCategory] = useState<ExerciseCategory_V3>(
-    ExerciseCategory_V3.WARM_UP
-  );
-  const [skill, setSkill] = useState<Skill_V3 | undefined>();
+  const [periods, setPeriods] = useState<Period_V3[]>([]);
+  const [blockTypes, setBlockTypes] = useState<BlockType_V3[]>([]);
+  const [categories, setCategories] = useState<ExerciseCategory_V3[]>([]);
+  const [skills, setSkills] = useState<Skill_V3[]>([]);
   const [challengeLevel, setChallengeLevel] = useState<
     ChallengeLevel_V3 | undefined
   >();
@@ -325,10 +321,10 @@ export function ExerciseV3Form() {
       setAges,
       setLevel,
       setPlaces,
-      setPeriod,
-      setBlockType,
-      setCategory,
-      setSkill,
+      setPeriods,
+      setBlockTypes,
+      setCategories,
+      setSkills,
       setChallengeLevel,
       setMainMuscle,
       setElements,
@@ -373,6 +369,14 @@ export function ExerciseV3Form() {
       setValidationError(t('exercises2.validationPlaces'));
       return;
     }
+    if (blockTypes.length === 0) {
+      setValidationError(t('exercises2.validationBlockTypes'));
+      return;
+    }
+    if (categories.length === 0) {
+      setValidationError(t('exercises2.validationCategories'));
+      return;
+    }
 
     const normalizedName = normalizeForSearch(trimmedName);
     const nameTaken = exercises.some(
@@ -403,11 +407,11 @@ export function ExerciseV3Form() {
       ages,
       level,
       places,
-      blockType,
-      category,
+      blockTypes,
+      categories,
       version: existingExercise?.version ?? EXERCISE_2_VERSION,
-      ...(period !== undefined ? { period } : {}),
-      ...(skill !== undefined ? { skill } : {}),
+      ...(periods.length > 0 ? { periods } : {}),
+      ...(skills.length > 0 ? { skills } : {}),
       ...(challengeLevel !== undefined ? { challengeLevel } : {}),
       ...(trimmedMainMuscle ? { mainMuscle: trimmedMainMuscle } : {}),
       ...(elements.length > 0 ? { elements } : {}),
@@ -564,58 +568,6 @@ export function ExerciseV3Form() {
           />
         </div>
 
-        <div className="exercise-form-field">
-          <label htmlFor={blockTypeId}>{ExercisePropLabels.blockType}</label>
-          <select
-            id={blockTypeId}
-            value={blockType}
-            onChange={(e) => setBlockType(e.target.value as BlockType_V3)}
-          >
-            {Object.values(BlockType_V3).map((option) => (
-              <option key={option} value={option}>
-                {BlockTypeLabel[option]}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="exercise-form-field">
-          <label htmlFor={categoryId}>{ExercisePropLabels.category}</label>
-          <select
-            id={categoryId}
-            value={category}
-            onChange={(e) =>
-              setCategory(e.target.value as ExerciseCategory_V3)
-            }
-          >
-            {Object.values(ExerciseCategory_V3).map((option) => (
-              <option key={option} value={option}>
-                {ExerciseCategoryLabel[option]}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <OptionalEnumSelect
-          id={periodId}
-          label={ExercisePropLabels.period}
-          value={period}
-          options={Object.values(Period_V3)}
-          labelMap={PeriodLabel}
-          emptyLabel={t('exercises2.optionalEmpty')}
-          onChange={setPeriod}
-        />
-
-        <OptionalEnumSelect
-          id={skillId}
-          label={ExercisePropLabels.skill}
-          value={skill}
-          options={Object.values(Skill_V3)}
-          labelMap={SkillLabel}
-          emptyLabel={t('exercises2.optionalEmpty')}
-          onChange={setSkill}
-        />
-
         <OptionalEnumSelect
           id={challengeLevelId}
           label={ExercisePropLabels.challengeLevel}
@@ -702,6 +654,48 @@ export function ExerciseV3Form() {
             setPlaces(next);
             setValidationError('');
           }}
+        />
+
+        <EnumCheckboxGroup
+          id={periodId}
+          label={ExercisePropLabels.periods}
+          options={Object.values(Period_V3)}
+          labelMap={PeriodLabel}
+          values={periods}
+          onChange={setPeriods}
+        />
+
+        <EnumCheckboxGroup
+          id={blockTypeId}
+          label={ExercisePropLabels.blockTypes}
+          options={Object.values(BlockType_V3)}
+          labelMap={BlockTypeLabel}
+          values={blockTypes}
+          onChange={(next) => {
+            setBlockTypes(next);
+            setValidationError('');
+          }}
+        />
+
+        <EnumCheckboxGroup
+          id={categoryId}
+          label={ExercisePropLabels.categories}
+          options={Object.values(ExerciseCategory_V3)}
+          labelMap={ExerciseCategoryLabel}
+          values={categories}
+          onChange={(next) => {
+            setCategories(next);
+            setValidationError('');
+          }}
+        />
+
+        <EnumCheckboxGroup
+          id={skillId}
+          label={ExercisePropLabels.skills}
+          options={Object.values(Skill_V3)}
+          labelMap={SkillLabel}
+          values={skills}
+          onChange={setSkills}
         />
 
         <EnumCheckboxGroup

@@ -49,14 +49,14 @@ export function exercise2ToDynamoItem(exercise: Exercise_V3): DynamoItem {
     ages: exercise.ages,
     level: exercise.level,
     places: exercise.places,
-    blockType: exercise.blockType,
-    category: exercise.category,
+    blockTypes: exercise.blockTypes,
+    categories: exercise.categories,
   };
-  if (exercise.period !== undefined) {
-    item.period = exercise.period;
+  if (exercise.periods !== undefined && exercise.periods.length > 0) {
+    item.periods = exercise.periods;
   }
-  if (exercise.skill !== undefined) {
-    item.skill = exercise.skill;
+  if (exercise.skills !== undefined && exercise.skills.length > 0) {
+    item.skills = exercise.skills;
   }
   if (exercise.challengeLevel !== undefined) {
     item.challengeLevel = exercise.challengeLevel;

@@ -59,14 +59,14 @@ type Exercise_V3 = {
   ages: Age_V3[]
   level: Level_V3
   places: Place_V3[]
-  period?: Period_V3
-  blockType: BlockType_V3
-  category: ExerciseCategory_V3
-  skill?: Skill_V3
+  periods?: Period_V3[]
+  blockTypes: BlockType_V3[]
+  categories: ExerciseCategory_V3[]
+  skills?: Skill_V3[]
   challengeLevel?: ChallengeLevel_V3
   mainMuscle?: string
   elements?: Element_V3[]
-  weightType?: WeightType_V3  
+  weightType?: WeightType_V3
   impact?: Impact_V3
   difficulty?: Difficulty_V3
   sistituteGroup?: string

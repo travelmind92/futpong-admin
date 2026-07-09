@@ -326,8 +326,8 @@ export function normalizeExercise2(
     return null;
   }
 
-  const period = isEnumValue(Period_V3, raw.period) ? raw.period : undefined;
-  const skill = isEnumValue(Skill_V3, raw.skill) ? raw.skill : undefined;
+  const periods = enumArray(Period_V3, raw.periods);
+  const skills = enumArray(Skill_V3, raw.skills);
   const challengeLevel = isEnumValue(ChallengeLevel_V3, raw.challengeLevel)
     ? raw.challengeLevel
     : undefined;
@@ -354,14 +354,10 @@ export function normalizeExercise2(
     ages: enumArray(Age_V3, raw.ages),
     level: isEnumValue(Level_V3, raw.level) ? raw.level : Level_V3.RECREATIONAL,
     places: enumArray(Place_V3, raw.places),
-    blockType: isEnumValue(BlockType_V3, raw.blockType)
-      ? raw.blockType
-      : BlockType_V3.GENERAL_ACTIVATION,
-    category: isEnumValue(ExerciseCategory_V3, raw.category)
-      ? raw.category
-      : ExerciseCategory_V3.WARM_UP,
-    ...(period !== undefined ? { period } : {}),
-    ...(skill !== undefined ? { skill } : {}),
+    blockTypes: enumArray(BlockType_V3, raw.blockTypes),
+    categories: enumArray(ExerciseCategory_V3, raw.categories),
+    ...(periods.length > 0 ? { periods } : {}),
+    ...(skills.length > 0 ? { skills } : {}),
     ...(challengeLevel !== undefined ? { challengeLevel } : {}),
     ...(mainMuscle !== undefined ? { mainMuscle } : {}),
     ...(elements.length > 0 ? { elements } : {}),
