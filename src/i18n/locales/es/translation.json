@@ -161,6 +161,7 @@
     "clearCsv": "Quitar archivo CSV",
     "importCsvInvalid": "Elige un archivo .csv.",
     "downloadTemplate": "Descargar plantilla",
+    "downloadExistingExercises": "Descargar ejercicios",
     "importExercises": "Importar ejercicios",
     "importing": "Importando…",
     "importFailed": "La importación falló. Revisa la consola para más detalles.",

@@ -6,10 +6,8 @@ import {
   parseExercises2Csv,
 } from '../utils/parseExercises2Csv';
 import { downloadTextFile } from '../utils/downloadTextFile';
-import {
-  EJERCICIOS_V3_IMPORT_TEMPLATE,
-  EJERCICIOS_V3_IMPORT_TEMPLATE_FILENAME,
-} from '../templates/ejerciciosV3ImportTemplate';
+import { EJERCICIOS_V3_IMPORT_TEMPLATE_FILENAME } from '../templates/ejerciciosV3ImportTemplate';
+import { exercisesToExercises2Csv } from '../utils/exportExercises2Csv';
 import { Exercise_V3 } from '../types/types';
 
 const CSV_ACCEPT = '.csv,text/csv,application/vnd.ms-excel';
@@ -60,9 +58,9 @@ export function ImportExercises2Modal({
     onClose();
   };
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadExistingExercises = () => {
     downloadTextFile(
-      EJERCICIOS_V3_IMPORT_TEMPLATE,
+      exercisesToExercises2Csv(existingExercises),
       EJERCICIOS_V3_IMPORT_TEMPLATE_FILENAME
     );
   };
@@ -186,9 +184,9 @@ export function ImportExercises2Modal({
             type="button"
             className="blocks-modal-btn blocks-modal-btn--secondary"
             disabled={isImporting}
-            onClick={handleDownloadTemplate}
+            onClick={handleDownloadExistingExercises}
           >
-            {t('exercises2.downloadTemplate')}
+            {t('exercises2.downloadExistingExercises')}
           </button>
           <button
             type="button"

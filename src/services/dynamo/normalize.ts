@@ -343,6 +343,7 @@ export function normalizeExercise2(
   const videoUrl = optionalString(raw.videoUrl);
   const imageUrl = optionalString(raw.imageUrl);
   const elements = enumArray(Element_V3, raw.elements);
+  const version = optionalString(raw.version);
 
   return {
     id,
@@ -365,6 +366,7 @@ export function normalizeExercise2(
     ...(impact !== undefined ? { impact } : {}),
     ...(difficulty !== undefined ? { difficulty } : {}),
     ...(sistituteGroup !== undefined ? { sistituteGroup } : {}),
+    ...(version !== undefined ? { version } : {}),
     ...(videoUrl !== undefined ? { videoUrl } : {}),
     ...(imageUrl !== undefined ? { imageUrl } : {}),
   };

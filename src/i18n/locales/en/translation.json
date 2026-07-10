@@ -161,6 +161,7 @@
     "clearCsv": "Clear CSV file",
     "importCsvInvalid": "Please choose a .csv file.",
     "downloadTemplate": "Download template",
+    "downloadExistingExercises": "Download exercises",
     "importExercises": "Import exercises",
     "importing": "Importing…",
     "importFailed": "Import failed. Check the console for details.",

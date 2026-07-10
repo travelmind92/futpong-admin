@@ -308,7 +308,6 @@ export function RoutinesProvider({ children }: { children: ReactNode }) {
 
   const upsertRoutineMapping = useCallback(async (mapping: RoutineMapping) => {
     try {
-      console.log('upsertRoutineMapping', mapping);
       await save(
         'routines/mappings',
         mapping.id,

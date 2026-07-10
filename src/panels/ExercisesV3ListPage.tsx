@@ -131,6 +131,7 @@ export function ExercisesV3ListPage() {
               <button
                 type="button"
                 className="exercises-list-import"
+                disabled={dataLoading}
                 onClick={() => setImportModalOpen(true)}
               >
                 {t('exercises2.import')}
