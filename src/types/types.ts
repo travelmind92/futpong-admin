@@ -57,7 +57,7 @@ type Exercise_V3 = {
   description: string
   repType: RepType_V3
   ages: Age_V3[]
-  level: Level_V3
+  levels: Level_V3[]
   places: Place_V3[]
   periods?: Period_V3[]
   blockTypes: BlockType_V3[]

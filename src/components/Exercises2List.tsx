@@ -28,7 +28,7 @@ const EXERCISE_V3_DETAIL_PROPS = [
   'description',
   'repType',
   'ages',
-  'level',
+  'levels',
   'places',
   'periods',
   'blockTypes',
@@ -137,8 +137,8 @@ function formatExercise2DetailValue(
       return RepTypeLabel[exercise.repType];
     case 'ages':
       return formatEnumArray(exercise.ages, AgeLabel);
-    case 'level':
-      return LevelLabel[exercise.level];
+    case 'levels':
+      return formatEnumArray(exercise.levels, LevelLabel);
     case 'places':
       return formatEnumArray(exercise.places, PlaceLabel);
     case 'periods':
@@ -302,7 +302,7 @@ export function ExercisesV3List({
                     </td>
                     <td>{exercise.name}</td>
                     <td>{formatEnumArray(exercise.categories, ExerciseCategoryLabel)}</td>
-                    <td>{LevelLabel[exercise.level]}</td>
+                    <td>{formatEnumArray(exercise.levels, LevelLabel)}</td>
                     <td>{formatEnumArray(exercise.blockTypes, BlockTypeLabel)}</td>
                     <td>{RepTypeLabel[exercise.repType]}</td>
                     {!readOnly ? (

@@ -10,10 +10,10 @@ export const EXERCISE_2_VALUES_OPTIONAL_HEADERS = [
   'DIFICULTAD',
 ] as const;
 
-export const EXERCISES_2_VALUES_TABLE_CSV = `TIPO_REPETICION,EDADES,NIVEL,LUGARES,PERIODOS,TIPOS_BLOQUE,CATEGORIAS,HABILIDADES,NIVEL_DESAFIO,ELEMENTOS,TIPO_PESO,IMPACTO,DIFICULTAD
+export const EXERCISES_2_VALUES_TABLE_CSV = `TIPO_REPETICION,EDADES,NIVELES,LUGARES,PERIODOS,TIPOS_BLOQUE,CATEGORIAS,HABILIDADES,NIVEL_DESAFIO,ELEMENTOS,TIPO_PESO,IMPACTO,DIFICULTAD
 Repeticiones,Infantiles,Recreativo,Gimnasio,Competencia,Movilidad,Calentamiento,Control,Bronce,Pelota,Peso corporal,Bajo,Baja
 Segundos,Juveniles,Competitivo,Cancha,Pretemporada,Core,Fuerza superior,Pase,Plata,Mancuernas,Peso externo,Medio,Media
-,Adulto,,Plaza,Competencia / Pretemporada,Activacion fisica,Fuerza inferior,Regate,Oro,Barra,Sin peso,Alto,Alta
+,Adulto,Recreativo / Competitivo,Plaza,Competencia / Pretemporada,Activacion fisica,Fuerza inferior,Regate,Oro,Barra,Sin peso,Alto,Alta
 ,Adulto mayor,,Casa,,Bloque principal,Core,Tiro,,Banda elastica,,,
 ,Infantiles / Juveniles,,Casa / Plaza,,Tecnico,Potencia,Cabezazo,,Discos,,,
 ,,,,,Desafio,Velocidad y agilidad,Control / Pase,,Pesas rusas,,,

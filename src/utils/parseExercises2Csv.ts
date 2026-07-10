@@ -49,7 +49,7 @@ export const EXERCISE_2_IMPORT_COLUMNS: ImportProp[] = [
   'description',
   'repType',
   'ages',
-  'level',
+  'levels',
   'places',
   'periods',
   'blockTypes',
@@ -201,8 +201,8 @@ function parseRow(
     return { ok: false, error: 'invalidAges' };
   }
 
-  const level = parseEnum(LEVEL_LOOKUP, cellFor('level'));
-  if (!level) {
+  const levels = parseEnumArray(LEVEL_LOOKUP, cellFor('levels'));
+  if (!levels.ok || levels.values.length === 0) {
     return { ok: false, error: 'invalidLevel' };
   }
 
@@ -226,7 +226,7 @@ function parseRow(
     description,
     repType,
     ages: ages.values,
-    level,
+    levels: levels.values,
     places: places.values,
     blockTypes: blockTypes.values,
     categories: categories.values,

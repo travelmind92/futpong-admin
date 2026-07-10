@@ -47,7 +47,7 @@ export function exercise2ToDynamoItem(exercise: Exercise_V3): DynamoItem {
     description: exercise.description,
     repType: exercise.repType,
     ages: exercise.ages,
-    level: exercise.level,
+    levels: exercise.levels,
     places: exercise.places,
     blockTypes: exercise.blockTypes,
     categories: exercise.categories,

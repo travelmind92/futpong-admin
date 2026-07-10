@@ -29,7 +29,7 @@ function formatValidValues(
 export const EXERCISE_2_IMPORT_VALID_VALUES: string[] = [
   formatValidValues(ExercisePropLabels.repType, RepTypeLabel),
   formatValidValues(ExercisePropLabels.ages, AgeLabel),
-  formatValidValues(ExercisePropLabels.level, LevelLabel),
+  formatValidValues(ExercisePropLabels.levels, LevelLabel),
   formatValidValues(ExercisePropLabels.places, PlaceLabel),
   formatValidValues(ExercisePropLabels.periods, PeriodLabel),
   formatValidValues(ExercisePropLabels.blockTypes, BlockTypeLabel),

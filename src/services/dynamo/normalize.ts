@@ -352,7 +352,7 @@ export function normalizeExercise2(
       ? raw.repType
       : RepType_V3.REPETITIONS,
     ages: enumArray(Age_V3, raw.ages),
-    level: isEnumValue(Level_V3, raw.level) ? raw.level : Level_V3.RECREATIONAL,
+    levels: enumArray(Level_V3, raw.levels),
     places: enumArray(Place_V3, raw.places),
     blockTypes: enumArray(BlockType_V3, raw.blockTypes),
     categories: enumArray(ExerciseCategory_V3, raw.categories),

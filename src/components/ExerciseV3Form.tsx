@@ -200,7 +200,7 @@ function applyExerciseToForm(
     setDescription: (v: string) => void;
     setRepType: (v: RepType_V3) => void;
     setAges: (v: Age_V3[]) => void;
-    setLevel: (v: Level_V3) => void;
+    setLevels: (v: Level_V3[]) => void;
     setPlaces: (v: Place_V3[]) => void;
     setPeriods: (v: Period_V3[]) => void;
     setBlockTypes: (v: BlockType_V3[]) => void;
@@ -221,7 +221,7 @@ function applyExerciseToForm(
   setters.setDescription(exercise.description);
   setters.setRepType(exercise.repType);
   setters.setAges(exercise.ages);
-  setters.setLevel(exercise.level);
+  setters.setLevels(exercise.levels);
   setters.setPlaces(exercise.places);
   setters.setPeriods(exercise.periods ?? []);
   setters.setBlockTypes(exercise.blockTypes);
@@ -270,7 +270,7 @@ export function ExerciseV3Form() {
   const [description, setDescription] = useState('');
   const [repType, setRepType] = useState<RepType_V3>(RepType_V3.REPETITIONS);
   const [ages, setAges] = useState<Age_V3[]>([]);
-  const [level, setLevel] = useState<Level_V3>(Level_V3.RECREATIONAL);
+  const [levels, setLevels] = useState<Level_V3[]>([]);
   const [places, setPlaces] = useState<Place_V3[]>([]);
   const [periods, setPeriods] = useState<Period_V3[]>([]);
   const [blockTypes, setBlockTypes] = useState<BlockType_V3[]>([]);
@@ -319,7 +319,7 @@ export function ExerciseV3Form() {
       setDescription,
       setRepType,
       setAges,
-      setLevel,
+      setLevels,
       setPlaces,
       setPeriods,
       setBlockTypes,
@@ -365,6 +365,10 @@ export function ExerciseV3Form() {
       setValidationError(t('exercises2.validationAges'));
       return;
     }
+    if (levels.length === 0) {
+      setValidationError(t('exercises2.validationLevels'));
+      return;
+    }
     if (places.length === 0) {
       setValidationError(t('exercises2.validationPlaces'));
       return;
@@ -405,7 +409,7 @@ export function ExerciseV3Form() {
       description: trimmedDescription,
       repType,
       ages,
-      level,
+      levels,
       places,
       blockTypes,
       categories,
@@ -538,21 +542,6 @@ export function ExerciseV3Form() {
           </select>
         </div>
 
-        <div className="exercise-form-field">
-          <label htmlFor={levelId}>{ExercisePropLabels.level}</label>
-          <select
-            id={levelId}
-            value={level}
-            onChange={(e) => setLevel(e.target.value as Level_V3)}
-          >
-            {Object.values(Level_V3).map((option) => (
-              <option key={option} value={option}>
-                {LevelLabel[option]}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <div className="exercise-form-field exercise-form-field--full-row">
           <label htmlFor={descId}>{ExercisePropLabels.description}</label>
           <textarea
@@ -640,6 +629,18 @@ export function ExerciseV3Form() {
           values={ages}
           onChange={(next) => {
             setAges(next);
+            setValidationError('');
+          }}
+        />
+
+        <EnumCheckboxGroup
+          id={levelId}
+          label={ExercisePropLabels.levels}
+          options={Object.values(Level_V3)}
+          labelMap={LevelLabel}
+          values={levels}
+          onChange={(next) => {
+            setLevels(next);
             setValidationError('');
           }}
         />

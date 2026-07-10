@@ -149,6 +149,7 @@
     "editAria": "Edit {{name}}",
     "optionalEmpty": "—",
     "validationAges": "Select at least one age.",
+    "validationLevels": "Select at least one level.",
     "validationPlaces": "Select at least one place.",
     "validationBlockTypes": "Select at least one block type.",
     "validationCategories": "Select at least one category.",
@@ -167,7 +168,7 @@
     "templateDownloadFailed": "Could not download the template file.",
     "importErrors": {
       "emptyFile": "The CSV file is empty.",
-      "invalidHeaders": "Invalid headers. Expected: NOMBRE;DESCRIPCION;TIPO_REPETICION;EDADES;NIVEL;LUGARES;PERIODOS;TIPOS_BLOQUE;CATEGORIAS;HABILIDADES;NIVEL_DESAFIO;MUSCULO_PRINCIPAL;ELEMENTOS;TIPO_PESO;IMPACTO;DIFICULTAD;GRUPO_SUSTITUCION",
+      "invalidHeaders": "Invalid headers. Expected: NOMBRE;DESCRIPCION;TIPO_REPETICION;EDADES;NIVELES;LUGARES;PERIODOS;TIPOS_BLOQUE;CATEGORIAS;HABILIDADES;NIVEL_DESAFIO;MUSCULO_PRINCIPAL;ELEMENTOS;TIPO_PESO;IMPACTO;DIFICULTAD;GRUPO_SUSTITUCION",
       "invalidRow": "One or more rows have the wrong number of columns.",
       "missingName": "Every row must have a name (NOMBRE).",
       "missingDescription": "Every row must have a description (DESCRIPCION).",

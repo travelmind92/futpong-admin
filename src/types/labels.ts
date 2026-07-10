@@ -7,7 +7,7 @@ const ExercisePropLabels: Record<keyof Exercise_V3, string> = {
   description: 'Descripción',
   repType: 'Tipo de repetición',
   ages: 'Edades',
-  level: 'Nivel',
+  levels: 'Niveles',
   places: 'Lugares',
   periods: 'Periodos',
   blockTypes: 'Tipos de bloque',
