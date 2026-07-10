@@ -19,7 +19,7 @@ import {
   BlockType_V3,
   ChallengeLevel_V3,
   Difficulty_V3,
-  Element_V3,
+  ElementName_V3,
   ExerciseCategory_V3,
   Impact_V3,
   Level_V3,
@@ -208,7 +208,7 @@ function applyExerciseToForm(
     setSkills: (v: Skill_V3[]) => void;
     setChallengeLevel: (v: ChallengeLevel_V3 | undefined) => void;
     setMainMuscle: (v: string) => void;
-    setElements: (v: Element_V3[]) => void;
+    setElements: (v: ElementName_V3[]) => void;
     setWeightType: (v: WeightType_V3 | undefined) => void;
     setImpact: (v: Impact_V3 | undefined) => void;
     setDifficulty: (v: Difficulty_V3 | undefined) => void;
@@ -280,7 +280,7 @@ export function ExerciseV3Form() {
     ChallengeLevel_V3 | undefined
   >();
   const [mainMuscle, setMainMuscle] = useState('');
-  const [elements, setElements] = useState<Element_V3[]>([]);
+  const [elements, setElements] = useState<ElementName_V3[]>([]);
   const [weightType, setWeightType] = useState<WeightType_V3 | undefined>();
   const [impact, setImpact] = useState<Impact_V3 | undefined>();
   const [difficulty, setDifficulty] = useState<Difficulty_V3 | undefined>();
@@ -702,7 +702,7 @@ export function ExerciseV3Form() {
         <EnumCheckboxGroup
           id={elementsId}
           label={ExercisePropLabels.elements}
-          options={Object.values(Element_V3)}
+          options={Object.values(ElementName_V3)}
           labelMap={ElementLabel}
           values={elements}
           onChange={setElements}

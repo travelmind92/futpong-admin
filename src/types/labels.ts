@@ -1,4 +1,4 @@
-import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Focus, Impact_V3, Level_V3, Period_V3, Place_V3, Position, RepType_V3, Skill_V3, TipCategory, WeightType_V3 } from "./enums";
+import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, ElementName_V3, ExerciseCategory_V3, Focus, Impact_V3, Level_V3, Period_V3, Place_V3, Position, RepType_V3, Skill_V3, TipCategory, WeightType_V3 } from "./enums";
 import { Exercise_V3 } from "./types";
 
 const ExercisePropLabels: Record<keyof Exercise_V3, string> = {
@@ -102,7 +102,7 @@ const ChallengeLevelLabel: Record<ChallengeLevel_V3, string> = {
   Gold: 'Oro',
 };
 
-const ElementLabel: Record<Element_V3, string> = {
+const ElementLabel: Record<ElementName_V3, string> = {
   Ball: 'Pelota',
   Dumbbells: 'Mancuernas',
   Bar: 'Barra',

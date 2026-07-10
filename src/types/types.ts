@@ -1,4 +1,4 @@
-import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Impact_V3, Level_V3, Period_V3, Place_V3, RepType_V3, Skill_V3, TipCategory, WeightType_V3 } from "./enums"
+import { Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, ElementName_V3, ExerciseCategory_V3, Impact_V3, Level_V3, Period_V3, Place_V3, RepType_V3, Skill_V3, TipCategory, WeightType_V3 } from "./enums"
 
 type Routine_V3 = {
   id: string
@@ -65,7 +65,7 @@ type Exercise_V3 = {
   skills?: Skill_V3[]
   challengeLevel?: ChallengeLevel_V3
   mainMuscle?: string
-  elements?: Element_V3[]
+  elements?: ElementName_V3[]
   weightType?: WeightType_V3
   impact?: Impact_V3
   difficulty?: Difficulty_V3
@@ -82,7 +82,13 @@ type Question_V3 = {
   answer: string
 }
 
+type Element_V3 = {
+  id: string
+  name: ElementName_V3
+  imageUrl?: string
+}
+
 export type {
   Exercise_V3, ExerciseItem_V3, Question_V3, Routine_V3,
-  RoutineMapping_V3, TrainingBlock_V3, TrainingDay_V3, Tip
+  RoutineMapping_V3, TrainingBlock_V3, TrainingDay_V3, Tip, Element_V3
 }

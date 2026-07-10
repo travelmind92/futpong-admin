@@ -15,7 +15,7 @@ import {
   BlockType_V3,
   ChallengeLevel_V3,
   Difficulty_V3,
-  Element_V3,
+  ElementName_V3,
   ExerciseCategory_V3,
   Impact_V3,
   Level_V3,
@@ -342,7 +342,7 @@ export function normalizeExercise2(
   const sistituteGroup = optionalString(raw.sistituteGroup);
   const videoUrl = optionalString(raw.videoUrl);
   const imageUrl = optionalString(raw.imageUrl);
-  const elements = enumArray(Element_V3, raw.elements);
+  const elements = enumArray(ElementName_V3, raw.elements);
   const version = optionalString(raw.version);
 
   return {

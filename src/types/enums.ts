@@ -71,7 +71,7 @@ enum ChallengeLevel_V3 {
   GOLD = 'Gold'
 }
 
-enum Element_V3 {
+enum ElementName_V3 {
   BALL = 'Ball',
   DUMBBELLS = 'Dumbbells', // Mancuernas
   BAR = 'Bar',
@@ -135,7 +135,7 @@ enum Focus {
 }
 
 export {
-  Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, Element_V3, ExerciseCategory_V3, Gender_V3, Impact_V3, Level_V3,
+  Age_V3, BlockType_V3, ChallengeLevel_V3, Difficulty_V3, ElementName_V3, ExerciseCategory_V3, Gender_V3, Impact_V3, Level_V3,
   Period_V3,
   Place_V3,
   RepType_V3,

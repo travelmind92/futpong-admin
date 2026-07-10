@@ -4,7 +4,7 @@ import {
   BlockType_V3,
   ChallengeLevel_V3,
   Difficulty_V3,
-  Element_V3,
+  ElementName_V3,
   ExerciseCategory_V3,
   Impact_V3,
   Level_V3,
@@ -109,7 +109,7 @@ const CHALLENGE_LEVEL_LOOKUP = buildEnumLookup(
   ChallengeLevel_V3,
   ChallengeLevelLabel
 );
-const ELEMENT_LOOKUP = buildEnumLookup(Element_V3, ElementLabel);
+const ELEMENT_LOOKUP = buildEnumLookup(ElementName_V3, ElementLabel);
 const WEIGHT_TYPE_LOOKUP = buildEnumLookup(WeightType_V3, WeightTypeLabel);
 const IMPACT_LOOKUP = buildEnumLookup(Impact_V3, ImpactLabel);
 const DIFFICULTY_LOOKUP = buildEnumLookup(Difficulty_V3, DifficultyLabel);
