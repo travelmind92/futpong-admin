@@ -2304,6 +2304,22 @@ tbody.blocks-modal-block-group:last-of-type .blocks-modal-block-card {
   background: var(--accent-soft);
 }
 
+.exercises2-list-detail-item--badge dd {
+  margin: 0;
+}
+
+.routine-v3-detail-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+
 .routine-v3-detail-summary {
   margin: 0;
   font-size: 0.9375rem;

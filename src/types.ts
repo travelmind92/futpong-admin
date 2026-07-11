@@ -23,6 +23,9 @@ export type Routine = {
   playerType: PlayerType
   place: Place
   type: RoutineType
+  custom?: boolean
+  userId?: string
+  version?: string
 }
 
 export type RoutineMapping = {

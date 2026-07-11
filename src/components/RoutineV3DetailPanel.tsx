@@ -19,6 +19,7 @@ import {
   TrainingBlock_V3,
   TrainingDay_V3,
 } from '../types/types';
+import { useUsersByIds } from '../hooks/useUsersByIds';
 import { textContainsSearch } from '../utils/textSearch';
 
 function exerciseNameFor(
@@ -239,6 +240,10 @@ export function RoutineV3DetailPanel() {
     [routines, id]
   );
 
+  const { usersById } = useUsersByIds(
+    routine?.userId ? [routine.userId] : []
+  );
+
   useEffect(() => {
     if (!id || dataLoading) {
       return;
@@ -396,6 +401,25 @@ export function RoutineV3DetailPanel() {
               <dt>{t('routines2.period')}</dt>
               <dd>{PeriodLabel[routine.period]}</dd>
             </div>
+            {routine.custom ? (
+              <div className="exercises2-list-detail-item exercises2-list-detail-item--badge">
+                <dd>
+                  <span className="routine-v3-detail-badge">
+                    {t('routines2.customPersonalized')}
+                  </span>
+                </dd>
+              </div>
+            ) : null}
+            {routine.custom ? (
+              <div className="exercises2-list-detail-item">
+                <dt>{t('routines2.user')}</dt>
+                <dd>
+                  {routine.userId
+                    ? usersById.get(routine.userId)?.email ?? '—'
+                    : '—'}
+                </dd>
+              </div>
+            ) : null}
           </dl>
 
           <p className="routine-v3-detail-summary">

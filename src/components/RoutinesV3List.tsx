@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Routine_V3 } from '../types/types';
 import { useAuth } from '../context/AuthContext';
+import { useUsersByIds } from '../hooks/useUsersByIds';
 import {
   AgeLabel,
   LevelLabel,
@@ -16,7 +17,7 @@ import {
 
 const PAGE_SIZE = 20;
 
-type SortColumn = 'name' | 'age' | 'level' | 'place' | 'period';
+type SortColumn = 'name' | 'age' | 'level' | 'place' | 'period' | 'custom' | 'user';
 
 type SortState =
   | { mode: 'none' }
@@ -46,6 +47,30 @@ export function RoutinesV3List({
   const [page, setPage] = useState(1);
   const [sortState, setSortState] = useState<SortState>({ mode: 'none' });
 
+  const showUserColumn = useMemo(
+    () => routines.some((routine) => routine.userId),
+    [routines]
+  );
+
+  const routineUserIds = useMemo(
+    () =>
+      routines
+        .map((routine) => routine.userId)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0),
+    [routines]
+  );
+  const { usersById } = useUsersByIds(routineUserIds);
+
+  useEffect(() => {
+    if (
+      !showUserColumn &&
+      sortState.mode !== 'none' &&
+      sortState.column === 'user'
+    ) {
+      setSortState({ mode: 'none' });
+    }
+  }, [showUserColumn, sortState]);
+
   const sortedRoutines = useMemo(() => {
     if (sortState.mode === 'none') {
       return routines;
@@ -64,6 +89,12 @@ export function RoutinesV3List({
           return PlaceLabel[routine.place];
         case 'period':
           return PeriodLabel[routine.period];
+        case 'custom':
+          return routine.custom === true ? '1' : '0';
+        case 'user':
+          return routine.userId
+            ? usersById.get(routine.userId)?.email ?? routine.userId
+            : '—';
         default:
           return '';
       }
@@ -77,7 +108,7 @@ export function RoutinesV3List({
       }
       return a.id.localeCompare(b.id);
     });
-  }, [routines, sortState]);
+  }, [routines, sortState, usersById]);
 
   const totalPages = Math.max(1, Math.ceil(sortedRoutines.length / PAGE_SIZE));
 
@@ -108,7 +139,7 @@ export function RoutinesV3List({
   const showPaginationNav = !dataLoading && sortedRoutines.length > 0;
   const showPrevPage = showPaginationNav && safePage > 1;
   const showNextPage = showPaginationNav && safePage < totalPages;
-  const columnCount = 6;
+  const columnCount = showUserColumn ? 8 : 7;
 
   return (
     <>
@@ -156,6 +187,24 @@ export function RoutinesV3List({
                   onClick={() => toggleSort('period')}
                 />
               </th>
+              <th scope="col" aria-sort={listSortColumnAriaSort('custom', sortState)}>
+                <SortColumnHeaderButton
+                  label={t('routines2.customPersonalized')}
+                  column="custom"
+                  sortState={sortState}
+                  onClick={() => toggleSort('custom')}
+                />
+              </th>
+              {showUserColumn ? (
+                <th scope="col" aria-sort={listSortColumnAriaSort('user', sortState)}>
+                  <SortColumnHeaderButton
+                    label={t('routines2.user')}
+                    column="user"
+                    sortState={sortState}
+                    onClick={() => toggleSort('user')}
+                  />
+                </th>
+              ) : null}
               <th
                 scope="col"
                 className="exercises-list-actions-header"
@@ -186,6 +235,18 @@ export function RoutinesV3List({
                   <td>{LevelLabel[routine.level]}</td>
                   <td>{PlaceLabel[routine.place]}</td>
                   <td>{PeriodLabel[routine.period]}</td>
+                  <td>
+                    {routine.custom === true
+                      ? t('routines2.customYes')
+                      : t('routines2.customNo')}
+                  </td>
+                  {showUserColumn ? (
+                    <td>
+                      {routine.userId
+                        ? usersById.get(routine.userId)?.email ?? '—'
+                        : '—'}
+                    </td>
+                  ) : null}
                   <td className="exercises-list-actions-cell">
                     <div className="exercises-list-actions">
                       <button
