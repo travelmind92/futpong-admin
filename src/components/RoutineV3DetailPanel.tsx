@@ -223,6 +223,8 @@ export function RoutineV3DetailPanel() {
     routines,
     exercises,
     trainingDays,
+    trainingDaysLoading,
+    loadTrainingDaysForRoutine,
     trainingBlocks,
     trainingBlocksLoading,
     loadTrainingBlocksForDays,
@@ -245,6 +247,13 @@ export function RoutineV3DetailPanel() {
   );
 
   useEffect(() => {
+    if (!id || dataLoading || !routine) {
+      return;
+    }
+    void loadTrainingDaysForRoutine(id);
+  }, [id, dataLoading, routine, loadTrainingDaysForRoutine]);
+
+  useEffect(() => {
     if (!id || dataLoading) {
       return;
     }
@@ -259,11 +268,8 @@ export function RoutineV3DetailPanel() {
   );
 
   const daysForRoutine = useMemo(
-    () =>
-      trainingDays
-        .filter((day) => day.routineId === id)
-        .sort((a, b) => a.session - b.session),
-    [trainingDays, id]
+    () => [...trainingDays].sort((a, b) => a.session - b.session),
+    [trainingDays]
   );
 
   const dayIdsKey = useMemo(
@@ -276,11 +282,11 @@ export function RoutineV3DetailPanel() {
   );
 
   useEffect(() => {
-    if (dataLoading || !dayIdsKey) {
+    if (dataLoading || trainingDaysLoading || !dayIdsKey) {
       return;
     }
     void loadTrainingBlocksForDays(dayIdsKey.split(','));
-  }, [dayIdsKey, dataLoading, loadTrainingBlocksForDays]);
+  }, [dayIdsKey, dataLoading, trainingDaysLoading, loadTrainingBlocksForDays]);
 
   const blocksByDayId = useMemo(() => {
     const dayIds = new Set(daysForRoutine.map((day) => day.id));
@@ -452,7 +458,9 @@ export function RoutineV3DetailPanel() {
               ) : null}
             </div>
 
-            {daysForRoutine.length === 0 ? (
+            {trainingDaysLoading ? (
+              <p className="routine-v3-detail-empty">{t('routines2.loadingTrainingDays')}</p>
+            ) : daysForRoutine.length === 0 ? (
               <p className="routine-v3-detail-empty">{t('routines2.noTrainingDays')}</p>
             ) : filteredDays.length === 0 ? (
               <p className="routine-v3-detail-empty">

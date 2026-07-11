@@ -260,6 +260,7 @@
     "noDayFilterResults": "Ningún día coincide con el filtro",
     "noBlocks": "Sin bloques",
     "loadingBlocks": "Cargando bloques…",
+    "loadingTrainingDays": "Cargando días de entrenamiento…",
     "noExercisesInBlock": "Sin ejercicios en este bloque",
     "sessionNumber": "Sesión {{session}}",
     "dayMinutes": "{{minutes}} min",

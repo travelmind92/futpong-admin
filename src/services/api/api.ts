@@ -57,18 +57,31 @@ export async function getTrainingBlocksByDayIds<T>(
   if (ids.length === 0) {
     return [];
   }
-  const params = new URLSearchParams();
-  if (ids.length === 1) {
-    params.set("trainingDayId", ids[0]);
-  } else {
-    params.set("trainingDayIds", ids.join(","));
-  }
-  const path = `/public/training-days/training-blocks?${params.toString()}`;
+  const params = new URLSearchParams({
+    trainingDayIds: ids.join(','),
+  });
+  const path = `/public/training-blocks?${params.toString()}`;
   const res = await apiFetch(path, auth, { method: "GET" });
   if (!res.ok) {
     throw new Error(`Failed to load training blocks (${res.status})`);
   }
   return parseListBody<T>(await res.json(), "training-blocks");
+}
+
+export async function getTrainingDaysByRoutineId<T>(
+  routineId: string,
+  auth: boolean = true
+): Promise<T[]> {
+  if (!routineId) {
+    return [];
+  }
+  const params = new URLSearchParams({ routineId });
+  const path = `/public/training-days?${params.toString()}`;
+  const res = await apiFetch(path, auth, { method: "GET" });
+  if (!res.ok) {
+    throw new Error(`Failed to load training days (${res.status})`);
+  }
+  return parseListBody<T>(await res.json(), "training-days");
 }
 
 export async function save(

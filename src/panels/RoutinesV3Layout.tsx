@@ -4,6 +4,7 @@ import {
   bulkRemove,
   getAll,
   getTrainingBlocksByDayIds,
+  getTrainingDaysByRoutineId,
   remove,
   save,
 } from '../services/api/api';
@@ -43,6 +44,8 @@ export type RoutinesV3ContextValue = {
   routineMappings: RoutineMapping_V3[];
   exercises: Exercise_V3[];
   trainingDays: TrainingDay_V3[];
+  trainingDaysLoading: boolean;
+  loadTrainingDaysForRoutine: (routineId: string) => Promise<void>;
   trainingBlocks: TrainingBlock_V3[];
   trainingBlocksLoading: boolean;
   loadTrainingBlocksForDays: (dayIds: string[]) => Promise<void>;
@@ -65,6 +68,7 @@ export function RoutinesV3Layout() {
   const [exercises, setExercises] = useState<Exercise_V3[]>([]);
   const [routineMappings, setRoutineMappings] = useState<RoutineMapping_V3[]>([]);
   const [trainingDays, setTrainingDays] = useState<TrainingDay_V3[]>([]);
+  const [trainingDaysLoading, setTrainingDaysLoading] = useState(false);
   const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock_V3[]>([]);
   const [trainingBlocksLoading, setTrainingBlocksLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
@@ -72,7 +76,6 @@ export function RoutinesV3Layout() {
 
   const routinesRef = useRef(routines);
   const routineMappingsRef = useRef(routineMappings);
-  const trainingDaysRef = useRef(trainingDays);
 
   useEffect(() => {
     routinesRef.current = routines;
@@ -83,21 +86,16 @@ export function RoutinesV3Layout() {
   }, [routineMappings]);
 
   useEffect(() => {
-    trainingDaysRef.current = trainingDays;
-  }, [trainingDays]);
-
-  useEffect(() => {
     let cancelled = false;
     (async () => {
       setDataLoading(true);
       setDataError(null);
       try {
-        const [rawRoutines, rawExercises, rawMappings, rawDays] =
+        const [rawRoutines, rawExercises, rawMappings] =
           await Promise.all([
             getAll<Record<string, unknown>>(ROUTINE_V3_RESOURCE, true),
             getAll<Record<string, unknown>>(EXERCISE_2_RESOURCE, true),
             getAll<Record<string, unknown>>(ROUTINE_MAPPING_V3_FETCH_RESOURCE, true),
-            getAll<Record<string, unknown>>(TRAINING_DAY_V3_RESOURCE, true),
           ]);
         if (cancelled) return;
 
@@ -130,17 +128,6 @@ export function RoutinesV3Layout() {
           return a.routineId.localeCompare(b.routineId);
         });
         setRoutineMappings(rm);
-
-        const td = rawDays
-          .filter(isV3Item)
-          .map((item) => normalizeTrainingDayV3(item))
-          .filter((x): x is TrainingDay_V3 => x !== null);
-        td.sort((a, b) => {
-          const byRoutine = a.routineId.localeCompare(b.routineId);
-          if (byRoutine !== 0) return byRoutine;
-          return a.session - b.session;
-        });
-        setTrainingDays(td);
       } catch (e) {
         if (!cancelled) {
           setDataError(
@@ -157,6 +144,43 @@ export function RoutinesV3Layout() {
       cancelled = true;
     };
   }, []);
+
+  const fetchTrainingDaysForRoutine = useCallback(
+    async (routineId: string): Promise<TrainingDay_V3[]> => {
+      const raw = await getTrainingDaysByRoutineId<Record<string, unknown>>(
+        routineId
+      );
+      const days = raw
+        .filter(isV3Item)
+        .map((item) => normalizeTrainingDayV3(item))
+        .filter((x): x is TrainingDay_V3 => x !== null);
+      days.sort((a, b) => a.session - b.session);
+      return days;
+    },
+    []
+  );
+
+  const loadTrainingDaysForRoutine = useCallback(
+    async (routineId: string) => {
+      if (!routineId) {
+        setTrainingDays([]);
+        return;
+      }
+      setTrainingDaysLoading(true);
+      try {
+        const days = await fetchTrainingDaysForRoutine(routineId);
+        setTrainingDays(days);
+      } catch (e) {
+        setDataError(
+          e instanceof Error ? e.message : translate('errors.loadRoutines')
+        );
+        throw e instanceof Error ? e : new Error(translate('errors.loadRoutines'));
+      } finally {
+        setTrainingDaysLoading(false);
+      }
+    },
+    [fetchTrainingDaysForRoutine]
+  );
 
   const fetchTrainingBlocksForDays = useCallback(
     async (dayIds: string[]): Promise<TrainingBlock_V3[]> => {
@@ -204,9 +228,8 @@ export function RoutinesV3Layout() {
   );
 
   const removeRoutineChildren = useCallback(async (routineId: string) => {
-    const dayIds = trainingDaysRef.current
-      .filter((day) => day.routineId === routineId)
-      .map((day) => day.id);
+    const days = await fetchTrainingDaysForRoutine(routineId);
+    const dayIds = days.map((day) => day.id);
     const blockIds = (await fetchTrainingBlocksForDays(dayIds)).map(
       (block) => block.id
     );
@@ -231,7 +254,7 @@ export function RoutinesV3Layout() {
     setTrainingBlocks((prev) =>
       prev.filter((block) => !dayIds.includes(block.trainingDayId))
     );
-  }, [fetchTrainingBlocksForDays]);
+  }, [fetchTrainingDaysForRoutine, fetchTrainingBlocksForDays]);
 
   const removeRoutine = useCallback(
     async (id: string) => {
@@ -277,9 +300,8 @@ export function RoutinesV3Layout() {
       }
 
       const previousRoutine = existingRoutine;
-      const oldDayIds = trainingDaysRef.current
-        .filter((day) => day.routineId === routine.id)
-        .map((day) => day.id);
+      const oldDays = await fetchTrainingDaysForRoutine(routine.id);
+      const oldDayIds = oldDays.map((day) => day.id);
       const oldBlockIds = (await fetchTrainingBlocksForDays(oldDayIds)).map(
         (block) => block.id
       );
@@ -341,7 +363,7 @@ export function RoutinesV3Layout() {
         return [...blocks, ...rest];
       });
     },
-    [fetchTrainingBlocksForDays]
+    [fetchTrainingDaysForRoutine, fetchTrainingBlocksForDays]
   );
 
   const updateRoutineMapping = useCallback(async (mapping: RoutineMapping_V3) => {
@@ -428,6 +450,8 @@ export function RoutinesV3Layout() {
       routineMappings,
       exercises,
       trainingDays,
+      trainingDaysLoading,
+      loadTrainingDaysForRoutine,
       trainingBlocks,
       trainingBlocksLoading,
       loadTrainingBlocksForDays,
@@ -445,6 +469,8 @@ export function RoutinesV3Layout() {
       routineMappings,
       exercises,
       trainingDays,
+      trainingDaysLoading,
+      loadTrainingDaysForRoutine,
       trainingBlocks,
       trainingBlocksLoading,
       loadTrainingBlocksForDays,
