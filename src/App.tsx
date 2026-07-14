@@ -1,16 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { ExerciseForm } from './components/ExerciseForm';
-import { ExercisesLayout } from './panels/ExercisesLayout';
-import { ExercisesListPage } from './panels/ExercisesListPage';
+import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
 import { ExerciseV3Form } from './components/ExerciseV3Form';
 import { ExercisesV3Layout } from './panels/ExercisesV3Layout';
 import { ExercisesV3ListPage } from './panels/ExercisesV3ListPage';
-import { MappingsPanel } from './panels/MappingsPanel';
-import { RoutineForm } from './components/RoutineForm';
-import { RoutinesLayout } from './panels/RoutinesLayout';
-import { RoutinesListPage } from './panels/RoutinesListPage';
 import { RoutinesV3Layout } from './panels/RoutinesV3Layout';
 import { RoutinesV3ListPage } from './panels/RoutinesV3ListPage';
 import { MappingsV3ListPage } from './panels/MappingsV3ListPage';
@@ -19,66 +12,18 @@ import './App.css';
 import { buildCognitoLoginUrl, buildCognitoLogoutUrl } from './services/api/cognito';
 import { clearSession, getEmailFromIdToken, isAuthenticated } from './auth/auth';
 import { AuthProvider } from './context/AuthContext';
-import {
-  AppVersionProvider,
-  defaultPathForVersion,
-  isV2Path,
-  isV3Path,
-  useAppVersion,
-  type AppVersion,
-} from './context/AppVersionContext';
-import { ExercisesProvider } from './context/ExercisesContext';
-import { RoutinesProvider } from './context/RoutinesContext';
 import { exchangeCode } from './services/api/api';
+
+const DEFAULT_PATH = '/routines2';
 
 const menuItems: {
   to: string;
   labelKey: string;
-  version: AppVersion;
   icon: React.ReactNode;
 }[] = [
   {
-    to: '/routines',
-    labelKey: 'nav.routines',
-    version: 'v2',
-    icon: (
-      <svg
-        className="nav-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-      </svg>
-    ),
-  },
-  {
-    to: '/exercises',
-    labelKey: 'nav.exercises',
-    version: 'v2',
-    icon: (
-      <svg
-        className="nav-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <path d="M6 7v10M3.5 8.5v7M8.5 8.5v7M18 7v10M15.5 8.5v7M20.5 8.5v7M8.5 12h7" />
-      </svg>
-    ),
-  },
-  {
     to: '/routines2',
     labelKey: 'nav.routines2',
-    version: 'v3',
     icon: (
       <svg
         className="nav-icon"
@@ -97,7 +42,6 @@ const menuItems: {
   {
     to: '/exercises2',
     labelKey: 'nav.exercises2',
-    version: 'v3',
     icon: (
       <svg
         className="nav-icon"
@@ -116,7 +60,6 @@ const menuItems: {
   {
     to: '/mappings2',
     labelKey: 'nav.mappings2',
-    version: 'v3',
     icon: (
       <svg
         className="nav-icon"
@@ -136,46 +79,11 @@ const menuItems: {
       </svg>
     ),
   },
-  {
-    to: '/mappings',
-    labelKey: 'nav.mappings',
-    version: 'v2',
-    icon: (
-      <svg
-        className="nav-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-      </svg>
-    ),
-  },
 ];
 
 function AppShell({ onLogout }: { onLogout: () => void }) {
   const { t } = useTranslation();
   const userEmail = getEmailFromIdToken();
-  const { appVersion, setAppVersion } = useAppVersion();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const visibleMenuItems = menuItems.filter((item) => item.version === appVersion);
-  const defaultPath = defaultPathForVersion(appVersion);
-
-  useEffect(() => {
-    if (appVersion === 'v3' && isV2Path(location.pathname)) {
-      navigate(defaultPath, { replace: true });
-      return;
-    }
-    if (appVersion === 'v2' && isV3Path(location.pathname)) {
-      navigate('/routines', { replace: true });
-    }
-  }, [appVersion, location.pathname, navigate]);
 
   return (
     <div className="app-shell">
@@ -188,18 +96,6 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
             </span>
             <span className="app-title-admin">{t('common.admin')}</span>
           </h1>
-
-          <label className="app-version-select-wrap">
-            <select
-              className="app-version-select"
-              value={appVersion}
-              onChange={(e) => setAppVersion(e.target.value as AppVersion)}
-              aria-label={t('common.version')}
-            >
-              <option value="v3">v3</option>
-              <option value="v2">v2</option>
-            </select>
-          </label>
         </div>
 
         <div className="app-header-actions">
@@ -222,7 +118,7 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
         <aside className="app-sidebar" aria-label={t('nav.main')}>
           <nav className="app-nav">
             <ul className="app-nav-list">
-              {visibleMenuItems.map(({ to, labelKey, icon }) => (
+              {menuItems.map(({ to, labelKey, icon }) => (
                 <li key={to}>
                   <NavLink
                     to={to}
@@ -241,17 +137,7 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
 
         <main className="app-main">
           <Routes>
-            <Route path="/" element={<Navigate to={defaultPath} replace />} />
-            <Route path="/routines" element={<RoutinesLayout />}>
-              <Route index element={<RoutinesListPage />} />
-              <Route path="new" element={<RoutineForm />} />
-              <Route path=":id/edit" element={<RoutineForm />} />
-            </Route>
-            <Route path="/exercises" element={<ExercisesLayout />}>
-              <Route index element={<ExercisesListPage />} />
-              <Route path="new" element={<ExerciseForm />} />
-              <Route path=":id/edit" element={<ExerciseForm />} />
-            </Route>
+            <Route path="/" element={<Navigate to={DEFAULT_PATH} replace />} />
             <Route path="/routines2" element={<RoutinesV3Layout />}>
               <Route index element={<RoutinesV3ListPage />} />
               <Route path=":id" element={<RoutineV3DetailPanel />} />
@@ -263,8 +149,10 @@ function AppShell({ onLogout }: { onLogout: () => void }) {
             <Route path="/mappings2" element={<RoutinesV3Layout />}>
               <Route index element={<MappingsV3ListPage />} />
             </Route>
-            <Route path="/mappings" element={<MappingsPanel />} />
-            <Route path="*" element={<Navigate to={defaultPath} replace />} />
+            <Route path="/routines/*" element={<Navigate to={DEFAULT_PATH} replace />} />
+            <Route path="/exercises/*" element={<Navigate to="/exercises2" replace />} />
+            <Route path="/mappings/*" element={<Navigate to="/mappings2" replace />} />
+            <Route path="*" element={<Navigate to={DEFAULT_PATH} replace />} />
           </Routes>
         </main>
       </div>
@@ -340,13 +228,7 @@ function App() {
 
   return (
     <AuthProvider isAuthenticated>
-      <AppVersionProvider>
-        <RoutinesProvider>
-          <ExercisesProvider>
-            <AppShell onLogout={handleLogout} />
-          </ExercisesProvider>
-        </RoutinesProvider>
-      </AppVersionProvider>
+      <AppShell onLogout={handleLogout} />
     </AuthProvider>
   );
 }

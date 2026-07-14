@@ -118,32 +118,6 @@
   min-width: 0;
 }
 
-.app-version-select-wrap {
-  display: inline-flex;
-  flex-shrink: 0;
-}
-
-.app-version-select {
-  padding: 0.4rem 2rem 0.4rem 0.65rem;
-  font: inherit;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  background: var(--color-surface)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")
-    no-repeat right 0.45rem center / 1rem;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  appearance: none;
-}
-
-.app-version-select:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-  border-color: var(--accent);
-}
-
 .app-header-user-email {
   font-size: 0.875rem;
   font-weight: 500;

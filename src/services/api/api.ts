@@ -41,7 +41,8 @@ export async function getAll<T>(
   auth: boolean = false
 ): Promise<T[]> {
   const segment = resource.replace(/^\/+/, "").replace(/\/+$/, "");
-  const path = `/public/${segment}`;
+  const params = new URLSearchParams({ version: "v3" });
+  const path = `/public/${segment}?${params.toString()}`;
   const res = await apiFetch(path, auth, { method: "GET" });
   if (!res.ok) {
     throw new Error(`Failed to load ${segment} (${res.status})`);

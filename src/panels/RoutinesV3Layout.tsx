@@ -91,6 +91,7 @@ export function RoutinesV3Layout() {
       setDataLoading(true);
       setDataError(null);
       try {
+        console.log('fetching routines, exercises, mappings');
         const [rawRoutines, rawExercises, rawMappings] =
           await Promise.all([
             getAll<Record<string, unknown>>(ROUTINE_V3_RESOURCE, true),
