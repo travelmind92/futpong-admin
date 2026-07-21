@@ -117,9 +117,13 @@ enum TipCategory {
 
 enum Position {
   GOALKEEPER = 'Goalkeeper',
-  CENTER_BACK = 'CenterBack',
-  FULL_BACK = 'FullBack',
+  CENTER_BACK_LEFT = 'CenterBackLeft',
+  CENTER_BACK_RIGHT = 'CenterBackRight',
+  FULL_BACK_LEFT = 'FullBackLeft',
+  FULL_BACK_RIGHT = 'FullBackRight',
   DEFENSIVE_MIDFIELDER = 'DefensiveMidfielder',
+  WING_MIDFIELDER_LEFT = 'WingMidfielderLeft',
+  WING_MIDFIELDER_RIGHT = 'WingMidfielderRight',
   ATTACKING_MIDFIELDER = 'AttackingMidfielder',
   WINGER = 'Winger',
   STRIKER = 'Striker'

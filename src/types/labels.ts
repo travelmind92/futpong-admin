@@ -139,9 +139,13 @@ const DifficultyLabel: Record<Difficulty_V3, string> = {
 
 const PositionLabel: Record<Position, string> = {
   Goalkeeper: 'Arquero',
-  CenterBack: 'Defensor Central',
-  FullBack: 'Defensor Lateral',
+  CenterBackLeft: 'Defensor Central',
+  CenterBackRight: 'Defensor Central',
+  FullBackLeft: 'Lateral',
+  FullBackRight: 'Lateral',
   DefensiveMidfielder: 'Mediocampista Defensivo',
+  WingMidfielderLeft: 'Volante Ofensivo',
+  WingMidfielderRight: 'Volante Ofensivo',
   AttackingMidfielder: 'Mediocampista Ofensivo',
   Winger: 'Extremo',
   Striker: 'Delantero',
