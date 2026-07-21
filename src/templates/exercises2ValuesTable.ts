@@ -19,10 +19,10 @@ Segundos,Juveniles,Competitivo,Cancha,Pretemporada,Core,Fuerza superior,Pase,Pla
 ,,,,,Desafio,Velocidad y agilidad,Control / Pase,,Pesas rusas,,,
 ,,,,,Vuelta a la Calma,Tecnico de futbol,,,TRX,,,
 ,,,,,Prevencion de lesiones,Prevencion de lesiones,,,Fitball,,,
-,,,,,Movilidad / Core,Vuelta a la Calma,,,Bosu,,,
+,,,,,Movilidad / Core,Vuelta a la Calma,,,Medicine Ball,,,
 ,,,,,,Desafio tecnico,,,Colchoneta,,,
-,,,,,,Calentamiento / Core,,,Escalera de coordinacion,,,
-,,,,,,,,,Cono,,,
+,,,,,,Calentamiento / Core,,,Cono,,,
 ,,,,,,,,,Arco,,,
 ,,,,,,,,,Sin equipamiento,,,
+,,,,,,,,,Equipamiento de gimnasio,,,
 ,,,,,,,,,Pelota / Arco / Cono,,,`;

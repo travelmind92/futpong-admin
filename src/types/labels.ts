@@ -111,12 +111,12 @@ const ElementLabel: Record<ElementName_V3, string> = {
   ElasticBand: 'Banda elástica',
   TRX: 'TRX',
   Fitball: 'Fitball',
-  Bosu: 'Bosu',
   Pad: 'Colchoneta',
-  CoordinationLadder: 'Escalera de coordinación',
   Cone: 'Cono',
   Goal: 'Arco',
+  MedicineBall: 'Medicine ball',
   NoEquipment: 'Sin equipamiento',
+  GymEquipment: 'Equipamiento de gimnasio',
 };
 
 const WeightTypeLabel: Record<WeightType_V3, string> = {

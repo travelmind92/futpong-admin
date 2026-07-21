@@ -72,20 +72,20 @@ enum ChallengeLevel_V3 {
 }
 
 enum ElementName_V3 {
-  BALL = 'Ball',
+  GYM_EQUIPMENT = 'GymEquipment',
+  NO_EQUIPMENT = 'NoEquipment',
   DUMBBELLS = 'Dumbbells', // Mancuernas
   BAR = 'Bar',
   PLATES = 'Plates', // Discos
   KETTLEBELLS = 'Kettlebells', // Pesas rusas
-  ELASTIC_BAND = 'ElasticBand',
-  TRX = 'TRX',
   FITBALL = 'Fitball',
-  BOSU = 'Bosu',
+  MEDICINE_BALL = 'MedicineBall',
   PAD = 'Pad', // Colchoneta
-  COORDINATION_LADDER = 'CoordinationLadder',
+  TRX = 'TRX',
+  ELASTIC_BAND = 'ElasticBand',
   CONE = 'Cone',
+  BALL = 'Ball',
   GOAL = 'Goal',
-  NO_EQUIPMENT = 'NoEquipment'
 }
 
 enum WeightType_V3 {
