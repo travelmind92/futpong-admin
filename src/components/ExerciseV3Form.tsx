@@ -212,7 +212,7 @@ function applyExerciseToForm(
     setWeightType: (v: WeightType_V3 | undefined) => void;
     setImpact: (v: Impact_V3 | undefined) => void;
     setDifficulty: (v: Difficulty_V3 | undefined) => void;
-    setSistituteGroup: (v: string) => void;
+    setSubstituteGroup: (v: string) => void;
     setPriorVideoUrl: (v: string) => void;
     setPriorImageUrl: (v: string) => void;
   }
@@ -233,7 +233,7 @@ function applyExerciseToForm(
   setters.setWeightType(exercise.weightType);
   setters.setImpact(exercise.impact);
   setters.setDifficulty(exercise.difficulty);
-  setters.setSistituteGroup(exercise.sistituteGroup ?? '');
+  setters.setSubstituteGroup(exercise.substituteGroup ?? '');
   setters.setPriorVideoUrl(exercise.videoUrl ?? '');
   setters.setPriorImageUrl(exercise.imageUrl ?? '');
 }
@@ -262,7 +262,7 @@ export function ExerciseV3Form() {
   const weightTypeId = useId();
   const impactId = useId();
   const difficultyId = useId();
-  const sistituteGroupId = useId();
+  const substituteGroupId = useId();
   const videoId = useId();
   const imageId = useId();
 
@@ -284,7 +284,7 @@ export function ExerciseV3Form() {
   const [weightType, setWeightType] = useState<WeightType_V3 | undefined>();
   const [impact, setImpact] = useState<Impact_V3 | undefined>();
   const [difficulty, setDifficulty] = useState<Difficulty_V3 | undefined>();
-  const [sistituteGroup, setSistituteGroup] = useState('');
+  const [substituteGroup, setSubstituteGroup] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [priorVideoUrl, setPriorVideoUrl] = useState('');
@@ -331,7 +331,7 @@ export function ExerciseV3Form() {
       setWeightType,
       setImpact,
       setDifficulty,
-      setSistituteGroup,
+      setSubstituteGroup,
       setPriorVideoUrl,
       setPriorImageUrl,
     });
@@ -400,7 +400,7 @@ export function ExerciseV3Form() {
     setSaveError('');
 
     const trimmedMainMuscle = mainMuscle.trim();
-    const trimmedSistituteGroup = sistituteGroup.trim();
+    const trimmedSubstituteGroup = substituteGroup.trim();
     const existingExercise = exercises.find((item) => item.id === editId);
 
     const exercise: Exercise_V3 = {
@@ -422,8 +422,8 @@ export function ExerciseV3Form() {
       ...(weightType !== undefined ? { weightType } : {}),
       ...(impact !== undefined ? { impact } : {}),
       ...(difficulty !== undefined ? { difficulty } : {}),
-      ...(trimmedSistituteGroup
-        ? { sistituteGroup: trimmedSistituteGroup }
+      ...(trimmedSubstituteGroup
+        ? { substituteGroup: trimmedSubstituteGroup }
         : {}),
     };
 
@@ -609,14 +609,14 @@ export function ExerciseV3Form() {
         />
 
         <div className="exercise-form-field">
-          <label htmlFor={sistituteGroupId}>
-            {ExercisePropLabels.sistituteGroup}
+          <label htmlFor={substituteGroupId}>
+            {ExercisePropLabels.substituteGroup}
           </label>
           <input
-            id={sistituteGroupId}
+            id={substituteGroupId}
             type="text"
-            value={sistituteGroup}
-            onChange={(e) => setSistituteGroup(e.target.value)}
+            value={substituteGroup}
+            onChange={(e) => setSubstituteGroup(e.target.value)}
             autoComplete="off"
           />
         </div>

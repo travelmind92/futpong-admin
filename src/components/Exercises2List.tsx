@@ -40,7 +40,7 @@ const EXERCISE_V3_DETAIL_PROPS = [
   'weightType',
   'impact',
   'difficulty',
-  'sistituteGroup',
+  'substituteGroup',
   'videoUrl',
   'imageUrl',
 ] as const satisfies readonly (keyof Exercise_V3)[];
@@ -167,8 +167,8 @@ function formatExercise2DetailValue(
       return exercise.difficulty
         ? DifficultyLabel[exercise.difficulty]
         : '-';
-    case 'sistituteGroup':
-      return formatOptionalText(exercise.sistituteGroup);
+    case 'substituteGroup':
+      return formatOptionalText(exercise.substituteGroup);
     case 'videoUrl':
       return (
         <Exercise2MediaIcon

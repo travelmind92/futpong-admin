@@ -220,7 +220,7 @@ export function normalizeExercise2(
     ? raw.difficulty
     : undefined;
   const mainMuscle = optionalString(raw.mainMuscle);
-  const sistituteGroup = optionalString(raw.sistituteGroup);
+  const substituteGroup = optionalString(raw.substituteGroup);
   const videoUrl = optionalString(raw.videoUrl);
   const imageUrl = optionalString(raw.imageUrl);
   const elements = enumArray(ElementName_V3, raw.elements);
@@ -246,7 +246,7 @@ export function normalizeExercise2(
     ...(weightType !== undefined ? { weightType } : {}),
     ...(impact !== undefined ? { impact } : {}),
     ...(difficulty !== undefined ? { difficulty } : {}),
-    ...(sistituteGroup !== undefined ? { sistituteGroup } : {}),
+    ...(substituteGroup !== undefined ? { substituteGroup } : {}),
     ...(version !== undefined ? { version } : {}),
     ...(videoUrl !== undefined ? { videoUrl } : {}),
     ...(imageUrl !== undefined ? { imageUrl } : {}),

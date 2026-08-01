@@ -19,7 +19,7 @@ const ExercisePropLabels: Record<keyof Exercise_V3, string> = {
   weightType: 'Tipo de peso',
   impact: 'Impacto',
   difficulty: 'Dificultad',
-  sistituteGroup: 'Grupo de sustitución',
+  substituteGroup: 'Grupo de sustitución',
   videoUrl: 'Video',
   imageUrl: 'Imagen',
   version: 'Versión'

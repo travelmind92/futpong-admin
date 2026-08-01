@@ -61,7 +61,7 @@ export const EXERCISE_2_IMPORT_COLUMNS: ImportProp[] = [
   'weightType',
   'impact',
   'difficulty',
-  'sistituteGroup',
+  'substituteGroup',
 ];
 
 function labelToHeader(label: string): string {
@@ -306,9 +306,9 @@ function parseRow(
     row.difficulty = difficulty;
   }
 
-  const sistituteGroup = cellFor('sistituteGroup');
-  if (sistituteGroup) {
-    row.sistituteGroup = sistituteGroup;
+  const substituteGroup = cellFor('substituteGroup');
+  if (substituteGroup) {
+    row.substituteGroup = substituteGroup;
   }
 
   return { ok: true, row };

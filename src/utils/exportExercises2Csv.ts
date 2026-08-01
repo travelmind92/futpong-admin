@@ -93,8 +93,8 @@ function exerciseToCsvCells(exercise: Exercise_V3): string[] {
         return formatEnumCell(exercise.impact, ImpactLabel);
       case 'difficulty':
         return formatEnumCell(exercise.difficulty, DifficultyLabel);
-      case 'sistituteGroup':
-        return exercise.sistituteGroup ?? '';
+      case 'substituteGroup':
+        return exercise.substituteGroup ?? '';
       default:
         return '';
     }

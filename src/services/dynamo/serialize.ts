@@ -48,9 +48,9 @@ export function exercise2ToDynamoItem(exercise: Exercise_V3): DynamoItem {
   if (exercise.difficulty !== undefined) {
     item.difficulty = exercise.difficulty;
   }
-  const sistituteGroup = exercise.sistituteGroup?.trim();
-  if (sistituteGroup) {
-    item.sistituteGroup = sistituteGroup;
+  const substituteGroup = exercise.substituteGroup?.trim();
+  if (substituteGroup) {
+    item.substituteGroup = substituteGroup;
   }
   const videoUrl = exercise.videoUrl?.trim();
   if (videoUrl) {

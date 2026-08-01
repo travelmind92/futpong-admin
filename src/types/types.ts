@@ -71,7 +71,7 @@ type Exercise_V3 = {
   weightType?: WeightType_V3
   impact?: Impact_V3
   difficulty?: Difficulty_V3
-  sistituteGroup?: string
+  substituteGroup?: string
   videoUrl?: string
   imageUrl?: string
   version?: string
