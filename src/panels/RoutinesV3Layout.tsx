@@ -296,8 +296,14 @@ export function RoutinesV3Layout() {
         routine = {
           ...routine,
           id: existingRoutine.id,
+          custom: existingRoutine.custom === true,
+          ...(existingRoutine.custom === true && existingRoutine.userId
+            ? { userId: existingRoutine.userId }
+            : {}),
         };
         days = days.map((day) => ({ ...day, routineId: existingRoutine.id }));
+      } else {
+        routine = { ...routine, custom: false };
       }
 
       const previousRoutine = existingRoutine;

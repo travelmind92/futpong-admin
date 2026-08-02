@@ -64,7 +64,7 @@ export function exercise2ToDynamoItem(exercise: Exercise_V3): DynamoItem {
 }
 
 export function routineV3ToDynamoItem(routine: Routine_V3): DynamoItem {
-  return {
+  const item: DynamoItem = {
     id: routine.id,
     version: EXERCISE_2_VERSION,
     name: routine.name,
@@ -72,7 +72,12 @@ export function routineV3ToDynamoItem(routine: Routine_V3): DynamoItem {
     level: routine.level,
     place: routine.place,
     period: routine.period,
+    custom: routine.custom,
   };
+  if (routine.userId) {
+    item.userId = routine.userId;
+  }
+  return item;
 }
 
 export function routineMappingV3ToDynamoItem(mapping: RoutineMapping_V3): DynamoItem {

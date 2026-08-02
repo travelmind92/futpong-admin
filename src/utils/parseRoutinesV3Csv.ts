@@ -475,6 +475,7 @@ export function parseRoutinesV3Csv(
     level: meta.level,
     place: meta.place,
     period: meta.period,
+    custom: false,
     version: EXERCISE_2_VERSION,
   };
 

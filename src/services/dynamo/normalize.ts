@@ -42,8 +42,7 @@ export function normalizeRoutineV3(raw: Record<string, unknown>): Routine_V3 | n
   if (typeof id !== 'string' || !id) {
     return null;
   }
-  const custom =
-    typeof raw.custom === 'boolean' ? raw.custom : undefined;
+  const custom = typeof raw.custom === 'boolean' ? raw.custom : false;
   const userId =
     typeof raw.userId === 'string' && raw.userId ? raw.userId : undefined;
 
@@ -56,7 +55,7 @@ export function normalizeRoutineV3(raw: Record<string, unknown>): Routine_V3 | n
     period: isEnumValue(Period_V3, raw.period)
       ? raw.period
       : Period_V3.COMPETITION,
-    ...(custom !== undefined ? { custom } : {}),
+    custom,
     ...(userId !== undefined ? { userId } : {}),
   };
 }

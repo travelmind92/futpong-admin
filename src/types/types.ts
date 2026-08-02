@@ -7,7 +7,7 @@ type Routine_V3 = {
   level: Level_V3
   place: Place_V3
   period: Period_V3
-  custom?: boolean
+  custom: boolean
   userId?: string
   version?: string
 }
