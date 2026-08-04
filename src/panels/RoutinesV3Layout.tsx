@@ -297,13 +297,18 @@ export function RoutinesV3Layout() {
           ...routine,
           id: existingRoutine.id,
           custom: existingRoutine.custom === true,
+          createdAt: existingRoutine.createdAt || new Date().toISOString(),
           ...(existingRoutine.custom === true && existingRoutine.userId
             ? { userId: existingRoutine.userId }
             : {}),
         };
         days = days.map((day) => ({ ...day, routineId: existingRoutine.id }));
       } else {
-        routine = { ...routine, custom: false };
+        routine = {
+          ...routine,
+          custom: false,
+          createdAt: new Date().toISOString(),
+        };
       }
 
       const previousRoutine = existingRoutine;

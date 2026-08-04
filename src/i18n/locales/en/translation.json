@@ -201,6 +201,7 @@
     "level": "Level",
     "place": "Place",
     "period": "Period",
+    "createdAt": "Created",
     "customPersonalized": "Personalized",
     "customYes": "Yes",
     "customNo": "No",

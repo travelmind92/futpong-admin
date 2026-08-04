@@ -29,6 +29,14 @@ function exerciseNameFor(
   return exerciseById.get(exerciseId)?.name ?? exerciseId;
 }
 
+function formatCreatedAt(iso: string, locale: string): string {
+  if (!iso) {
+    return '—';
+  }
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString(locale);
+}
+
 type DayAccordionProps = {
   day: TrainingDay_V3;
   blocks: TrainingBlock_V3[];
@@ -216,7 +224,7 @@ function DayAccordion({
 }
 
 export function RoutineV3DetailPanel() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const {
@@ -406,6 +414,10 @@ export function RoutineV3DetailPanel() {
             <div className="exercises2-list-detail-item">
               <dt>{t('routines2.period')}</dt>
               <dd>{PeriodLabel[routine.period]}</dd>
+            </div>
+            <div className="exercises2-list-detail-item">
+              <dt>{t('routines2.createdAt')}</dt>
+              <dd>{formatCreatedAt(routine.createdAt, i18n.language)}</dd>
             </div>
             {routine.custom ? (
               <div className="exercises2-list-detail-item exercises2-list-detail-item--badge">

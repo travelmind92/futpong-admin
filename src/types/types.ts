@@ -10,6 +10,7 @@ type Routine_V3 = {
   custom: boolean
   userId?: string
   version?: string
+  createdAt: string
 }
 
 type RoutineMapping_V3 = {

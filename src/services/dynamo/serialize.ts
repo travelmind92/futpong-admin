@@ -73,6 +73,7 @@ export function routineV3ToDynamoItem(routine: Routine_V3): DynamoItem {
     place: routine.place,
     period: routine.period,
     custom: routine.custom,
+    createdAt: routine.createdAt,
   };
   if (routine.userId) {
     item.userId = routine.userId;

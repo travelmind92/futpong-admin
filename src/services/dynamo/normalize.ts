@@ -43,6 +43,8 @@ export function normalizeRoutineV3(raw: Record<string, unknown>): Routine_V3 | n
     return null;
   }
   const custom = typeof raw.custom === 'boolean' ? raw.custom : false;
+  const createdAt =
+    typeof raw.createdAt === 'string' ? raw.createdAt : '';
   const userId =
     typeof raw.userId === 'string' && raw.userId ? raw.userId : undefined;
 
@@ -56,6 +58,7 @@ export function normalizeRoutineV3(raw: Record<string, unknown>): Routine_V3 | n
       ? raw.period
       : Period_V3.COMPETITION,
     custom,
+    createdAt,
     ...(userId !== undefined ? { userId } : {}),
   };
 }

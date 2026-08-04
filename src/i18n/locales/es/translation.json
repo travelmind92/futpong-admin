@@ -201,6 +201,7 @@
     "level": "Nivel",
     "place": "Lugar",
     "period": "Periodo",
+    "createdAt": "Creada",
     "customPersonalized": "Personalizada",
     "customYes": "Sí",
     "customNo": "No",
