@@ -221,7 +221,7 @@
     "importReadFailed": "No se pudo leer el archivo seleccionado.",
     "importErrors": {
       "emptyFile": "El archivo CSV está vacío.",
-      "invalidHeaders": "Encabezados inválidos. Se esperaba: NOMBRE,EDAD,NIVEL,LUGAR,PERIODO,DIA_SESION,DIA_NOMBRE,DIA_MINUTOS,BLOQUE_N,BLOQUE_NOMBRE,BLOQUE_TIPO,BLOQUE_SERIES,EJ_N,EJ_NOMBRE,EJ_REPETICIONES,EJ_SEGUNDOS_DESCANSO",
+      "invalidHeaders": "Encabezados inválidos. Se esperaba: NOMBRE,EDAD,NIVEL,LUGAR,PERIODO,DIA_SESION,DIA_NOMBRE,DIA_MINUTOS,DIA_FRASE_INICIAL,DIA_FRASE_FINAL,BLOQUE_N,BLOQUE_NOMBRE,BLOQUE_TIPO,BLOQUE_SERIES,EJ_N,EJ_NOMBRE,EJ_REPETICIONES,EJ_SEGUNDOS_DESCANSO",
       "invalidRow": "Una o más filas tienen un número incorrecto de columnas.",
       "missingRoutineName": "La primera fila debe incluir el nombre de la rutina (NOMBRE).",
       "multipleRoutineNames": "El CSV define más de un nombre de rutina (NOMBRE).",
@@ -267,6 +267,8 @@
     "dayMinutes": "{{minutes}} min",
     "matchdayLabel": "MD {{matchday}}",
     "tips": "Consejos",
+    "openingPhrase": "Frase de apertura",
+    "closingPhrase": "Frase de cierre",
     "blockSeries": "{{series}} series",
     "exerciseIndex": "#",
     "exerciseReps": "Repeticiones",

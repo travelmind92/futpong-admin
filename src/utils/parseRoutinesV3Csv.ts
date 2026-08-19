@@ -36,6 +36,8 @@ const EXPECTED_HEADERS = [
   'DIA_SESION',
   'DIA_NOMBRE',
   'DIA_MINUTOS',
+  'DIA_FRASE_INICIAL',
+  'DIA_FRASE_FINAL',
   'BLOQUE_N',
   'BLOQUE_NOMBRE',
   'BLOQUE_TIPO',
@@ -71,6 +73,8 @@ type DayBuilder = {
   session: number;
   name: string;
   minutes: number;
+  openingPhrase: string;
+  closingPhrase: string;
   blocks: Map<number, BlockBuilder>;
 };
 
@@ -286,6 +290,9 @@ export function parseRoutinesV3Csv(
         return { ok: false, error: 'invalidDayMinutes' };
       }
 
+      const openingPhrase = row.DIA_FRASE_INICIAL.trim();
+      const closingPhrase = row.DIA_FRASE_FINAL.trim();
+
       let dayBuilder = daysBySession.get(session);
       if (!dayBuilder) {
         dayBuilder = {
@@ -293,12 +300,20 @@ export function parseRoutinesV3Csv(
           session,
           name: dayName,
           minutes,
+          openingPhrase,
+          closingPhrase,
           blocks: new Map(),
         };
         daysBySession.set(session, dayBuilder);
       } else {
         dayBuilder.name = dayName;
         dayBuilder.minutes = minutes;
+        if (openingPhrase) {
+          dayBuilder.openingPhrase = openingPhrase;
+        }
+        if (closingPhrase) {
+          dayBuilder.closingPhrase = closingPhrase;
+        }
       }
 
       currentDay = dayBuilder;
@@ -445,6 +460,8 @@ export function parseRoutinesV3Csv(
       name: dayBuilder.name.trim(),
       matchday: matchdayForDay(dayBuilder.session),
       minutes: dayBuilder.minutes,
+      openingPhrase: dayBuilder.openingPhrase,
+      closingPhrase: dayBuilder.closingPhrase,
     };
   });
 

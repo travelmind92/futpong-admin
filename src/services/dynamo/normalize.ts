@@ -113,6 +113,8 @@ export function normalizeTrainingDayV3(
     ...(matchday !== undefined ? { matchday } : {}),
     minutes: minutes >= 0 ? minutes : 0,
     ...(tips !== undefined && tips.length > 0 ? { tips } : {}),
+    openingPhrase: typeof raw.openingPhrase === 'string' ? raw.openingPhrase : '',
+    closingPhrase: typeof raw.closingPhrase === 'string' ? raw.closingPhrase : '',
   };
 }
 

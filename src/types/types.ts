@@ -30,6 +30,9 @@ type TrainingDay_V3 = {
   matchday?: string
   minutes: number
   tips?: Tip[]
+  openingPhrase: string
+  closingPhrase: string
+  version?: string
 }
 
 type Tip = {
@@ -45,6 +48,7 @@ type TrainingBlock_V3 = {
   blockType: BlockType_V3
   series: number
   exercises: ExerciseItem_V3[]
+  version?: string
 }
 
 type ExerciseItem_V3 = {

@@ -108,6 +108,14 @@ export function trainingDayV3ToDynamoItem(day: TrainingDay_V3): DynamoItem {
   if (day.tips !== undefined && day.tips.length > 0) {
     item.tips = day.tips;
   }
+  const openingPhrase = day.openingPhrase?.trim();
+  if (openingPhrase) {
+    item.openingPhrase = openingPhrase;
+  }
+  const closingPhrase = day.closingPhrase?.trim();
+  if (closingPhrase) {
+    item.closingPhrase = closingPhrase;
+  }
   return item;
 }
 

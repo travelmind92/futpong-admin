@@ -121,6 +121,21 @@ function DayAccordion({
 
       {isExpanded ? (
         <div className="routine-v3-detail-day-body">
+          {day.openingPhrase ? (
+            <div className="routine-v3-detail-tips">
+              <span className="routine-v3-detail-tips-label">
+                {t('routines2.openingPhrase')}
+              </span>
+              <ul className="routine-v3-detail-tips-list">
+                <li className="routine-v3-detail-tip">
+                  <span className="routine-v3-detail-tip-text">
+                    {day.openingPhrase}
+                  </span>
+                </li>
+              </ul>
+            </div>
+          ) : null}
+
           {day.tips && day.tips.length > 0 ? (
             <div className="routine-v3-detail-tips">
               <span className="routine-v3-detail-tips-label">
@@ -217,6 +232,21 @@ function DayAccordion({
               </div>
             ))
           )}
+
+          {day.closingPhrase ? (
+            <div className="routine-v3-detail-tips">
+              <span className="routine-v3-detail-tips-label">
+                {t('routines2.closingPhrase')}
+              </span>
+              <ul className="routine-v3-detail-tips-list">
+                <li className="routine-v3-detail-tip">
+                  <span className="routine-v3-detail-tip-text">
+                    {day.closingPhrase}
+                  </span>
+                </li>
+              </ul>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
