@@ -21,6 +21,11 @@ import {
 } from '../types/types';
 import { useUsersByIds } from '../hooks/useUsersByIds';
 import { textContainsSearch } from '../utils/textSearch';
+import { downloadTextFile } from '../utils/downloadTextFile';
+import {
+  routineToRoutinesV3Csv,
+  routineV3CsvFilename,
+} from '../utils/exportRoutinesV3Csv';
 
 function exerciseNameFor(
   exerciseId: string,
@@ -379,6 +384,25 @@ export function RoutineV3DetailPanel() {
     });
   }, [daysForRoutine, dayFilter]);
 
+  const exportDisabled =
+    !routine ||
+    trainingDaysLoading ||
+    trainingBlocksLoading ||
+    daysForRoutine.length === 0;
+
+  const handleExport = () => {
+    if (!routine || exportDisabled) {
+      return;
+    }
+    const csv = routineToRoutinesV3Csv({
+      routine,
+      days: daysForRoutine,
+      blocksByDayId,
+      exerciseById,
+    });
+    downloadTextFile(csv, routineV3CsvFilename(routine.name));
+  };
+
   const toggleDay = (dayId: string) => {
     setExpandedDayIds((prev) => {
       const next = new Set(prev);
@@ -411,9 +435,21 @@ export function RoutineV3DetailPanel() {
           </svg>
           {t('routines2.backToList')}
         </button>
-        <h2 className="exercise-form-title">
-          {routine?.name ?? t('routines2.detailTitle')}
-        </h2>
+        <div className="routine-v3-detail-title-row">
+          <h2 className="exercise-form-title">
+            {routine?.name ?? t('routines2.detailTitle')}
+          </h2>
+          {routine ? (
+            <button
+              type="button"
+              className="exercises2-list-values-btn routine-v3-detail-export"
+              disabled={exportDisabled}
+              onClick={handleExport}
+            >
+              {t('routines2.exportRoutine')}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {dataLoading ? (

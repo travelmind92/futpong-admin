@@ -27,7 +27,7 @@ import { normalizeForSearch } from './textSearch';
 import { normalizeImportValue } from './stripAccents';
 import { CsvDelimiter, parseCsvRecords } from './parseCsvRecords';
 
-const EXPECTED_HEADERS = [
+export const EXPECTED_HEADERS = [
   'NOMBRE',
   'EDAD',
   'NIVEL',

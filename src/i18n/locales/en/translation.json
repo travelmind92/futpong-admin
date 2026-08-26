@@ -253,6 +253,7 @@
     "viewAria": "View {{name}}",
     "detailTitle": "Routine details",
     "backToList": "Back to routines",
+    "exportRoutine": "Export CSV",
     "trainingDays": "Training days",
     "trainingDaysSummary": "{{days}} training days · {{blocks}} blocks · {{exercises}} exercises",
     "filterDaysLabel": "Filter training days",
